@@ -33,16 +33,16 @@ namespace Mnemosyne2Reborn
         public bool OptedOut;
         public void AddUrlUsed(string Url)
         {
-            if(OptedOut)
+            if (OptedOut)
             {
                 return;
             }
-            if(Program.exclusions.IsMatch(Url))
+            if (Program.exclusions.IsMatch(Url))
             {
                 ExcludedUrlsUsed++;
                 return;
             }
-            if(Program.providers.IsMatch(Url))
+            if (Program.providers.IsMatch(Url))
             {
                 ArchivedUrlsUsed++;
             }
@@ -50,11 +50,11 @@ namespace Mnemosyne2Reborn
             {
                 UnArchivedUrlsUsed++;
             }
-            if(Program.ImageRegex.IsMatch(Url))
+            if (Program.ImageRegex.IsMatch(Url))
             {
                 ImageUrlsUsed++;
             }
-            if(Users.ContainsKey(User.Name))
+            if (Users.ContainsKey(User.Name))
             {
                 Users[User.Name] = this;
             }
@@ -95,7 +95,7 @@ namespace Mnemosyne2Reborn
             this.Name = User.Name;
             if (!UseSQLite)
             {
-                if(!Users.ContainsKey(User.Name))
+                if (!Users.ContainsKey(User.Name))
                 {
                     Users.Add(User.Name, new RedditUserProfile() { ArchivedUrlsUsed = 0, UnArchivedUrlsUsed = 0, User = user, Name = user.Name, ExcludedUrlsUsed = 0, OptedOut = false });
                 }

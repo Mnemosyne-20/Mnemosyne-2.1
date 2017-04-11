@@ -22,7 +22,10 @@ namespace Mnemosyne2Reborn
             {
                 string foundlink = match.Value.TrimStart('"').TrimEnd('"');
                 if (!LinksList.Contains(foundlink))
+                {
                     LinksList.Add(foundlink);
+                }
+
                 match = match.NextMatch();
             }
             return LinksList;

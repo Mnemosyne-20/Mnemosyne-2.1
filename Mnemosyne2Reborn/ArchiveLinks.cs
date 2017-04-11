@@ -9,24 +9,38 @@ namespace Mnemosyne2Reborn
 {
     public static class ArchiveLinks
     {
-        public static List<string> ArchivePostLinks(List<string> FoundLinks, Regex exclusions, RedditUserProfile profile)
+        public static Tuple<List<string>,List<string>> ArchivePostLinks(List<string> FoundLinks, Regex exclusions, RedditSharp.Things.RedditUser user)
         {
             List<string> ArchiveLinks = new List<string>();
+            bool removed1 = false;
             for(int i = 0; i < FoundLinks.Count; i++)
             {
-                string link = FoundLinks[i];
-                ArchiveService service = new ArchiveService("www.archive.is");
-                profile.AddUrlUsed(link);
-                if (!exclusions.IsMatch(link))
+                if(removed1)
                 {
-                    ArchiveLinks.Add(service.Save(link));
+                    i--;
+                    removed1 = false;
+                }
+                string link = FoundLinks[i];
+                ArchiveService service = new ArchiveService("https://www.archive.is");
+                new RedditUserProfile(user, false).AddUrlUsed(link);
+                if (!exclusions.IsMatch(link) && !Program.ImageRegex.IsMatch(link) && !Program.providers.IsMatch(link))
+                {
+                    ArchiveLinks.Add(FoundLinks[i]);//ArchiveLinks.Add(service.Save(link));
                 }
                 else
                 {
                     FoundLinks.RemoveAt(i);
+                    if (i != 0)
+                    {
+                        i--;
+                    }
+                    else
+                    {
+                        removed1 = true;
+                    }
                 }
             }
-            return ArchiveLinks;
+            return Tuple.Create(ArchiveLinks, FoundLinks);
         }
     }
 }

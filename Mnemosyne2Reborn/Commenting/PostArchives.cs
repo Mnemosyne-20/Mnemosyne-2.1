@@ -16,23 +16,23 @@ namespace Mnemosyne2Reborn.Commenting
         public static void ArchivePostLinks(Config conf, IBotState state, Post post, List<string> OriginalLinks, List<string> ArchivedLinks, bool ArchivePost, ArchiveApi.ArchiveService serv)
         {
             List<string> LinksToPost = new List<string>();
-            if(ArchivePost)
+            if (ArchivePost)
             {
-                LinksToPost.Add($"* **Post:** {serv.Save(post.Url)}\n");
+                //LinksToPost.Add($"* **Post:** {serv.Save(post.Url)}\n");
             }
-            for(int i = 0; i < OriginalLinks.Count; i++)
+            for (int i = 0; i < OriginalLinks.Count; i++)
             {
                 string hostname = new Uri(OriginalLinks[i]).Host.Replace("www.", "");
                 LinksToPost.Add($"* **Link: {(i + 1).ToString()}** ([{hostname}]({OriginalLinks[i]})): {ArchivedLinks[i]}\n");
             }
-            PostArchiveLinks(conf, state, Program.Headers[2], post, LinksToPost);
+            PostArchiveLinks(conf, state, Program.Headers[0], post, LinksToPost);
         }
         public static void ArchiveCommentLinks(Config conf, IBotState state, Reddit reddit, Comment comment, List<string> ArchiveLinks, List<string> OriginalLinks)
         {
             List<string> Links = new List<string>();
             string commentID = comment.Id;
             string postID = comment.LinkId.Substring(3);
-            for(int i = 0; i < ArchiveLinks.Count; i++)
+            for (int i = 0; i < ArchiveLinks.Count; i++)
             {
                 string hostname = new Uri(OriginalLinks[i]).Host.Replace("www.", "");
                 string commentLink = $"https://www.reddit.com/comments/{postID}/_/{comment.Id}";
@@ -57,19 +57,24 @@ namespace Mnemosyne2Reborn.Commenting
         }
         public static void PostArchiveLinks(Config conf, IBotState state, string head, Post post, List<string> ArchiveList)
         {
+            Console.Title = $"Posting new comment to post {post.Id}";
             string LinksListBody = "";
-            foreach(string str in ArchiveList)
+            foreach (string str in ArchiveList)
             {
                 LinksListBody += str;
             }
-            string c = head + LinksListBody + "\n" + string.Format(Program.Headers[3], conf.FlavorText[rand.Next(0, conf.FlavorText.Length)]);
+            string c =
+                head +
+                LinksListBody + "\n" +
+                string.Format(Program.Headers[3], conf.FlavorText[rand.Next(0, conf.FlavorText.Length)]);
             //Comment botComment = post.Comment(c);
             try
             {
                 //state.AddBotComment(post.Id, botComment.Id);
                 Console.WriteLine(c);
+                Console.ReadLine();
             }
-            catch(InvalidOperationException e)
+            catch (InvalidOperationException e)
             {
                 //Console.WriteLine($"Caught exception replying to {post.Id} with new comment  {Regex.Replace(botComment.Id, "t1_", "")}: {e.Message}");
                 //botComment.Del();
@@ -77,13 +82,13 @@ namespace Mnemosyne2Reborn.Commenting
         }
         public static void EditArchiveComment(Comment targetComment, List<string> ArchivesToInsert)
         {
-            if(ArchivesToInsert.Count > 0)
+            if (ArchivesToInsert.Count > 0)
             {
                 Console.Title = $"Editing comment {targetComment.Id}";
                 bool bEditGood = false;
                 string newCommentText = "";
                 string[] oldCommentLines = targetComment.Body.Split("\n".ToArray());
-                if(oldCommentLines.Length >= 1)
+                if (oldCommentLines.Length >= 1)
                 {
                     string[] head = oldCommentLines.Take(oldCommentLines.Length - 3).ToArray();
                     string[] tail = oldCommentLines.Skip(oldCommentLines.Length - 3).ToArray();

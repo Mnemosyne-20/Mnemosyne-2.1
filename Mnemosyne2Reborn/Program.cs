@@ -28,52 +28,50 @@ namespace Mnemosyne2Reborn
             "deepsalter-001"
         };
         string[] tempReminder = new string[] { "Watch out for moon rocks!", "My face is tired.", "#FREEKEKISTAN", "THE KEKISTANI PEOPLE MUST BE FREE!" };
-        public static string[] Headers = new string[] { "Archives for links in this post:\n\n", "Archive for this post:\n\n", "Archives for the links in comments:\n\n", $"----\nI am Mnemosyne 2.0, {0} ^^^^/r/botsrights ^^^^[Contribute](https://github.com/chuggafan/Mnemosyne-2.1) ^^^^[Website](https://mnemosyne-20.github.io/Mnemosyne-2.1/)" };
+        public static string[] Headers = new string[] { "Archives for links in this post:\n\n", "Archive for this post:\n\n", "Archives for the links in comments:\n\n", $"----\nI am Mnemosyne 2.0, {0} ^^^^/r/botsrights ^^^^[Contribute](https://github.com/Mnemosyne-20/Mnemosyne-2.1) ^^^^(message me suggestions at any time)" };
         public static Regex exclusions = new Regex(@"(streamable\.com|www\.gobrickindustry\.us|gyazo\.com|sli\.mg|imgur\.com|reddit\.com/message|youtube\.com|youtu\.be|wiki/rules|politics_feedback_results_and_where_it_goes_from|urbandictionary\.com)");
         public static Regex providers = new Regex(@"archive\.is|archive\.fo|web\.archive\.org|archive\.today|megalodon\.jp|web\.archive\.org|webcache\.googleusercontent\.com|archive\.li");
         public static Regex ImageRegex = new Regex(@"(\.gif|\.jpg|\.png|\.pdf|\.webm)$");
         public static Config Config = !File.Exists("./Data/Settings.json") ? CreateNewConfig() : Config.GetConfig();
         static void Main(string[] args)
         {
+            Console.Title = "Mnemosyne-2.1 by chugga_fan";
             Console.Clear();
             IBotState botstate = Config.Sqlite ? (IBotState)new SQLiteBotState() : new FlatBotState();
             string AccessToken = "";
             if (Config.UseOAuth)
             {
-                AuthProvider provider = new AuthProvider(Config.OAuthClientId, Config.OAuthSecret, "www.github.com/Memosyne/Mnemosyne-2.1");
+                AuthProvider provider = new AuthProvider(Config.OAuthClientId, Config.OAuthSecret, "https://www.github.com/Memosyne/Mnemosyne-2.1");
                 AccessToken = provider.GetOAuthToken(Config.Username, Config.Password);
                 provider.GetAuthUrl(Config.Username, AuthProvider.Scope.edit | AuthProvider.Scope.submit);
             }
 #pragma warning disable CS0618 // Type or member is obsolete
             Reddit reddit = !Config.UseOAuth ? new Reddit(Config.Username, Config.Password) : new Reddit(AccessToken);
 #pragma warning restore CS0618 // Type or member is obsolete
-            if (false)
+            Subreddit[] subs = new Subreddit[Config.Subreddits.Length];
+            for (int i = 0; i < Config.Subreddits.Length; i++)
             {
-                Subreddit[] subs = new Subreddit[Config.Subreddits.Length];
-                for (int i = 0; i < Config.Subreddits.Length; i++)
+                subs[i] = reddit.GetSubreddit(Config.Subreddits[i]);
+            }
+            while (true)
+            {
+                bool newMessages = reddit.User.UnreadMessages.Count() >= 1;
+                foreach (Subreddit sub in subs)
                 {
-                    subs[i] = reddit.GetSubreddit(Config.Subreddits[i]);
+                    Console.Title = $"Finding posts in {sub.Name} New messages: {newMessages}";
+                    IteratePosts(reddit, botstate, sub, false);
+                    Console.Title = $"Finding comments in {sub.Name} New messages: {newMessages}";
+                    IterateComments(reddit, botstate, sub);
                 }
-                while (true)
-                {
-                    bool newMessages = reddit.User.UnreadMessages.Count() >= 1;
-                    foreach (Subreddit sub in subs)
-                    {
-                        Console.Title = $"Finding posts in {sub.Name} New messages: {newMessages}";
-                        IteratePosts(reddit, botstate, sub, false);
-                        Console.Title = $"Finding comments in {sub.Name} New messages: {newMessages}";
-                        IterateComments(reddit, botstate, sub);
-                    }
-                    System.Threading.Thread.Sleep(10000);
-                    Console.Title = $"Sleeping, New messages: {newMessages}";
-                }
+                Console.Title = $"Sleeping, New messages: {newMessages}";
+                System.Threading.Thread.Sleep(10000);
             }
         }
         public static void IteratePosts(Reddit reddit, IBotState state, Subreddit subreddit, bool ArchivePost)
         {
             foreach (var post in subreddit.Posts.Take(25))
             {
-                if (!state.DoesCommentExist(post.Id))
+                if (!state.DoesCommentExist(post.Id) && state.HasCommentBeenChecked(post.Id))
                 {
                     List<string> Links = new List<string>();
                     if (Config.ArchiveLinks)
@@ -84,10 +82,13 @@ namespace Mnemosyne2Reborn
                     {
                         Links.AddRange(RegularExpressions.FindLinks(post.SelfTextHtml));
                     }
-                    List<string> ArchivedLinks = ArchiveLinks.ArchivePostLinks(Links, exclusions, new RedditUserProfile(new Reddit().GetUser(post.AuthorName), Config.Sqlite));
-                    PostArchives.ArchivePostLinks(Config, state, post, Links, ArchivedLinks, ArchivePost, new ArchiveApi.ArchiveService("www.archive.is"));
-
+                    Tuple<List<string>, List<string>> tup = ArchiveLinks.ArchivePostLinks(Links, exclusions, reddit.GetUser(post.AuthorName));
+                    List<string> ArchivedLinks = tup.Item1;
+                    Links = tup.Item2;
+                    PostArchives.ArchivePostLinks(Config, state, post, Links, ArchivedLinks, ArchivePost, new ArchiveApi.ArchiveService(Config.ArchiveService));
+                    state.AddCheckedComment(post.Id);
                 }
+                
             }
         }
         public static Config CreateNewConfig()
@@ -121,12 +122,15 @@ namespace Mnemosyne2Reborn
                     continue;
                 }
                 List<string> Links = RegularExpressions.FindLinks(comment.BodyHtml);
-                foreach(string s in Links)
+                foreach (string s in Links)
                 {
                     Console.WriteLine($"Found {s} in comment {comment.Id}");
                 }
-                List<string> ArchivedLinks = ArchiveLinks.ArchivePostLinks(Links, exclusions, new RedditUserProfile(new Reddit().GetUser(comment.AuthorName), Config.Sqlite));
+                Tuple<List<string>, List<string>> tup = ArchiveLinks.ArchivePostLinks(Links, exclusions, reddit.GetUser(comment.AuthorName));
+                List<string> ArchivedLinks = tup.Item1;
+                Links = tup.Item2;
                 PostArchives.ArchiveCommentLinks(Config, state, reddit, comment, ArchivedLinks, Links);
+                state.AddCheckedComment(comment.Id);
             }
         }
     }

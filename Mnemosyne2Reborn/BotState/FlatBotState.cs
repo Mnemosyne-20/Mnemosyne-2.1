@@ -9,16 +9,38 @@ namespace Mnemosyne2Reborn.BotState
 {
     public class FlatBotState : IBotState
     {
+        Dictionary<string, string> ReadReplyTrackingFile(string file)
+        {
+            Dictionary<string, string> replyDict = new Dictionary<string, string>();
+            string fileIn = File.ReadAllText(file);
+            string[] elements = fileIn.Split(new char[] { ':', ',' }, StringSplitOptions.RemoveEmptyEntries);
+            for (int i = 0; i < elements.Length; i += 2)
+            {
+                string postID = elements[i];
+                string botCommentID = elements[i + 1];
+                replyDict.Add(postID, botCommentID);
+            }
+
+            return replyDict;
+        }
         public FlatBotState()
         {
-            if (!File.Exists("./Data/Dictionary.json"))
+            if (File.Exists("./Data/ReplyTracker.txt"))
             {
-                CommentDictionary = new Dictionary<string, string>();
-                File.Create("./Data/Dictionary.json").Dispose();
+                CommentDictionary = ReadReplyTrackingFile("./Data/ReplyTracker.txt");
+                File.Delete("./Data/ReplyTracker.txt");
             }
             else
             {
-                CommentDictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText("./Data/Dictionary.json"));
+                if (!File.Exists("./Data/Dictionary.json"))
+                {
+                    CommentDictionary = new Dictionary<string, string>();
+                    File.Create("./Data/Dictionary.json").Dispose();
+                }
+                else
+                {
+                    CommentDictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText("./Data/Dictionary.json")) ?? new Dictionary<string, string>();
+                }
             }
             if (!File.Exists("./Data/CheckedComments.json"))
             {
@@ -27,7 +49,7 @@ namespace Mnemosyne2Reborn.BotState
             }
             else
             {
-                CheckedComments = JsonConvert.DeserializeObject<List<string>>(File.ReadAllText("./Data/CheckedComments.json"));
+                CheckedComments = JsonConvert.DeserializeObject<List<string>>(File.ReadAllText("./Data/CheckedComments.json")) ?? new List<string>();
             }
         }
         private void DumpDictionary()

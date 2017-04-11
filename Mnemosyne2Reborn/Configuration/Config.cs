@@ -29,9 +29,9 @@ namespace Mnemosyne2Reborn.Configuration
         public bool ArchiveLinks;
         [JsonProperty("ArchiveService")]
         public string ArchiveService;
-        [JsonIgnore]
-        public bool PassOrOAuth => OAuthClientId != null;
-        public Config(bool SQLite, string Username, string[] Subreddits, string Password, string OAuthSecret = null, string OAuthClientId = null, bool ArchiveLinks = false, string ArchiveService = "www.archive.is")
+        [JsonProperty("UseOAuth")]
+        public bool UseOAuth;
+        public Config(bool SQLite, string Username, string[] Subreddits, string Password, bool UseOAuth, string OAuthSecret = null, string OAuthClientId = null, bool ArchiveLinks = false, string ArchiveService = "www.archive.is")
         {
             Sqlite = SQLite;
             this.Username = Username ?? throw new Exception("THIS IS A REQUIRED FEILD");
@@ -40,6 +40,7 @@ namespace Mnemosyne2Reborn.Configuration
             this.Password = Password ?? throw new Exception("THIS IS A REQUIRED FIELD");
             this.Subreddits = Subreddits ?? throw new Exception("THIS IS A REQUIRED FIELD");
             this.ArchiveLinks = ArchiveLinks;
+            this.UseOAuth = UseOAuth;
             FlavorText = new string[] { };
             this.ArchiveService = ArchiveService;
             Ver = 1;

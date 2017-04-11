@@ -63,15 +63,16 @@ namespace Mnemosyne2Reborn.Commenting
                 LinksListBody += str;
             }
             string c = head + LinksListBody + "\n" + string.Format(Program.Headers[3], conf.FlavorText[rand.Next(0, conf.FlavorText.Length)]);
-            Comment botComment = post.Comment(c);
+            //Comment botComment = post.Comment(c);
             try
             {
-                state.AddBotComment(post.Id, botComment.Id);
+                //state.AddBotComment(post.Id, botComment.Id);
+                Console.WriteLine(c);
             }
             catch(InvalidOperationException e)
             {
-                Console.WriteLine($"Caught exception replying to {post.Id} with new comment  {Regex.Replace(botComment.Id, "t1_", "")}: {e.Message}");
-                botComment.Del();
+                //Console.WriteLine($"Caught exception replying to {post.Id} with new comment  {Regex.Replace(botComment.Id, "t1_", "")}: {e.Message}");
+                //botComment.Del();
             }
         }
         public static void EditArchiveComment(Comment targetComment, List<string> ArchivesToInsert)

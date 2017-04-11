@@ -32,19 +32,20 @@ namespace Mnemosyne2Reborn
         public static Regex exclusions = new Regex(@"(streamable\.com|www\.gobrickindustry\.us|gyazo\.com|sli\.mg|imgur\.com|reddit\.com/message|youtube\.com|youtu\.be|wiki/rules|politics_feedback_results_and_where_it_goes_from|urbandictionary\.com)");
         public static Regex providers = new Regex(@"archive\.is|archive\.fo|web\.archive\.org|archive\.today|megalodon\.jp|web\.archive\.org|webcache\.googleusercontent\.com|archive\.li");
         public static Regex ImageRegex = new Regex(@"(\.gif|\.jpg|\.png|\.pdf|\.webm)$");
-        public static Config Config = File.Exists("./Data/Settings.json") ? CreateNewConfig() : Config.GetConfig();
+        public static Config Config = !File.Exists("./Data/Settings.json") ? CreateNewConfig() : Config.GetConfig();
         static void Main(string[] args)
         {
+            Console.Clear();
             IBotState botstate = Config.Sqlite ? (IBotState)new SQLiteBotState() : new FlatBotState();
             string AccessToken = "";
-            if (!Config.PassOrOAuth)
+            if (Config.UseOAuth)
             {
                 AuthProvider provider = new AuthProvider(Config.OAuthClientId, Config.OAuthSecret, "www.github.com/Memosyne/Mnemosyne-2.1");
                 AccessToken = provider.GetOAuthToken(Config.Username, Config.Password);
                 provider.GetAuthUrl(Config.Username, AuthProvider.Scope.edit | AuthProvider.Scope.submit);
             }
 #pragma warning disable CS0618 // Type or member is obsolete
-            Reddit reddit = Config.PassOrOAuth ? new Reddit(Config.Username, Config.Password) : new Reddit(AccessToken);
+            Reddit reddit = !Config.UseOAuth ? new Reddit(Config.Username, Config.Password) : new Reddit(AccessToken);
 #pragma warning restore CS0618 // Type or member is obsolete
             if (false)
             {
@@ -53,10 +54,18 @@ namespace Mnemosyne2Reborn
                 {
                     subs[i] = reddit.GetSubreddit(Config.Subreddits[i]);
                 }
-                foreach (Subreddit sub in subs)
+                while (true)
                 {
-                    IteratePosts(reddit, botstate, sub, false);
-                    IterateComments(reddit, botstate, sub);
+                    bool newMessages = reddit.User.UnreadMessages.Count() >= 1;
+                    foreach (Subreddit sub in subs)
+                    {
+                        Console.Title = $"Finding posts in {sub.Name} New messages: {newMessages}";
+                        IteratePosts(reddit, botstate, sub, false);
+                        Console.Title = $"Finding comments in {sub.Name} New messages: {newMessages}";
+                        IterateComments(reddit, botstate, sub);
+                    }
+                    System.Threading.Thread.Sleep(10000);
+                    Console.Title = $"Sleeping, New messages: {newMessages}";
                 }
             }
         }
@@ -83,8 +92,8 @@ namespace Mnemosyne2Reborn
         }
         public static Config CreateNewConfig()
         {
-            Console.WriteLine("Would you like to store data using SQLite instead of JSON files?");
-            bool useSQLite = bool.Parse(Console.ReadLine().ToLower());
+            Console.WriteLine("Would you like to store data using SQLite instead of JSON files? (Yes/No)");
+            bool useSQLite = Console.ReadLine().ToLower()[0] == 'y';
             Console.WriteLine("What is your username?");
             string Username = Console.ReadLine();
             Console.WriteLine("What is your password? note: required & in plaintext, suggest you use a secure system");
@@ -100,7 +109,8 @@ namespace Mnemosyne2Reborn
             Console.WriteLine("If you want to archive links, input \"Y\"");
             bool ArchiveLinks = Console.ReadLine().ToLower()[0] == 'y';
             Console.WriteLine("To add flavortext, you must manually add it in as an array in the ./Data/Settings.json file");
-            return new Config(useSQLite, Username, Subs, Password, ArchiveLinks: ArchiveLinks);
+            System.Threading.Thread.Sleep(10000);
+            return new Config(useSQLite, Username, Subs, Password, false, ArchiveLinks: ArchiveLinks);
         }
         public static void IterateComments(Reddit reddit, IBotState state, Subreddit subreddit)
         {
@@ -111,6 +121,10 @@ namespace Mnemosyne2Reborn
                     continue;
                 }
                 List<string> Links = RegularExpressions.FindLinks(comment.BodyHtml);
+                foreach(string s in Links)
+                {
+                    Console.WriteLine($"Found {s} in comment {comment.Id}");
+                }
                 List<string> ArchivedLinks = ArchiveLinks.ArchivePostLinks(Links, exclusions, new RedditUserProfile(new Reddit().GetUser(comment.AuthorName), Config.Sqlite));
                 PostArchives.ArchiveCommentLinks(Config, state, reddit, comment, ArchivedLinks, Links);
             }

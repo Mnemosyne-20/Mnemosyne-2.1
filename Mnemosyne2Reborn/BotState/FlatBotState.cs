@@ -26,12 +26,12 @@ namespace Mnemosyne2Reborn.BotState
         public FlatBotState()
         {
             if (File.Exists("./Data/ReplyTracker.txt"))
-            {
+            { // takes the old reply checking file and updates it to the new format
                 CommentDictionary = ReadReplyTrackingFile("./Data/ReplyTracker.txt");
                 File.Delete("./Data/ReplyTracker.txt");
             }
             else
-            {
+            { //Dictonary of replies
                 if (!File.Exists("./Data/Dictionary.json"))
                 {
                     CommentDictionary = new Dictionary<string, string>();
@@ -75,7 +75,7 @@ namespace Mnemosyne2Reborn.BotState
         /// <summary>
         /// COMMENT EXISTING FOR POST
         /// </summary>
-        /// <param name="commentID"></param>
+        /// <param name="postID"></param>
         /// <returns></returns>
         public bool DoesCommentExist(string postID) => CommentDictionary.ContainsKey(postID);
 

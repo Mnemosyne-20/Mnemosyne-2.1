@@ -16,7 +16,7 @@ namespace Mnemosyne2Reborn
         /// <param name="exclusions"></param>
         /// <param name="user"></param>
         /// <returns>A tuple, the first part of the tuple is archived links, second part is the links you put in minus the regexes</returns>
-        public static Tuple<List<string>, List<string>> ArchivePostLinks(List<string> FoundLinks, Regex exclusions, RedditSharp.Things.RedditUser user)
+        public static List<string> ArchivePostLinks(ref List<string> FoundLinks, Regex exclusions, RedditSharp.Things.RedditUser user, ArchiveService service)
         {
             List<string> ArchiveLinks = new List<string>();
             bool removed1 = false;
@@ -28,11 +28,10 @@ namespace Mnemosyne2Reborn
                     removed1 = false;
                 }
                 string link = FoundLinks[i];
-                ArchiveService service = new ArchiveService("https://www.archive.is");
                 new RedditUserProfile(user, false).AddUrlUsed(link);
                 if (!exclusions.IsMatch(link) && !Program.ImageRegex.IsMatch(link) && !Program.providers.IsMatch(link))
                 {
-                    ArchiveLinks.Add(FoundLinks[i]);//ArchiveLinks.Add(service.Save(link));
+                    ArchiveLinks.Add(service.Save(link));
                 }
                 else
                 {
@@ -47,7 +46,7 @@ namespace Mnemosyne2Reborn
                     }
                 }
             }
-            return Tuple.Create(ArchiveLinks, FoundLinks);
+            return ArchiveLinks;
         }
         /// <summary>
         /// Returns two lists, one contains the links that have been archived, the other the links found that aren't excluded
@@ -56,7 +55,7 @@ namespace Mnemosyne2Reborn
         /// <param name="exclusions">This is an array of regexes that you use to not archive certain types, exists so that I have orginized exlusions</param>
         /// <param name="user"></param>
         /// <returns>A tuple, the first part of the tuple is archived links, second part is the links you put in minus the regexes</returns>
-        public static Tuple<List<string>, List<string>> ArchivePostLinks(List<string> FoundLinks, Regex[] exclusions, RedditSharp.Things.RedditUser user)
+        public static List<string> ArchivePostLinks(ref List<string> FoundLinks, Regex[] exclusions, RedditSharp.Things.RedditUser user, ArchiveService service)
         {
             List<string> ArchiveLinks = new List<string>();
             bool removed1 = false;
@@ -68,11 +67,10 @@ namespace Mnemosyne2Reborn
                     removed1 = false;
                 }
                 string link = FoundLinks[i];
-                ArchiveService service = new ArchiveService("https://www.archive.is");
                 new RedditUserProfile(user, false).AddUrlUsed(link);
-                if (exclusions.Sum(a => a.IsMatch(FoundLinks[i]) ? 1 : 0) > 0)
+                if (exclusions.Sum(a => a.IsMatch(link) ? 1 : 0) == 0)
                 {
-                    ArchiveLinks.Add(FoundLinks[i]);//ArchiveLinks.Add(service.Save(link));
+                    ArchiveLinks.Add(service.Save(link));
                 }
                 else
                 {
@@ -87,7 +85,7 @@ namespace Mnemosyne2Reborn
                     }
                 }
             }
-            return Tuple.Create(ArchiveLinks, FoundLinks);
+            return ArchiveLinks;
         }
     }
 }

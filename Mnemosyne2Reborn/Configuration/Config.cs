@@ -31,6 +31,10 @@ namespace Mnemosyne2Reborn.Configuration
         public string ArchiveService;
         [JsonProperty("UseOAuth")]
         public bool UseOAuth;
+        
+        /// <summary>
+        /// EXISTS ONLY FOR JSONCONVERT
+        /// </summary>
         public Config()
         {
 

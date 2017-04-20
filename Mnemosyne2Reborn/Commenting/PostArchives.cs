@@ -8,17 +8,19 @@ using Mnemosyne2Reborn.BotState;
 using RedditSharp;
 using RedditSharp.Things;
 using System.Text.RegularExpressions;
+using ArchiveApi;
 namespace Mnemosyne2Reborn.Commenting
 {
     public static class PostArchives
     {
         static Random rand = new Random();
-        public static void ArchivePostLinks(Config conf, IBotState state, Post post, List<string> OriginalLinks, List<string> ArchivedLinks, bool ArchivePost, ArchiveApi.ArchiveService serv)
+        public static void ArchivePostLinks(Config conf, IBotState state, Post post, List<string> OriginalLinks, List<string> ArchivedLinks)
         {
+            ArchiveService serv = new ArchiveService(conf.ArchiveService);
             List<string> LinksToPost = new List<string>();
-            if (ArchivePost)
+            if (conf.ArchiveLinks)
             {
-                //LinksToPost.Add($"* **Post:** {serv.Save(post.Url)}\n");
+                LinksToPost.Add($"* **Post:** {serv.Save(post.Url)}\n");
             }
             for (int i = 0; i < OriginalLinks.Count; i++)
             {
@@ -55,6 +57,9 @@ namespace Mnemosyne2Reborn.Commenting
                 state.AddCheckedComment(commentID);
             }
         }
+        /// <summary>
+        /// Posts the archives as a comment, works great
+        /// </summary>
         public static void PostArchiveLinks(Config conf, IBotState state, string head, Post post, List<string> ArchiveList)
         {
             Console.Title = $"Posting new comment to post {post.Id}";
@@ -67,19 +72,23 @@ namespace Mnemosyne2Reborn.Commenting
                 head +
                 LinksListBody + "\n" +
                 string.Format(Program.Headers[3], conf.FlavorText[rand.Next(0, conf.FlavorText.Length)]);
-            //Comment botComment = post.Comment(c);
+            Comment botComment = post.Comment(c);
             try
             {
-                //state.AddBotComment(post.Id, botComment.Id);
+                state.AddBotComment(post.Id, botComment.Id);
                 Console.WriteLine(c);
-                Console.ReadLine();
             }
             catch (InvalidOperationException e)
             {
-                //Console.WriteLine($"Caught exception replying to {post.Id} with new comment  {Regex.Replace(botComment.Id, "t1_", "")}: {e.Message}");
-                //botComment.Del();
+                Console.WriteLine($"Caught exception replying to {post.Id} with new comment  {Regex.Replace(botComment.Id, "t1_", "")}: {e.Message}");
+                botComment.Del();
             }
         }
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="targetComment">Comment to edit, checks what is current and updates it with new archives</param>
+        /// <param name="ArchivedToInsert">The list of items to insert, not the archives themselves, this is usually used internally</param>
         public static void EditArchiveComment(Comment targetComment, List<string> ArchivesToInsert)
         {
             if (ArchivesToInsert.Count > 0)

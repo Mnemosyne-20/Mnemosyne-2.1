@@ -14,7 +14,7 @@ namespace Mnemosyne2Reborn.Commenting
         /// </summary>
         /// <param name="comment"></param>
         /// <returns></returns>
-        public static Post GetCommentPost(Comment comment)
+        public static Post GetCommentPost(this Comment comment)
         {
             return (Post)new Reddit().GetThingByFullname(comment.LinkId);
         }

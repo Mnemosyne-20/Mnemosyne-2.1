@@ -32,11 +32,11 @@ namespace ArchiveApi
         /// <returns>true if it does not contain "submit" in the uri</returns>
         public bool Verify(string ArchiveUrl)
         {
-            return (!new Uri(ArchiveUrl).AbsolutePath.Contains(submitEndpoint));
+            return (!new Uri(ArchiveUrl).LocalPath.Contains(submitEndpoint));
         }
         public bool Verify(Uri ArchiveUrl)
         {
-            return !ArchiveUrl.AbsolutePath.Contains(submitEndpoint);
+            return !ArchiveUrl.LocalPath.Contains(submitEndpoint);
         }
         /// <summary>
         /// Saves a webpage
@@ -55,6 +55,7 @@ namespace ArchiveApi
                     {"url", Url }
                 });
                 var response = client.SendAsync(request);
+                Task.WaitAll(response);
                 ReturnUrl = response.Result.RequestMessage.RequestUri.ToString();
                 if (!response.Result.IsSuccessStatusCode)
                 {
@@ -88,6 +89,7 @@ namespace ArchiveApi
                     {"url", Url.ToString() }
                 });
                 var response = client.SendAsync(request);
+                Task.WaitAll(response);
                 ReturnUrl = response.Result.RequestMessage.RequestUri.ToString();
                 if (!response.Result.IsSuccessStatusCode)
                 {

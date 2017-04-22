@@ -44,7 +44,7 @@ namespace Mnemosyne2Reborn
         {
             Console.Title = "Mnemosyne-2.1 by chugga_fan";
             Console.Clear();
-            IBotState botstate = Config.Sqlite ? (IBotState)new SQLiteBotState() : new FlatBotState();
+            IBotState botstate = Config.SQLite ? (IBotState)new SQLiteBotState() : new FlatBotState();
             string AccessToken = "";
             if (Config.UseOAuth)
             {
@@ -54,7 +54,7 @@ namespace Mnemosyne2Reborn
             }
             ArchiveService service = new ArchiveService(Config.ArchiveService);
 #pragma warning disable CS0618 // Type or member is obsolete
-            Reddit reddit = !Config.UseOAuth ? new Reddit(Config.Username, Config.Password) : new Reddit(AccessToken);
+            Reddit reddit = Config.UseOAuth ? new Reddit(AccessToken) : new Reddit(Config.Username, Config.Password);
 #pragma warning restore CS0618 // Type or member is obsolete
             Subreddit[] subs = new Subreddit[Config.Subreddits.Length];
             for (int i = 0; i < Config.Subreddits.Length; i++)
@@ -63,16 +63,16 @@ namespace Mnemosyne2Reborn
             }
             IteratePost = IteratePosts;
             IterateComment = IterateComments;
-            while (true)
+            while (true) // main loop, calls delegates that move through every subreddit allowed iteratively
             {
-                foreach (Subreddit sub in subs)
+                foreach (Subreddit sub in subs) // Iterates allowed subreddits
                 {
                     IteratePost(reddit, botstate, sub);
                     IterateComment(reddit, botstate, sub);
                     IterateMessages(reddit, botstate, sub);
                 }
                 Console.Title = $"Sleeping, New messages: {reddit.User.UnreadMessages.Count() >= 1}";
-                System.Threading.Thread.Sleep(10000);
+                System.Threading.Thread.Sleep(1000); // sleeps for one second to help with the reddit calls
             }
         }
 

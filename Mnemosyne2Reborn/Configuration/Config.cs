@@ -20,7 +20,7 @@ namespace Mnemosyne2Reborn.Configuration
         [JsonProperty("Password")]
         public string Password;
         [JsonProperty("UseSQLite")]
-        public bool Sqlite;
+        public bool SQLite;
         [JsonProperty("Version")]
         public int Ver;
         [JsonProperty("Subreddit")]
@@ -31,7 +31,7 @@ namespace Mnemosyne2Reborn.Configuration
         public string ArchiveService;
         [JsonProperty("UseOAuth")]
         public bool UseOAuth;
-        
+
         /// <summary>
         /// EXISTS ONLY FOR JSONCONVERT
         /// </summary>
@@ -41,7 +41,7 @@ namespace Mnemosyne2Reborn.Configuration
         }
         public Config(bool SQLite, string Username, string[] Subreddits, string Password, bool UseOAuth, string OAuthSecret = null, string OAuthClientId = null, bool ArchiveLinks = false, string ArchiveService = "https://www.archive.is")
         {
-            Sqlite = SQLite;
+            this.SQLite = SQLite;
             this.Username = Username ?? throw new Exception("THIS IS A REQUIRED FEILD");
             this.OAuthClientId = OAuthClientId;
             this.OAuthSecret = OAuthSecret;

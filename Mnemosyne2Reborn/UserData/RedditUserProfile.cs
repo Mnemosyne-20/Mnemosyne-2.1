@@ -31,6 +31,10 @@ namespace Mnemosyne2Reborn
         public int ImageUrlsUsed;
         [JsonProperty("OptedOut")]
         public bool OptedOut;
+        /// <summary> 
+        /// Adds a url used to a user that you made
+        /// </summary>
+        /// <param name="Url">The url to be added</param>
         public void AddUrlUsed(string Url)
         {
             if (OptedOut)
@@ -65,7 +69,7 @@ namespace Mnemosyne2Reborn
             string val = JsonConvert.SerializeObject(Users, Formatting.Indented);
             File.WriteAllText("./Data/Users.json", val);
         }
-        void Init()
+        static RedditUserProfile()
         {
             if (Users == null)
             {
@@ -90,7 +94,7 @@ namespace Mnemosyne2Reborn
         }
         public RedditUserProfile(RedditUser user, bool UseSQLite)
         {
-            this.Init();
+            //this.Init();
             this.User = user;
             this.Name = User.Name;
             if (!UseSQLite)
@@ -99,6 +103,10 @@ namespace Mnemosyne2Reborn
                 {
                     Users.Add(User.Name, new RedditUserProfile() { ArchivedUrlsUsed = 0, UnArchivedUrlsUsed = 0, User = user, Name = user.Name, ExcludedUrlsUsed = 0, OptedOut = false });
                 }
+            }
+            else
+            {
+
             }
             this.ArchivedUrlsUsed = Users[User.Name].ArchivedUrlsUsed;
             this.UnArchivedUrlsUsed = Users[User.Name].UnArchivedUrlsUsed;

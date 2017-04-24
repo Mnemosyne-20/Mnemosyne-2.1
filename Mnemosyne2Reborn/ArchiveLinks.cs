@@ -1,10 +1,7 @@
-﻿using System;
+﻿using ArchiveApi;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Text.RegularExpressions;
-using ArchiveApi;
 namespace Mnemosyne2Reborn
 {
     public static class ArchiveLinks
@@ -31,7 +28,13 @@ namespace Mnemosyne2Reborn
                 new RedditUserProfile(user, false).AddUrlUsed(link);
                 if (!exclusions.IsMatch(link) && !Program.ImageRegex.IsMatch(link) && !Program.providers.IsMatch(link))
                 {
-                    ArchiveLinks.Add(service.Save(link));
+                    string check = service.Save(link);
+                    while (!service.Verify(link))
+                    {
+                        System.Threading.Thread.Sleep(5000);
+                        check = service.Save(link);
+                    }
+                    ArchiveLinks.Add(check);
                 }
                 else
                 {
@@ -70,7 +73,13 @@ namespace Mnemosyne2Reborn
                 new RedditUserProfile(user, false).AddUrlUsed(link);
                 if (exclusions.Sum(a => a.IsMatch(link) ? 1 : 0) == 0)
                 {
-                    ArchiveLinks.Add(service.Save(link));
+                    string check = service.Save(link);
+                    while (!service.Verify(link))
+                    {
+                        System.Threading.Thread.Sleep(5000);
+                        check = service.Save(link);
+                    }
+                    ArchiveLinks.Add(check);
                 }
                 else
                 {

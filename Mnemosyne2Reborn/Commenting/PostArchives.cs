@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Mnemosyne2Reborn.Configuration;
+﻿using ArchiveApi;
 using Mnemosyne2Reborn.BotState;
+using Mnemosyne2Reborn.Configuration;
 using RedditSharp;
 using RedditSharp.Things;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
-using ArchiveApi;
 namespace Mnemosyne2Reborn.Commenting
 {
     public static class PostArchives

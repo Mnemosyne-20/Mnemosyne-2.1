@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RedditSharp;
-using System.IO;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using RedditSharp.Things;
+using System.Collections.Generic;
+using System.IO;
 namespace Mnemosyne2Reborn
 {
     [JsonObject]

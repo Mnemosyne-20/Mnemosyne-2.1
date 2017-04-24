@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using RedditSharp;
 using RedditSharp.Things;
-using RedditSharp;
 namespace Mnemosyne2Reborn.Commenting
 {
     public static class Extensions

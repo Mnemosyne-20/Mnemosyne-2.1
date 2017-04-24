@@ -33,7 +33,6 @@ namespace MnemosyneTest
             ArchiveService service = new ArchiveService("https://archive.is");
             Assert.IsFalse(service.Verify(new Uri("https://archive.is/submit/")));
             Assert.IsFalse(service.Verify("https://archive.is/submit/"));
-
         }
     }
 }

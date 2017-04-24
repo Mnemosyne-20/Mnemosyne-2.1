@@ -66,10 +66,7 @@ namespace Mnemosyne2Reborn.Commenting
             {
                 LinksListBody += str;
             }
-            string c =
-                head +
-                LinksListBody + "\n" +
-                string.Format(Program.Headers[3], conf.FlavorText[rand.Next(0, conf.FlavorText.Length)]);
+            string c = head + LinksListBody + "\n" + string.Format(Program.Headers[3], conf.FlavorText[rand.Next(0, conf.FlavorText.Length)]);
             Comment botComment = post.Comment(c);
             try
             {

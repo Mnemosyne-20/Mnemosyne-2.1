@@ -33,8 +33,8 @@ namespace Mnemosyne2Reborn
         public delegate void IterateThing(Reddit reddit, IBotState state, Subreddit subbreddit);
         public static IterateThing IteratePost;
         public static IterateThing IterateComment;
-        public static IterateThing IterateMessages;
-        public static string[] Headers = new string[] { "Archives for links in this post:\n\n", "Archive for this post:\n\n", "Archives for the links in comments:\n\n", "----\nI am Mnemosyne 2.1, {0} ^^^^/r/botsrights ^^^^[Contribute](https://github.com/Mnemosyne-20/Mnemosyne-2.1) ^^^^(message me suggestions at any time)" };
+        public static IterateThing IterateMessage;
+        public static string[] Headers = new string[] { "Archives for links in this post:\n\n", "Archive for this post:\n\n", "Archives for the links in comments:\n\n", "----\nI am Mnemosyne 2.1, {0} ^^^^/r/botsrights ^^^^[Contribute](https://github.com/Mnemosyne-20/Mnemosyne-2.1) ^^^^(message me suggestions at any time) ^^^^(Opt out of tracking by messaging me \"Opt Out\" at any time)" };
         public static Regex exclusions = new Regex(@"(streamable\.com|www\.gobrickindustry\.us|gyazo\.com|sli\.mg|imgur\.com|reddit\.com/message|youtube\.com|youtu\.be|wiki/rules|politics_feedback_results_and_where_it_goes_from|urbandictionary\.com)");
         public static Regex providers = new Regex(@"archive\.is|archive\.fo|web\.archive\.org|archive\.today|megalodon\.jp|web\.archive\.org|webcache\.googleusercontent\.com|archive\.li");
         public static Regex ImageRegex = new Regex(@"(\.gif|\.jpg|\.png|\.pdf|\.webm|\.mp4)$");
@@ -50,7 +50,7 @@ namespace Mnemosyne2Reborn
             {
                 AuthProvider provider = new AuthProvider(Config.OAuthClientId, Config.OAuthSecret, "https://www.github.com/Memosyne/Mnemosyne-2.1");
                 AccessToken = provider.GetOAuthToken(Config.Username, Config.Password);
-                System.Diagnostics.Process.Start(provider.GetAuthUrl(Config.Username, AuthProvider.Scope.edit | AuthProvider.Scope.submit));
+                System.Diagnostics.Process.Start(provider.GetAuthUrl(Config.Username, AuthProvider.Scope.edit | AuthProvider.Scope.submit | AuthProvider.Scope.read | AuthProvider.Scope.privatemessages));
             }
             ArchiveService service = new ArchiveService(Config.ArchiveService);
 #pragma warning disable CS0618 // Type or member is obsolete
@@ -63,6 +63,7 @@ namespace Mnemosyne2Reborn
             }
             IteratePost = IteratePosts;
             IterateComment = IterateComments;
+            IterateMessage = IterateMessages;
             while (true) // main loop, calls delegates that move through every subreddit allowed iteratively
             {
                 foreach (Subreddit sub in subs) // Iterates allowed subreddits
@@ -100,6 +101,17 @@ namespace Mnemosyne2Reborn
             return new Config(useSQLite, Username, Subs, Password, false, ArchiveLinks: ArchiveLinks);
         }
         #region IterateThings
+        public static void IterateMessages(Reddit reddit, IBotState state, Subreddit subreddit)
+        {
+            foreach(var message in reddit.User.PrivateMessages.Take(25))
+            {
+                if(message.Body.ToLower().Contains("opt out"))
+                {
+                    new RedditUserProfile(reddit.GetUser(message.Author), false);
+                    message.SetAsRead();
+                }
+            }
+        }
         public static void IteratePosts(Reddit reddit, IBotState state, Subreddit subreddit)
         {
             Console.Title = $"Finding posts in {subreddit.Name} New messages: {reddit.User.UnreadMessages.Count() >= 1}";

@@ -1,10 +1,18 @@
 ﻿using System;
-
+using System.Data;
+using System.Data.SQLite;
 namespace Mnemosyne2Reborn.BotState
 {
     public class SQLiteBotState : IBotState
     {
         public SQLiteBotState()
+        {
+        }
+        void InitializeDatabase()
+        {
+
+        }
+        void InitializeCommands()
         {
 
         }

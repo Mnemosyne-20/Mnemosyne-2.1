@@ -6,43 +6,44 @@ namespace Mnemosyne2Reborn.Configuration
     public class Config
     {
         [JsonProperty("OAuthSecert")]
-        public string OAuthSecret;
+        public string OAuthSecret { get; set; }
         [JsonProperty("OAuthClientId")]
-        public string OAuthClientId;
+        public string OAuthClientId { get; set; }
         [JsonProperty("FlavorText")]
-        public string[] FlavorText;
+        public string[] FlavorText { get; set; }
         [JsonProperty("Username")]
-        public string Username;
+        public string UserName { get; set; }
         [JsonProperty("Password")]
-        public string Password;
+        public string Password { get; set; }
         [JsonProperty("UseSQLite")]
-        public bool SQLite;
+        public bool SQLite { get; set; }
         [JsonProperty("Version")]
-        public int Ver;
+        public int Ver { get; private set; }
         [JsonProperty("Subreddit")]
-        public string[] Subreddits;
+        public string[] Subreddits { get; set; }
         [JsonProperty("ArchiveLinks")]
-        public bool ArchiveLinks;
+        public bool ArchiveLinks { get; set; }
         [JsonProperty("ArchiveService")]
-        public string ArchiveService;
+        public string ArchiveService { get; set; }
         [JsonProperty("UseOAuth")]
-        public bool UseOAuth;
+        public bool UseOAuth { get; set; }
 
         /// <summary>
         /// EXISTS ONLY FOR JSONCONVERT
+        /// DO NOT USE
         /// </summary>
         public Config()
         {
 
         }
-        public Config(bool SQLite, string Username, string[] Subreddits, string Password, bool UseOAuth, string OAuthSecret = null, string OAuthClientId = null, bool ArchiveLinks = false, string ArchiveService = "https://www.archive.is")
+        public Config(bool SQLite, string UserName, string[] Subreddits, string Password, bool UseOAuth = false, string OAuthSecret = null, string OAuthClientId = null, bool ArchiveLinks = false, string ArchiveService = "https://www.archive.is")
         {
             this.SQLite = SQLite;
-            this.Username = Username ?? throw new Exception("THIS IS A REQUIRED FEILD");
+            this.UserName = UserName ?? throw new ArgumentNullException("Username");
             this.OAuthClientId = OAuthClientId;
             this.OAuthSecret = OAuthSecret;
-            this.Password = Password ?? throw new Exception("THIS IS A REQUIRED FIELD");
-            this.Subreddits = Subreddits ?? throw new Exception("THIS IS A REQUIRED FIELD");
+            this.Password = Password ?? throw new ArgumentNullException("Password");
+            this.Subreddits = Subreddits ?? throw new ArgumentNullException("Subreddits");
             this.ArchiveLinks = ArchiveLinks;
             this.UseOAuth = UseOAuth;
             FlavorText = new string[] { };

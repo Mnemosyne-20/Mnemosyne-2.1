@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using RedditSharp.Things;
+using System;
 using System.Collections.Generic;
 using System.IO;
 namespace Mnemosyne2Reborn
@@ -59,6 +60,36 @@ namespace Mnemosyne2Reborn
             }
             DumpUserData();
         }
+        public void AddUrlUsed(Uri Url)
+        {
+            string url = Url.ToString();
+            if (OptedOut)
+            {
+                return;
+            }
+            if (Program.exclusions.IsMatch(url))
+            {
+                ExcludedUrlsUsed++;
+                return;
+            }
+            if (Program.providers.IsMatch(url))
+            {
+                ArchivedUrlsUsed++;
+            }
+            else
+            {
+                UnArchivedUrlsUsed++;
+            }
+            if (Program.ImageRegex.IsMatch(url))
+            {
+                ImageUrlsUsed++;
+            }
+            if (Users.ContainsKey(User.Name))
+            {
+                Users[User.Name] = this;
+            }
+            DumpUserData();
+        }
         public static void DumpUserData()
         {
             string val = JsonConvert.SerializeObject(Users, Formatting.Indented);
@@ -66,22 +97,20 @@ namespace Mnemosyne2Reborn
         }
         static RedditUserProfile()
         {
-            if (Users == null)
+            if (!Directory.Exists("./Data"))
+                Directory.CreateDirectory("./Data/");
+            if (File.Exists("./Data/Users.json"))
             {
-                if (!Directory.Exists("./Data"))
-                    Directory.CreateDirectory("./Data/");
-                if (File.Exists("./Data/Users.json"))
-                {
-                    Users = JsonConvert.DeserializeObject<Dictionary<string, RedditUserProfile>>(File.ReadAllText("./Data/Users.json"));
-                }
-                else
-                {
-                    Users = new Dictionary<string, RedditUserProfile>();
-                }
+                Users = JsonConvert.DeserializeObject<Dictionary<string, RedditUserProfile>>(File.ReadAllText("./Data/Users.json"));
+            }
+            else
+            {
+                Users = new Dictionary<string, RedditUserProfile>();
             }
         }
         /// <summary>
         /// ONLY EXISTS FOR JSON SERIALIZATION
+        /// DO NOT USE
         /// </summary>
         public RedditUserProfile()
         {
@@ -89,7 +118,6 @@ namespace Mnemosyne2Reborn
         }
         public RedditUserProfile(RedditUser user, bool UseSQLite)
         {
-            //this.Init();
             this.User = user;
             this.Name = User.Name;
             if (!UseSQLite)

@@ -26,7 +26,7 @@ namespace Mnemosyne2Reborn.Commenting
             {
                 if (str.Contains(types[i]))
                 {
-                    str.Replace(types[i], replacement[i]);
+                    str = str.Replace(types[i], replacement[i]);
                 }
             }
             return str;

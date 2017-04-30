@@ -6,7 +6,12 @@ namespace Mnemosyne2Reborn.BotState
 {
     public class FlatBotState : IBotState
     {
-        Dictionary<string, string> ReadReplyTrackingFile(string file)
+        /// <summary>
+        /// Returns a dictionary the exact same as the new format from the old format
+        /// </summary>
+        /// <param name="file">File to old format for the original bot</param>
+        /// <returns>New dictionary</returns>
+        static Dictionary<string, string> ReadReplyTrackingFile(string file)
         {
             Dictionary<string, string> replyDict = new Dictionary<string, string>();
             string fileIn = File.ReadAllText(file);
@@ -17,9 +22,11 @@ namespace Mnemosyne2Reborn.BotState
                 string botCommentID = elements[i + 1];
                 replyDict.Add(postID, botCommentID);
             }
-
             return replyDict;
         }
+        /// <summary>
+        /// Main constructor, should setup everything on it's own fine
+        /// </summary>
         public FlatBotState()
         {
             if (File.Exists("./Data/ReplyTracker.txt"))
@@ -75,7 +82,11 @@ namespace Mnemosyne2Reborn.BotState
         /// <param name="postID"></param>
         /// <returns></returns>
         public bool DoesCommentExist(string postID) => CommentDictionary.ContainsKey(postID);
-
+        /// <summary>
+        /// Gets the comment for post
+        /// </summary>
+        /// <param name="postID">Post to check if we commented on it.</param>
+        /// <returns>A comment ID</returns>
         public string GetCommentForPost(string postID) => CommentDictionary[postID];
         /// <summary>
         /// Checks if the comment is checked

@@ -21,7 +21,6 @@ namespace Mnemosyne2Reborn
                 {
                     LinksList.Add(foundlink);
                 }
-
                 match = match.NextMatch();
             }
             return LinksList;

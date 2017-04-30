@@ -59,7 +59,11 @@ namespace Mnemosyne2Reborn.Commenting
         /// Posts the archives as a comment, works great
         /// </summary>
         public static void PostArchiveLinks(Config conf, IBotState state, string head, Post post, List<string> ArchiveList)
-        {
+        { 
+            if(conf == null || state == null || head == null || post == null || ArchiveList == null)
+            {
+                throw new ArgumentNullException(conf == null ? "conf" : state == null ? "state" : head == null ? "head" : post == null ? "post" : "ArchiveList");
+            }
             Console.Title = $"Posting new comment to post {post.Id}";
             string LinksListBody = "";
             foreach (string str in ArchiveList)
@@ -102,21 +106,27 @@ namespace Mnemosyne2Reborn.Commenting
                         if (head[head.Length - 1].StartsWith("* **By")) // a comment
                         {
                             foreach (string str in ArchivesToInsert)
+                            {
                                 newCommentText += "\n" + str;
+                            }
                             bEditGood = true;
                         }
                         else if (head[head.Length - 1].StartsWith("* **Link")) // links in a post
                         {
                             newCommentText += "\n\n----\nArchives for links in comments: \n\n";
                             foreach (string str in ArchivesToInsert)
+                            {
                                 newCommentText += str;
+                            }
                             bEditGood = true;
                         }
                         else if (head[head.Length - 1].StartsWith("* **Post")) // POST
                         {
                             newCommentText += "\n\n----\nArchives for links in comments: \n\n";
                             foreach (string str in ArchivesToInsert)
+                            {
                                 newCommentText += str;
+                            }
                             bEditGood = true;
                         }
                         else

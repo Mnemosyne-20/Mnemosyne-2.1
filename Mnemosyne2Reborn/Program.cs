@@ -40,7 +40,7 @@ namespace Mnemosyne2Reborn
         public static Regex ImageRegex = new Regex(@"(\.gif|\.jpg|\.png|\.pdf|\.webm|\.mp4)$");
         public static Config Config = !File.Exists("./Data/Settings.json") ? CreateNewConfig() : Config.GetConfig();
         #endregion
-        static void Main(string[] args)
+        static void Main()
         {
             Console.Title = "Mnemosyne-2.1 by chugga_fan";
             Console.Clear();
@@ -49,12 +49,11 @@ namespace Mnemosyne2Reborn
             if (Config.UseOAuth)
             {
                 AuthProvider provider = new AuthProvider(Config.OAuthClientId, Config.OAuthSecret, "https://www.github.com/Memosyne/Mnemosyne-2.1");
-                AccessToken = provider.GetOAuthToken(Config.Username, Config.Password);
-                System.Diagnostics.Process.Start(provider.GetAuthUrl(Config.Username, AuthProvider.Scope.edit | AuthProvider.Scope.submit | AuthProvider.Scope.read | AuthProvider.Scope.privatemessages));
+                AccessToken = provider.GetOAuthToken(Config.UserName, Config.Password);
+                System.Diagnostics.Process.Start(provider.GetAuthUrl(Config.UserName, AuthProvider.Scope.edit | AuthProvider.Scope.submit | AuthProvider.Scope.read | AuthProvider.Scope.privatemessages));
             }
-            ArchiveService service = new ArchiveService(Config.ArchiveService);
 #pragma warning disable CS0618 // Type or member is obsolete
-            Reddit reddit = Config.UseOAuth ? new Reddit(AccessToken) : new Reddit(Config.Username, Config.Password);
+            Reddit reddit = Config.UseOAuth ? new Reddit(AccessToken) : new Reddit(Config.UserName, Config.Password);
 #pragma warning restore CS0618 // Type or member is obsolete
             Subreddit[] subs = new Subreddit[Config.Subreddits.Length];
             for (int i = 0; i < Config.Subreddits.Length; i++)
@@ -103,17 +102,29 @@ namespace Mnemosyne2Reborn
         #region IterateThings
         public static void IterateMessages(Reddit reddit, IBotState state, Subreddit subreddit)
         {
-            foreach(var message in reddit.User.PrivateMessages.Take(25))
+            if (reddit == null || state == null || subreddit == null)
             {
-                if(message.Body.ToLower().Contains("opt out"))
+                throw new ArgumentNullException(reddit == null ? "reddit" : state == null ? "state" : "subreddit");
+            }
+            foreach (var message in reddit.User.PrivateMessages.Take(25))
+            {
+                if (!message.Unread)
                 {
-                    new RedditUserProfile(reddit.GetUser(message.Author), false);
+                    break;
+                }
+                if (message.Body.ToLower().Contains("opt out"))
+                {
+                    new RedditUserProfile(reddit.GetUser(message.Author), false).OptedOut = true;
                     message.SetAsRead();
                 }
             }
         }
         public static void IteratePosts(Reddit reddit, IBotState state, Subreddit subreddit)
         {
+            if(reddit == null || state == null || subreddit == null)
+            {
+                throw new ArgumentNullException(reddit == null ? "reddit" : state == null ?  "state" : "subreddit");
+            }
             Console.Title = $"Finding posts in {subreddit.Name} New messages: {reddit.User.UnreadMessages.Count() >= 1}";
             foreach (var post in subreddit.Posts.Take(25))
             {
@@ -133,6 +144,10 @@ namespace Mnemosyne2Reborn
         }
         public static void IterateComments(Reddit reddit, IBotState state, Subreddit subreddit)
         {
+            if (reddit == null || state == null || subreddit == null)
+            {
+                throw new ArgumentNullException(reddit == null ? "reddit" : state == null ? "state" : "subreddit");
+            }
             Console.Title = $"Finding comments in {subreddit.Name} New messages: {reddit.User.UnreadMessages.Count() >= 1}";
             foreach (var comment in subreddit.Comments.Take(25))
             {

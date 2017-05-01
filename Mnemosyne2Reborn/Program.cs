@@ -82,7 +82,7 @@ namespace Mnemosyne2Reborn
             bool useSQLite = Console.ReadLine().ToLower()[0] == 'y';
             Console.WriteLine("What is your username?");
             string Username = Console.ReadLine();
-            Console.WriteLine("What is your password? note: required & in plaintext, suggest you use a secure system");
+            Console.WriteLine("What is your password? note: required and is stored in plaintext, suggest you use a secure system");
             string Password = Console.ReadLine();
             Console.WriteLine("What subreddits do you want to patroll? note: comma separated names without spaces");
             string[] Subs = Console.ReadLine().Split(',');
@@ -114,7 +114,7 @@ namespace Mnemosyne2Reborn
                 }
                 if (message.Body.ToLower().Contains("opt out"))
                 {
-                    new RedditUserProfile(reddit.GetUser(message.Author), false).OptedOut = true;
+                    new RedditUserProfile(reddit.GetUser(message.Author), false).SetOptedOut();
                     message.SetAsRead();
                 }
             }

@@ -3,6 +3,7 @@ using RedditSharp.Things;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Data.SQLite;
 namespace Mnemosyne2Reborn
 {
     [JsonObject]
@@ -13,6 +14,10 @@ namespace Mnemosyne2Reborn
         /// </summary>
         [JsonIgnore]
         public static Dictionary<string, RedditUserProfile> Users;
+        [JsonIgnore]
+        static SQLiteConnection dbConnection;
+        [JsonIgnore]
+        static SQLiteCommand InsertCommand, ExtractCommand;
         [JsonIgnore]
         public RedditUser User;
         [JsonProperty("Name")]
@@ -27,6 +32,11 @@ namespace Mnemosyne2Reborn
         public int ImageUrlsUsed;
         [JsonProperty("OptedOut")]
         public bool OptedOut;
+        public void SetOptedOut()
+        {
+            OptedOut = true;
+            DumpUserData();
+        }
         /// <summary> 
         /// Adds a url used to a user that you made
         /// </summary>
@@ -40,6 +50,7 @@ namespace Mnemosyne2Reborn
             if (Program.exclusions.IsMatch(Url))
             {
                 ExcludedUrlsUsed++;
+                DumpUserData();
                 return;
             }
             if (Program.providers.IsMatch(Url))
@@ -70,6 +81,7 @@ namespace Mnemosyne2Reborn
             if (Program.exclusions.IsMatch(url))
             {
                 ExcludedUrlsUsed++;
+                DumpUserData();
                 return;
             }
             if (Program.providers.IsMatch(url))
@@ -94,6 +106,23 @@ namespace Mnemosyne2Reborn
         {
             string val = JsonConvert.SerializeObject(Users, Formatting.Indented);
             File.WriteAllText("./Data/Users.json", val);
+        }
+        void InitDatabase()
+        {
+            string query = "create table if not exists Users (Name text unique, ArchiveUrlsUsed int, UnArchivedUrlsUsed int, ExcludedUrlsUsed int, ImageUrlsUsed int, OptedOut bool not null check (OptedOut in (0,1))";
+            SQLiteCommand cmd = new SQLiteCommand(query, dbConnection);
+            cmd.ExecuteNonQuery();
+            cmd.Dispose();
+        }
+        void InitCommands()
+        {
+            InsertCommand = new SQLiteCommand("insert or abort into Users (Name, ArchiveUrlsUsed, UnArchivedUrlsUsed, ExcludedUrlsUsed, ImageUrlsUsed, OptedOut) values (@Name, @ArchiveUrlsUsed, @UnArchivedUrlsUsed, @ExcludedUrlsUsed, @ImageUrlsUsed, @OptedOut)");
+            InsertCommand.Parameters.Add(new SQLiteParameter("@Name"));
+            InsertCommand.Parameters.Add(new SQLiteParameter("@ArchiveUrlsUsed"));
+            InsertCommand.Parameters.Add(new SQLiteParameter("@UnArchivedUrlsUsed"));
+            InsertCommand.Parameters.Add(new SQLiteParameter("@ExcludedUrlsUsed"));
+            InsertCommand.Parameters.Add(new SQLiteParameter("@ImageUrlsUsed"));
+            InsertCommand.Parameters.Add(new SQLiteParameter("@OptedOut"));
         }
         static RedditUserProfile()
         {
@@ -129,7 +158,16 @@ namespace Mnemosyne2Reborn
             }
             else
             {
-
+                if (!File.Exists("./Data/UserProfiles.sqlite"))
+                {
+                    SQLiteConnection.CreateFile("./Data/UserProfiles.sqlite");
+                }
+                string assemblyPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+                AppDomain.CurrentDomain.SetData("DataDirectory", assemblyPath);
+                dbConnection = new SQLiteConnection($"Data Source=|DataDirectory|/Data/UserProfiles.sqlite;Version=3;");
+                dbConnection.Open();
+                InitDatabase();
+                InitCommands();
             }
             this.ArchivedUrlsUsed = Users[User.Name].ArchivedUrlsUsed;
             this.UnArchivedUrlsUsed = Users[User.Name].UnArchivedUrlsUsed;

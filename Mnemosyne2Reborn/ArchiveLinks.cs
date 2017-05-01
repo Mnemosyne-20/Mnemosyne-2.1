@@ -29,8 +29,10 @@ namespace Mnemosyne2Reborn
                 if (!exclusions.IsMatch(link) && !Program.ImageRegex.IsMatch(link) && !Program.providers.IsMatch(link))
                 {
                     string check = service.Save(link);
-                    while (!service.Verify(link))
+                    int retries = 0;
+                    while (!service.Verify(link) && retries < 10)
                     {
+                        retries++;
                         System.Threading.Thread.Sleep(5000);
                         check = service.Save(link);
                     }
@@ -74,8 +76,10 @@ namespace Mnemosyne2Reborn
                 if (exclusions.Sum(a => a.IsMatch(link) ? 1 : 0) == 0)
                 {
                     string check = service.Save(link);
-                    while (!service.Verify(link))
+                    int retries = 0;
+                    while (!service.Verify(link) && retries < 10)
                     {
+                        retries++;
                         System.Threading.Thread.Sleep(5000);
                         check = service.Save(link);
                     }

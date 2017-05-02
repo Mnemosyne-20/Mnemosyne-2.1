@@ -1,6 +1,7 @@
-﻿namespace Mnemosyne2Reborn.BotState
+﻿using System;
+namespace Mnemosyne2Reborn.BotState
 {
-    public interface IBotState
+    public interface IBotState : IDisposable
     {
         bool DoesCommentExist(string postID);
         string GetCommentForPost(string postID);

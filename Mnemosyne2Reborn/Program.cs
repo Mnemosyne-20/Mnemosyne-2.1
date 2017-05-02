@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Diagnostics;
 namespace Mnemosyne2Reborn
 {
     public class Program
@@ -65,11 +66,23 @@ namespace Mnemosyne2Reborn
             IterateMessage = IterateMessages;
             while (true) // main loop, calls delegates that move through every subreddit allowed iteratively
             {
-                foreach (Subreddit sub in subs) // Iterates allowed subreddits
+                try
                 {
-                    IteratePost(reddit, botstate, sub);
-                    IterateComment(reddit, botstate, sub);
-                    IterateMessages(reddit, botstate, sub);
+                    foreach (Subreddit sub in subs) // Iterates allowed subreddits
+                    {
+                        IteratePost(reddit, botstate, sub);
+                        IterateComment(reddit, botstate, sub);
+                        IterateMessages(reddit, botstate, sub);
+                    }
+                }
+                catch(Exception e)
+                {
+                    if(!Directory.Exists("./Errors"))
+                    {
+                        Directory.CreateDirectory("./Errors");
+                    }
+                    File.AppendAllText("./Errors/Failures.txt", $"{e.ToString()}\n");
+                    Console.WriteLine($"Caught an exception of type {e.GetType()} output is in ./Errors/Failures.txt");
                 }
                 Console.Title = $"Sleeping, New messages: {reddit.User.UnreadMessages.Count() >= 1}";
                 System.Threading.Thread.Sleep(1000); // sleeps for one second to help with the reddit calls

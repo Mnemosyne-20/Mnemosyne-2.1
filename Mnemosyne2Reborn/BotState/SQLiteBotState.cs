@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Data;
 using System.Data.SQLite;
+using System.Data.SQLite.Linq;
+using System.Linq;
 using System.IO;
 namespace Mnemosyne2Reborn.BotState
 {
@@ -31,6 +33,7 @@ namespace Mnemosyne2Reborn.BotState
         {
             try
             {
+                
                 SQLCmd_AddCheckedComment.Parameters["@commentID"].Value = commentID;
                 SQLCmd_AddCheckedComment.ExecuteNonQuery();
             }

@@ -29,11 +29,11 @@ namespace ArchiveApi
         /// <returns>true if it does not contain "submit" in the uri</returns>
         public bool Verify(string ArchiveUrl)
         {
-            return (!new Uri(ArchiveUrl).LocalPath.Contains(submitEndpoint));
+            return (!new Uri(ArchiveUrl).LocalPath.Contains(submitEndpoint)) &&(new Uri(ArchiveUrl) != Url);
         }
         public bool Verify(Uri ArchiveUrl)
         {
-            return !ArchiveUrl.LocalPath.Contains(submitEndpoint);
+            return !ArchiveUrl.LocalPath.Contains(submitEndpoint) && ArchiveUrl != Url;
         }
         /// <summary>
         /// Saves a webpage
@@ -79,7 +79,7 @@ namespace ArchiveApi
             string ReturnUrl = "";
             using (var client = new HttpClient(new HttpClientHandler() { AllowAutoRedirect = true }))
             {
-                var request = new HttpRequestMessage(HttpMethod.Post, Url);
+                var request = new HttpRequestMessage(HttpMethod.Post, this.Url + submitEndpoint);
                 request.Headers.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36");
                 request.Content = new FormUrlEncodedContent(new Dictionary<string, string>
                 {

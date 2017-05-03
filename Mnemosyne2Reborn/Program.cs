@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Diagnostics;
+using System.Net;
 namespace Mnemosyne2Reborn
 {
     public class Program
@@ -74,17 +75,21 @@ namespace Mnemosyne2Reborn
                         IterateComment(reddit, botstate, sub);
                         IterateMessages(reddit, botstate, sub);
                     }
+                    Console.Title = $"Sleeping, New messages: {reddit.User.UnreadMessages.Count() >= 1}";
                 }
-                catch(Exception e)
+                catch (WebException e)
                 {
-                    if(!Directory.Exists("./Errors"))
+                    Console.WriteLine($"{e.Message}");
+                }
+                catch (Exception e)
+                {
+                    if (!Directory.Exists("./Errors"))
                     {
                         Directory.CreateDirectory("./Errors");
                     }
                     File.AppendAllText("./Errors/Failures.txt", $"{e.ToString()}\n");
                     Console.WriteLine($"Caught an exception of type {e.GetType()} output is in ./Errors/Failures.txt");
                 }
-                Console.Title = $"Sleeping, New messages: {reddit.User.UnreadMessages.Count() >= 1}";
                 System.Threading.Thread.Sleep(1000); // sleeps for one second to help with the reddit calls
             }
         }

@@ -30,11 +30,24 @@ namespace Mnemosyne2Reborn
                 {
                     string check = service.Save(link);
                     int retries = 0;
-                    while (!service.Verify(link) && retries < 10)
+                    while (!service.Verify(check) && retries < 10)
                     {
                         retries++;
                         System.Threading.Thread.Sleep(5000);
                         check = service.Save(link);
+                    }
+                    if (!service.Verify(check))
+                    {
+                        FoundLinks.RemoveAt(i);
+                        if (i != 0)
+                        {
+                            i--;
+                        }
+                        else
+                        {
+                            removed1 = true;
+                        }
+                        continue;
                     }
                     ArchiveLinks.Add(check);
                 }
@@ -77,11 +90,24 @@ namespace Mnemosyne2Reborn
                 {
                     string check = service.Save(link);
                     int retries = 0;
-                    while (!service.Verify(link) && retries < 10)
+                    while (!service.Verify(check) && retries < 10)
                     {
                         retries++;
                         System.Threading.Thread.Sleep(5000);
                         check = service.Save(link);
+                    }
+                    if (!service.Verify(check))
+                    {
+                        FoundLinks.RemoveAt(i);
+                        if (i != 0)
+                        {
+                            i--;
+                        }
+                        else
+                        {
+                            removed1 = true;
+                        }
+                        continue;
                     }
                     ArchiveLinks.Add(check);
                 }

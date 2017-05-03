@@ -36,6 +36,19 @@ namespace Mnemosyne2Reborn
                         System.Threading.Thread.Sleep(5000);
                         check = service.Save(link);
                     }
+                    if (!service.Verify(check))
+                    {
+                        FoundLinks.RemoveAt(i);
+                        if (i != 0)
+                        {
+                            i--;
+                        }
+                        else
+                        {
+                            removed1 = true;
+                        }
+                        continue;
+                    }
                     ArchiveLinks.Add(check);
                 }
                 else
@@ -82,6 +95,19 @@ namespace Mnemosyne2Reborn
                         retries++;
                         System.Threading.Thread.Sleep(5000);
                         check = service.Save(link);
+                    }
+                    if (!service.Verify(check))
+                    {
+                        FoundLinks.RemoveAt(i);
+                        if (i != 0)
+                        {
+                            i--;
+                        }
+                        else
+                        {
+                            removed1 = true;
+                        }
+                        continue;
                     }
                     ArchiveLinks.Add(check);
                 }

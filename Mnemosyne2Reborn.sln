@@ -11,6 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MnemosyneTest", "MnemosyneT
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{42CFF1CC-BD0A-4FB3-9988-8D7DC92E7D88}"
 	ProjectSection(SolutionItems) = preProject
+		appveyor.yml = appveyor.yml
 		Design.md = Design.md
 		Readme.md = Readme.md
 	EndProjectSection

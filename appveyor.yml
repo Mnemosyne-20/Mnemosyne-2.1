@@ -1,0 +1,12 @@
+version: 1.0.{build}
+pull_requests:
+  do_not_increment_build_number: true
+skip_non_tags: true
+image: Visual Studio 2017
+build:
+  verbosity: minimal
+deploy:
+- provider: GitHub
+  auth_token:
+    secure: f47v+SsAj4FXY3D5EQX449lYVmm2rP20prLGvTefDG0SICNHqE7OK9xMuABjJlH1
+  draft: true

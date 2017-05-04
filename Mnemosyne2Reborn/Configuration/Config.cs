@@ -27,6 +27,8 @@ namespace Mnemosyne2Reborn.Configuration
         public string ArchiveService { get; set; }
         [JsonProperty("UseOAuth")]
         public bool UseOAuth { get; set; }
+        [JsonProperty("RedirectURI")]
+        public string RedirectURI { get; set; }
 
         /// <summary>
         /// EXISTS ONLY FOR JSONCONVERT
@@ -36,24 +38,30 @@ namespace Mnemosyne2Reborn.Configuration
         {
 
         }
-        public Config(bool SQLite, string UserName, string[] Subreddits, string Password, bool UseOAuth = false, string OAuthSecret = null, string OAuthClientId = null, bool ArchiveLinks = false, string ArchiveService = "https://www.archive.is")
+        public Config(bool SQLite, string UserName, string[] Subreddits, string Password, bool UseOAuth = false, string OAuthSecret = null, string OAuthClientId = null, bool ArchiveLinks = false, string ArchiveService = "https://www.archive.is", string RedirectURI = "https://github.com/Mnemosyne-20/Mnemosyne-2.1")
         {
             this.SQLite = SQLite;
             this.UserName = UserName ?? throw new ArgumentNullException("Username");
-            this.OAuthClientId = OAuthClientId;
-            this.OAuthSecret = OAuthSecret;
+            this.UseOAuth = UseOAuth;
+            if (UseOAuth)
+            {
+                this.OAuthClientId = OAuthClientId ?? throw new ArgumentNullException("Neccessity to use OAuth");
+                this.OAuthSecret = OAuthSecret ?? throw new ArgumentNullException("Neccessity to use OAuth");
+            }
+            else
+            {
+                this.OAuthClientId = OAuthClientId;
+                this.OAuthSecret = OAuthSecret;
+            }
             this.Password = Password ?? throw new ArgumentNullException("Password");
             this.Subreddits = Subreddits ?? throw new ArgumentNullException("Subreddits");
             this.ArchiveLinks = ArchiveLinks;
-            this.UseOAuth = UseOAuth;
             FlavorText = new string[] { };
             this.ArchiveService = ArchiveService;
-            Ver = 1;
+            Ver = 2;
+            this.RedirectURI = RedirectURI;
             File.WriteAllText("./Data/Settings.json", JsonConvert.SerializeObject(this, Formatting.Indented));
         }
-        public static Config GetConfig()
-        {
-            return JsonConvert.DeserializeObject<Config>(File.ReadAllText("./Data/Settings.json"));
-        }
+        public static Config GetConfig() => JsonConvert.DeserializeObject<Config>(File.ReadAllText("./Data/Settings.json"));
     }
 }

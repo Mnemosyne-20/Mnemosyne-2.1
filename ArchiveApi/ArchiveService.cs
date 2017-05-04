@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
-
+using System.Text.RegularExpressions;
 namespace ArchiveApi
 {
     /// <summary>
@@ -27,14 +27,15 @@ namespace ArchiveApi
         /// </summary>
         /// <param name="ArchiveUrl"></param>
         /// <returns>true if it does not contain "submit" in the uri</returns>
-        public bool Verify(string ArchiveUrl)
-        {
-            return (!new Uri(ArchiveUrl).LocalPath.Contains(submitEndpoint)) &&(new Uri(ArchiveUrl) != Url);
-        }
-        public bool Verify(Uri ArchiveUrl)
-        {
-            return !ArchiveUrl.LocalPath.Contains(submitEndpoint) && ArchiveUrl != Url;
-        }
+        public bool Verify(string ArchiveUrl) => Verify(new Uri(ArchiveUrl));
+        /// <summary>
+        /// Checks if the ArchiveUrl is a successful URL
+        /// </summary>
+        /// <remarks>Yes I know the internals of this are actually stupid, but the unit test passed, that is what matters here</remarks>
+        /// <param name="ArchiveUrl"></param>
+        /// <returns>true if it does not contain "submit" in the uri</returns>
+        public bool Verify(Uri ArchiveUrl) => !ArchiveUrl.AbsolutePath.ToString().TrimEnd('/').Contains(submitEndpoint.TrimEnd('/')) && ArchiveUrl.ToString().Replace("https://", "http://").TrimEnd('/') != Url.ToString().Replace("https://", "http://").TrimEnd('/');
+
         /// <summary>
         /// Saves a webpage
         /// </summary>
@@ -65,6 +66,7 @@ namespace ArchiveApi
                         string[] sides = reader.ReadLine().Split('=');
                         ReturnUrl = sides[1];
                     }
+
                 }
             }
             return ReturnUrl;

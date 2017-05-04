@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Mnemosyne2Reborn")]
-[assembly: AssemblyCopyright("Copyright © chugga_fan  2017")]
+[assembly: AssemblyCopyright("Copyright © chugga_fan 2017")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

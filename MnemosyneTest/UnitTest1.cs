@@ -1,5 +1,4 @@
-﻿using ArchiveApi;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Mnemosyne2Reborn;
 using RedditSharp;
 using System;
@@ -16,7 +15,7 @@ namespace MnemosyneTest
             {
                 "archive.is"
             };
-            List<string> s = ArchiveLinks.ArchivePostLinks(ref foundLinks, new System.Text.RegularExpressions.Regex[] { new System.Text.RegularExpressions.Regex(@"archive\.is") }, new Reddit().GetUser("chugga_fan"), new ArchiveService("http://www.archive.is"));
+            List<string> s = ArchiveLinks.ArchivePostLinks(ref foundLinks, new System.Text.RegularExpressions.Regex[] { new System.Text.RegularExpressions.Regex(@"archive\.is") }, new Reddit().GetUser("chugga_fan"), "http://www.archive.is");
             Assert.IsTrue(s.Count == 0 && foundLinks.Count == 0);
         }
         [TestMethod]
@@ -26,13 +25,6 @@ namespace MnemosyneTest
             int before = profile.ArchivedUrlsUsed;
             profile.AddUrlUsed("archive.is");
             Assert.AreNotEqual(before, profile.ArchivedUrlsUsed);
-        }
-        [TestMethod]
-        public void Test()
-        {
-            ArchiveService service = new ArchiveService("https://archive.is");
-            Assert.IsFalse(service.Verify(new Uri("https://archive.is/submit/")));
-            Assert.IsFalse(service.Verify("https://archive.is/submit/"));
         }
     }
 }

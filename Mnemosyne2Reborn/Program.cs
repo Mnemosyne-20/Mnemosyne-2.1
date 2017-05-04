@@ -77,9 +77,9 @@ namespace Mnemosyne2Reborn
                     }
                     Console.Title = $"Sleeping, New messages: {reddit.User.UnreadMessages.Count() >= 1}";
                 }
-                catch (WebException e)
+                catch (WebException)
                 {
-                    Console.WriteLine($"{e.Message}");
+                    Console.WriteLine("Connect to the internet");
                 }
                 catch (Exception e)
                 {
@@ -132,7 +132,7 @@ namespace Mnemosyne2Reborn
                 }
                 if (message.Body.ToLower().Contains("opt out"))
                 {
-                    new RedditUserProfile(reddit.GetUser(message.Author), false).SetOptedOut();
+                    new RedditUserProfile(reddit.GetUser(message.Author), false).OptedOut = true;
                     message.SetAsRead();
                 }
             }

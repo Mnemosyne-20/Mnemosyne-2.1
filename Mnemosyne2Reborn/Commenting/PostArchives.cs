@@ -29,6 +29,10 @@ namespace Mnemosyne2Reborn.Commenting
         }
         public static void ArchiveCommentLinks(Config conf, IBotState state, Reddit reddit, Comment comment, List<string> ArchiveLinks, List<string> OriginalLinks)
         {
+            if(ArchiveLinks.Count < 1)
+            {
+                return;
+            }
             List<string> Links = new List<string>();
             string commentID = comment.Id;
             string postID = comment.LinkId.Substring(3);

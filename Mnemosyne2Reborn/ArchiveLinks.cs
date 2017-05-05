@@ -38,13 +38,13 @@ namespace Mnemosyne2Reborn
                 string link = FoundLinks[i];
                 if (!exclusions.IsMatch(link) && !Program.ImageRegex.IsMatch(link) && !Program.providers.IsMatch(link))
                 {
-                    string check = service.Save(link);
+                    string check = service.Save(link).Result;
                     int retries = 0;
                     while (!service.Verify(check) && retries < 10)
                     {
                         retries++;
                         System.Threading.Thread.Sleep(5000);
-                        check = service.Save(link);
+                        check = service.Save(link).Result;
                     }
                     ArchiveLinks.Add(check);
                 }
@@ -53,6 +53,14 @@ namespace Mnemosyne2Reborn
                     FoundLinks.Remove(link);
                 }
             }
+            Console.WriteLine("Test: ");
+            for (int i = 0; i < FoundLinks.Count; i++)
+            {
+                Console.WriteLine(FoundLinks[i]);
+                Console.WriteLine(ArchiveLinks[i]);
+            }
+            Console.WriteLine(FoundLinks.Count);
+            Console.WriteLine(ArchiveLinks.Count);
             return ArchiveLinks;
         }
         public static List<string> ArchivePostLinks(ref List<string> FoundLinks, Regex[] exclusions, RedditSharp.Things.RedditUser user, string service) =>
@@ -73,13 +81,13 @@ namespace Mnemosyne2Reborn
                 new RedditUserProfile(user, false).AddUrlUsed(link);
                 if (exclusions.Sum(b => b.IsMatch(link) ? 1 : 0) == 0)
                 {
-                    string check = service.Save(link);
+                    string check = service.Save(link).Result;
                     int retries = 0;
                     while (!service.Verify(check) && retries < 10)
                     {
                         retries++;
                         System.Threading.Thread.Sleep(5000);
-                        check = service.Save(link);
+                        check = service.Save(link).Result;
                     }
                     ArchiveLinks.Add(check);
                 }
@@ -87,6 +95,14 @@ namespace Mnemosyne2Reborn
                 {
                     FoundLinks.Remove(link);
                 }
+            }
+            Console.WriteLine("Test: ");
+            Console.WriteLine(FoundLinks.Count);
+            Console.WriteLine(ArchiveLinks.Count);
+            for (int i = 0; i < FoundLinks.Count; i++)
+            {
+                Console.WriteLine(FoundLinks[i]);
+                Console.WriteLine(ArchiveLinks[i]);
             }
             return ArchiveLinks;
         }

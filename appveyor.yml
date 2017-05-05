@@ -3,6 +3,8 @@ pull_requests:
   do_not_increment_build_number: true
 skip_non_tags: true
 image: Visual Studio 2017
+before_build:
+- cmd: nuget restore
 build:
   verbosity: minimal
 deploy:

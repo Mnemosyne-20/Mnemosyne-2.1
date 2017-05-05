@@ -13,14 +13,14 @@ namespace ArchiveApi
     {
         string submitEndpoint = "/submit/";
         string timeMapEndpoint = "/timemap/";
-        public Uri Url;
+        public string Url;
         public ArchiveService(string Url)
         {
-            this.Url = new Uri(Url);
+            this.Url = Url;
         }
         public ArchiveService(Uri Url)
         {
-            this.Url = Url;
+            this.Url = Url.ToString();
         }
         /// <summary>
         /// Checks if the ArchiveUrl is a successful URL
@@ -41,23 +41,30 @@ namespace ArchiveApi
         /// </summary>
         /// <param name="Url">Url to archive</param>
         /// <returns>Archive link</returns>
-        public string Save(string Url)
+        public async Task<string> Save(string Url)
         {
             string ReturnUrl = "";
             using (var client = new HttpClient(new HttpClientHandler() { AllowAutoRedirect = true }))
             {
-                var request = new HttpRequestMessage(HttpMethod.Post, this.Url + submitEndpoint);
+                /// <summary>
+                /// This puts a request to the archive site, so yhea...
+                /// </summary>
+                var request = new HttpRequestMessage(HttpMethod.Post, Url.TrimEnd('/')+submitEndpoint);
                 request.Headers.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36");
                 request.Content = new FormUrlEncodedContent(new Dictionary<string, string>
                 {
                     {"url", Url }
                 });
-                var response = client.SendAsync(request);
-                Task.WaitAll(response);
-                ReturnUrl = response.Result.RequestMessage.RequestUri.ToString();
-                if (!response.Result.IsSuccessStatusCode)
+                var response = await client.SendAsync(request);
+                Task.Delay(8000).Wait(); // elementary test to make it wait 8 seconds to get around, doesn't work
+                ReturnUrl = response.RequestMessage.RequestUri.ToString();
+                /// <remarks>
+                /// Fixes the bug where archive.is returns a json file that has a url tag
+                /// </remarks>
+                if (ReturnUrl == Url+submitEndpoint && !response.IsSuccessStatusCode)
                 {
-                    using (StringReader reader = new StringReader(response.Result.ToString()))
+                    #region fixing issues with return because this works somehow!?!?
+                    using (StringReader reader = new StringReader(response.ToString()))
                     {
                         for (int i = 0; i < 3; i++)
                         {
@@ -66,7 +73,7 @@ namespace ArchiveApi
                         string[] sides = reader.ReadLine().Split('=');
                         ReturnUrl = sides[1];
                     }
-
+                    #endregion
                 }
             }
             return ReturnUrl;
@@ -76,23 +83,22 @@ namespace ArchiveApi
         /// </summary>
         /// <param name="Url">Url to archive</param>
         /// <returns>Archive link</returns>
-        public string Save(Uri Url)
+        public async Task<string> Save(Uri Url)
         {
             string ReturnUrl = "";
             using (var client = new HttpClient(new HttpClientHandler() { AllowAutoRedirect = true }))
             {
-                var request = new HttpRequestMessage(HttpMethod.Post, this.Url + submitEndpoint);
-                request.Headers.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36");
+                var request = new HttpRequestMessage(HttpMethod.Post, this.Url.ToString().TrimEnd('/') + submitEndpoint);
+                request.Headers.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.96 Safari/537.36");
                 request.Content = new FormUrlEncodedContent(new Dictionary<string, string>
                 {
                     {"url", Url.ToString() }
                 });
-                var response = client.SendAsync(request);
-                Task.WaitAll(response);
-                ReturnUrl = response.Result.RequestMessage.RequestUri.ToString();
-                if (!response.Result.IsSuccessStatusCode)
+                var response = await client.SendAsync(request);
+                ReturnUrl = response.RequestMessage.RequestUri.ToString();
+                if (!response.IsSuccessStatusCode)
                 {
-                    using (StringReader reader = new StringReader(response.Result.ToString()))
+                    using (StringReader reader = new StringReader(response.ToString()))
                     {
                         for (int i = 0; i < 3; i++)
                         {

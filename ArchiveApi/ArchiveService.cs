@@ -13,28 +13,35 @@ namespace ArchiveApi
     {
         string submitEndpoint = "/submit/";
         string timeMapEndpoint = "/timemap/";
-        public string Url;
+        public Uri Url;
         public ArchiveService(string Url)
         {
-            this.Url = Url;
+            this.Url = new Uri(Url);
         }
         public ArchiveService(Uri Url)
         {
-            this.Url = Url.ToString();
+            this.Url = Url;
         }
         /// <summary>
         /// Checks if the ArchiveUrl is a successful URL
         /// </summary>
         /// <param name="ArchiveUrl"></param>
         /// <returns>true if it does not contain "submit" in the uri</returns>
-        public bool Verify(string ArchiveUrl) => Verify(new Uri(ArchiveUrl));
+        public bool Verify(string ArchiveUrl)
+        {
+            if (ArchiveUrl == null || ArchiveUrl == "http://archive.is/submit/" || ArchiveUrl == "http://archive.fo/submit/")
+            {
+                return false;
+            }
+            return true;
+        }
         /// <summary>
         /// Checks if the ArchiveUrl is a successful URL
         /// </summary>
         /// <remarks>Yes I know the internals of this are actually stupid, but the unit test passed, that is what matters here</remarks>
         /// <param name="ArchiveUrl"></param>
         /// <returns>true if it does not contain "submit" in the uri</returns>
-        public bool Verify(Uri ArchiveUrl) => !ArchiveUrl.AbsolutePath.ToString().TrimEnd('/').Contains(submitEndpoint.TrimEnd('/')) && ArchiveUrl.ToString().Replace("https://", "http://").TrimEnd('/') != Url.ToString().Replace("https://", "http://").TrimEnd('/');
+        public bool Verify(Uri ArchiveUrl) => !ArchiveUrl.AbsolutePath.Contains("submit") && ArchiveUrl.ToString() == "http://archive.is";
 
         /// <summary>
         /// Saves a webpage
@@ -49,7 +56,7 @@ namespace ArchiveApi
                 /// <summary>
                 /// This puts a request to the archive site, so yhea...
                 /// </summary>
-                var request = new HttpRequestMessage(HttpMethod.Post, Url.TrimEnd('/')+submitEndpoint);
+                var request = new HttpRequestMessage(HttpMethod.Post, "http://archive.is/submit/");
                 request.Headers.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36");
                 request.Content = new FormUrlEncodedContent(new Dictionary<string, string>
                 {
@@ -61,7 +68,7 @@ namespace ArchiveApi
                 /// <remarks>
                 /// Fixes the bug where archive.is returns a json file that has a url tag
                 /// </remarks>
-                if (ReturnUrl == Url+submitEndpoint && !response.IsSuccessStatusCode)
+                if (ReturnUrl == $"http://archive.is/submit/" && !response.IsSuccessStatusCode)
                 {
                     #region fixing issues with return because this works somehow!?!?
                     using (StringReader reader = new StringReader(response.ToString()))

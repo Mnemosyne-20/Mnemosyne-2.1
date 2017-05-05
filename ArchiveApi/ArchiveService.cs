@@ -29,7 +29,7 @@ namespace ArchiveApi
         /// <returns>true if it does not contain "submit" in the uri</returns>
         public bool Verify(string ArchiveUrl)
         {
-            if (ArchiveUrl == null || ArchiveUrl == "http://archive.is/submit/" || ArchiveUrl == "http://archive.fo/submit/")
+            if (ArchiveUrl == null || ArchiveUrl == "http://archive.is/submit/" || ArchiveUrl == "http://archive.fo/submit/" || ArchiveUrl.TrimEnd('/') == "http://archive.is/")
             {
                 return false;
             }

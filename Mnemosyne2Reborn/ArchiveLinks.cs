@@ -27,13 +27,13 @@ namespace Mnemosyne2Reborn
         public static List<string> ArchivePostLinks(ref List<string> FoundLinks, Regex exclusions, RedditSharp.Things.RedditUser user, ArchiveService service)
         {
             Console.WriteLine("New test");
-            foreach(var b in FoundLinks)
+            foreach (var b in FoundLinks)
             {
                 Console.WriteLine(b);
             }
             Console.WriteLine(FoundLinks.Count);
             List<string> ArchiveLinks = new List<string>();
-            for(int i = 0; i < FoundLinks.Count; i++)
+            for (int i = 0; i < FoundLinks.Count; i++)
             {
                 string link = FoundLinks[i];
                 if (!exclusions.IsMatch(link) && !Program.ImageRegex.IsMatch(link) && !Program.providers.IsMatch(link))
@@ -53,14 +53,6 @@ namespace Mnemosyne2Reborn
                     FoundLinks.Remove(link);
                 }
             }
-            Console.WriteLine("Test: ");
-            for (int i = 0; i < FoundLinks.Count; i++)
-            {
-                Console.WriteLine(FoundLinks[i]);
-                Console.WriteLine(ArchiveLinks[i]);
-            }
-            Console.WriteLine(FoundLinks.Count);
-            Console.WriteLine(ArchiveLinks.Count);
             return ArchiveLinks;
         }
         public static List<string> ArchivePostLinks(ref List<string> FoundLinks, Regex[] exclusions, RedditSharp.Things.RedditUser user, string service) =>
@@ -75,7 +67,7 @@ namespace Mnemosyne2Reborn
         public static List<string> ArchivePostLinks(ref List<string> FoundLinks, Regex[] exclusions, RedditSharp.Things.RedditUser user, ArchiveService service)
         {
             List<string> ArchiveLinks = new List<string>();
-            for(int i = 0; i < FoundLinks.Count; i++)
+            for (int i = 0; i < FoundLinks.Count; i++)
             {
                 string link = FoundLinks[i];
                 new RedditUserProfile(user, false).AddUrlUsed(link);
@@ -95,14 +87,6 @@ namespace Mnemosyne2Reborn
                 {
                     FoundLinks.Remove(link);
                 }
-            }
-            Console.WriteLine("Test: ");
-            Console.WriteLine(FoundLinks.Count);
-            Console.WriteLine(ArchiveLinks.Count);
-            for (int i = 0; i < FoundLinks.Count; i++)
-            {
-                Console.WriteLine(FoundLinks[i]);
-                Console.WriteLine(ArchiveLinks[i]);
             }
             return ArchiveLinks;
         }

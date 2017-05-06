@@ -11,14 +11,17 @@ namespace Mnemosyne2Reborn.Configuration
         public string OAuthClientId { get; set; }
         [JsonProperty("FlavorText")]
         public string[] FlavorText { get; set; }
+        [JsonRequired]
         [JsonProperty("Username")]
         public string UserName { get; set; }
+        [JsonRequired]
         [JsonProperty("Password")]
         public string Password { get; set; }
         [JsonProperty("UseSQLite")]
         public bool SQLite { get; set; }
         [JsonProperty("Version")]
         public int Ver { get; private set; }
+        [JsonRequired]
         [JsonProperty("Subreddit")]
         public string[] Subreddits { get; set; }
         [JsonProperty("ArchiveLinks")]
@@ -38,7 +41,7 @@ namespace Mnemosyne2Reborn.Configuration
         {
 
         }
-        public Config(bool SQLite, string UserName, string[] Subreddits, string Password, bool UseOAuth = false, string OAuthSecret = null, string OAuthClientId = null, bool ArchiveLinks = false, string ArchiveService = "https://www.archive.is", string RedirectURI = "https://github.com/Mnemosyne-20/Mnemosyne-2.1")
+        public Config(bool SQLite, string UserName, string[] Subreddits, string Password, bool UseOAuth = false, string OAuthSecret = null, string OAuthClientId = null, bool ArchiveLinks = false, string ArchiveService = "http://www.archive.is", string RedirectURI = "https://github.com/Mnemosyne-20/Mnemosyne-2.1")
         {
             this.SQLite = SQLite;
             this.UserName = UserName ?? throw new ArgumentNullException("Username");

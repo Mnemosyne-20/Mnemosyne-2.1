@@ -18,7 +18,7 @@ namespace Mnemosyne2Reborn.Commenting
             List<string> LinksToPost = new List<string>();
             if (conf.ArchiveLinks)
             {
-                LinksToPost.Add($"* **Post:** {serv.Save(post.Url)}\n");
+                LinksToPost.Add($"* **Post:** {serv.Save(post.Url)}\n"); // saves post if you want to archive something
             }
             for (int i = 0; i < OriginalLinks.Count; i++)
             {
@@ -49,7 +49,7 @@ namespace Mnemosyne2Reborn.Commenting
                 {
                     string botCommentThingID = state.GetCommentForPost(postID);
                     Console.WriteLine($"Already have post in {postID}, getting comment {botCommentThingID.Substring(3)}");
-                    EditArchiveComment((Comment)reddit.GetThingByFullname(botCommentThingID), ArchiveLinks);
+                    EditArchiveComment((Comment)reddit.GetThingByFullname(botCommentThingID), Links);
                 }
                 else
                 {

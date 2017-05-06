@@ -33,7 +33,6 @@ namespace Mnemosyne2Reborn.BotState
         {
             try
             {
-                
                 SQLCmd_AddCheckedComment.Parameters["@commentID"].Value = commentID;
                 SQLCmd_AddCheckedComment.ExecuteNonQuery();
             }

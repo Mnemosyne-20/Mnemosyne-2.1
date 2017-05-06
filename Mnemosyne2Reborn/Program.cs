@@ -83,6 +83,7 @@ namespace Mnemosyne2Reborn
                 }
                 catch (Exception e)
                 {
+                    // Catches errors and documents them, I should switch to a System.Diagnostics logger but I have no experience with it
                     if (!Directory.Exists("./Errors"))
                     {
                         Directory.CreateDirectory("./Errors");
@@ -105,17 +106,22 @@ namespace Mnemosyne2Reborn
             Console.WriteLine("What subreddits do you want to patroll? note: comma separated names without spaces");
             string[] Subs = Console.ReadLine().Split(',');
             // TODO: MAKE THIS AVAILIBLE
-            /*Console.WriteLine("If you do not want to use OAuth, input Y");
+            Console.WriteLine("Would you like to use OAuth? (Yes/No)");
             bool wantOAuth = Console.ReadLine().ToLower()[0] == 'y';
-            if(!wantOAuth)
+            string ClientID = null, ClientSecret = null;
+            if (wantOAuth)
             {
-
-            }*/
+                Console.WriteLine("Get an OAuth client ID and Secret");
+                Console.WriteLine("What is your clientID?");
+                ClientID = Console.ReadLine();
+                Console.WriteLine("What is your client secret?");
+                ClientSecret = Console.ReadLine();
+            }
             Console.WriteLine("Do you want to archive post links? (Yes/No)");
             bool ArchiveLinks = Console.ReadLine().ToLower()[0] == 'y';
             Console.WriteLine("To add flavortext, you must manually add it in as an array in the ./Data/Settings.json file");
             System.Threading.Thread.Sleep(10000);
-            return new Config(useSQLite, Username, Subs, Password, false, ArchiveLinks: ArchiveLinks);
+            return new Config(useSQLite, Username, Subs, Password, wantOAuth, ClientSecret, ClientID, ArchiveLinks);
         }
         #region IterateThings
         public static void IterateMessages(Reddit reddit, IBotState state, Subreddit subreddit)
@@ -139,9 +145,9 @@ namespace Mnemosyne2Reborn
         }
         public static void IteratePosts(Reddit reddit, IBotState state, Subreddit subreddit)
         {
-            if(reddit == null || state == null || subreddit == null)
+            if (reddit == null || state == null || subreddit == null)
             {
-                throw new ArgumentNullException(reddit == null ? "reddit" : state == null ?  "state" : "subreddit");
+                throw new ArgumentNullException(reddit == null ? "reddit" : state == null ? "state" : "subreddit");
             }
             Console.Title = $"Finding posts in {subreddit.Name} New messages: {reddit.User.UnreadMessages.Count() >= 1}";
             foreach (var post in subreddit.Posts.Take(25))
@@ -164,7 +170,7 @@ namespace Mnemosyne2Reborn
         {
             if (reddit == null || state == null || subreddit == null)
             {
-                throw new ArgumentNullException(reddit == null ? "reddit" : state == null ? "state" : "subreddit");
+                throw new ArgumentNullException(reddit == null ? nameof(reddit) : state == null ? nameof(state) : nameof(subreddit));
             }
             Console.Title = $"Finding comments in {subreddit.Name} New messages: {reddit.User.UnreadMessages.Count() >= 1}";
             foreach (var comment in subreddit.Comments.Take(25))
@@ -174,7 +180,7 @@ namespace Mnemosyne2Reborn
                     continue;
                 }
                 List<string> Links = RegularExpressions.FindLinks(comment.BodyHtml);
-                if(Links.Count == 0)
+                if (Links.Count == 0)
                 {
                     continue;
                 }

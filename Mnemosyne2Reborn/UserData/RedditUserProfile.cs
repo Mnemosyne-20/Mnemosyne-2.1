@@ -71,33 +71,7 @@ namespace Mnemosyne2Reborn
         public void AddUrlUsed(Uri Url)
         {
             string url = Url.ToString();
-            if (OptedOut)
-            {
-                return;
-            }
-            if (Program.exclusions.IsMatch(url))
-            {
-                ExcludedUrlsUsed++;
-                DumpUserData();
-                return;
-            }
-            if (Program.providers.IsMatch(url))
-            {
-                ArchivedUrlsUsed++;
-            }
-            else
-            {
-                UnArchivedUrlsUsed++;
-            }
-            if (Program.ImageRegex.IsMatch(url))
-            {
-                ImageUrlsUsed++;
-            }
-            if (Users.ContainsKey(User.Name))
-            {
-                Users[User.Name] = this;
-            }
-            DumpUserData();
+            AddUrlUsed(url);
         }
         public static void DumpUserData()
         {
@@ -146,14 +120,7 @@ namespace Mnemosyne2Reborn
         {
             this.User = user;
             this.Name = User.Name;
-            if (!UseSQLite)
-            {
-                if (!Users.ContainsKey(User.Name))
-                {
-                    Users.Add(User.Name, new RedditUserProfile() { ArchivedUrlsUsed = 0, UnArchivedUrlsUsed = 0, User = user, Name = user.Name, ExcludedUrlsUsed = 0, OptedOut = false });
-                }
-            }
-            else
+            if (UseSQLite)
             {
                 if (!File.Exists("./Data/UserProfiles.sqlite"))
                 {
@@ -165,6 +132,13 @@ namespace Mnemosyne2Reborn
                 dbConnection.Open();
                 InitDatabase();
                 InitCommands();
+            }
+            else
+            {
+                if (!Users.ContainsKey(User.Name))
+                {
+                    Users.Add(User.Name, new RedditUserProfile() { ArchivedUrlsUsed = 0, UnArchivedUrlsUsed = 0, User = user, Name = user.Name, ExcludedUrlsUsed = 0, OptedOut = false });
+                }
             }
             this.ArchivedUrlsUsed = Users[User.Name].ArchivedUrlsUsed;
             this.UnArchivedUrlsUsed = Users[User.Name].UnArchivedUrlsUsed;

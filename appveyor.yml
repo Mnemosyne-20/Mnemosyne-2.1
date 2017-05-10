@@ -4,11 +4,11 @@ pull_requests:
 skip_non_tags: true
 image: Visual Studio 2017
 before_build:
-- cmd: nuget restore
+  - cmd: nuget restore
 build:
   verbosity: minimal
 artifacts:
-- path: bin
+  - path: bins
 deploy:
 - provider: GitHub
   auth_token:

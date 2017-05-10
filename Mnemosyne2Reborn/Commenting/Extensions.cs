@@ -8,7 +8,7 @@ namespace Mnemosyne2Reborn.Commenting
         /// Gets a post the comment replies to
         /// </summary>
         /// <param name="comment"></param>
-        /// <returns></returns>
+        /// <returns>Post obtained <see cref="Post"/></returns>
         public static Post GetCommentPost(this Comment comment)
         {
             return (Post)new Reddit().GetThingByFullname(comment.LinkId);

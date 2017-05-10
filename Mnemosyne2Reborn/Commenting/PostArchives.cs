@@ -12,7 +12,15 @@ namespace Mnemosyne2Reborn.Commenting
     public static class PostArchives
     {
         static Random rand = new Random();
-        public static void ArchivePostLinks(Config conf, IBotState state, Post post, List<string> OriginalLinks, List<string> ArchivedLinks)
+        /// <summary>
+        /// Archives post links
+        /// </summary>
+        /// <param name="conf">Any configuration file</param>
+        /// <param name="state">An IBotstate <see cref="IBotState"/></param>
+        /// <param name="post">A reddit post to reply to <see cref="Post"/></param>
+        /// <param name="OriginalLinks">A list of the original links</param>
+        /// <param name="ArchivedLinks">A list of pre-archived links that gets formatted for posting</param>
+        public static void ArchivePostLinks(Config conf, IBotState state, Post post, int[] LinkNumber, List<string> OriginalLinks, List<string> ArchivedLinks)
         {
             ArchiveService serv = new ArchiveService(conf.ArchiveService);
             List<string> LinksToPost = new List<string>();
@@ -27,9 +35,35 @@ namespace Mnemosyne2Reborn.Commenting
             }
             PostArchiveLinks(conf, state, Program.Headers[0], post, LinksToPost);
         }
+        public static void ArchivePostLinks(Config conf, IBotState state, Post post, List<string> OriginalLinks, Dictionary<string, int> ArchivedLinks)
+        {
+            ArchiveService serv = new ArchiveService(conf.ArchiveService);
+            List<string> LinksToPost = new List<string>();
+            if (conf.ArchiveLinks)
+            {
+                LinksToPost.Add($"* **Post:** {serv.Save(post.Url)}\n"); // saves post if you want to archive something
+            }
+            int i = 0;
+            foreach(var val in ArchivedLinks)
+            {
+                string hostname = new Uri(OriginalLinks[i]).Host.Replace("www.", "");
+                LinksToPost.Add($"* **Link: {val.Value.ToString()}** ([{hostname}]({OriginalLinks[i]})): {val.Key}\n");
+                i++;
+            }
+            PostArchiveLinks(conf, state, Program.Headers[0], post, LinksToPost);
+        }
+        /// <summary>
+        /// Archives all of the links in a comment
+        /// </summary>
+        /// <param name="conf">Configuartion <see cref="Config"/></param>
+        /// <param name="state">An IBotstate tracker <see cref="IBotState"/></param>
+        /// <param name="reddit">A reddit user to post with <see cref="Reddit"/></param>
+        /// <param name="comment">A comment to track the post to reply to <see cref="Comment"/></param>
+        /// <param name="ArchiveLinks">A list of the archived links</param>
+        /// <param name="OriginalLinks">A list of the original links</param>
         public static void ArchiveCommentLinks(Config conf, IBotState state, Reddit reddit, Comment comment, List<string> ArchiveLinks, List<string> OriginalLinks)
         {
-            if(ArchiveLinks.Count < 1)
+            if (ArchiveLinks.Count < 1)
             {
                 return;
             }
@@ -54,17 +88,22 @@ namespace Mnemosyne2Reborn.Commenting
                 else
                 {
                     Console.WriteLine($"No comment in {postID} to edit, making new one");
-                    PostArchiveLinks(conf, state, Program.Headers[2], (Post)reddit.GetThingByFullname(comment.LinkId), Links);
+                    PostArchiveLinks(conf, state, Program.Headers[2], comment.GetCommentPost(), Links);
                 }
                 state.AddCheckedComment(commentID);
             }
         }
         /// <summary>
-        /// Posts the archives as a comment, works great
+        /// Posts all links archived, throws <see cref="ArgumentNullException"/> if you attempt to call this with any null arguments
         /// </summary>
+        /// <param name="conf"></param>
+        /// <param name="state"></param>
+        /// <param name="head"></param>
+        /// <param name="post"></param>
+        /// <param name="ArchiveList"></param>
         public static void PostArchiveLinks(Config conf, IBotState state, string head, Post post, List<string> ArchiveList)
-        { 
-            if(conf == null || state == null || head == null || post == null || ArchiveList == null)
+        {
+            if (conf == null || state == null || head == null || post == null || ArchiveList == null)
             {
                 throw new ArgumentNullException(conf == null ? "conf" : state == null ? "state" : head == null ? "head" : post == null ? "post" : "ArchiveList");
             }
@@ -135,7 +174,7 @@ namespace Mnemosyne2Reborn.Commenting
                         }
                         else
                         {
-                            throw new Exception($"Unexpected end of head: {head[head.Length - 1]}"); // more appropriate, as that's not supposed to happen
+                            throw new Exception($"Unexpected end of head: {head[head.Length - 1]}, comment: {targetComment.Id}"); // more appropriate, as that's not supposed to happen
                         }
                         newCommentText += string.Join("\n", tail);
                     }

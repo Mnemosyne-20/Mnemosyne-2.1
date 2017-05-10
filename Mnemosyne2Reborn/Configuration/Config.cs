@@ -19,6 +19,9 @@ namespace Mnemosyne2Reborn.Configuration
         public string Password { get; set; }
         [JsonProperty("UseSQLite")]
         public bool SQLite { get; set; }
+        /// <summary>
+        /// This exists so that we know what version of the filesystem we're on, I'm going to attempt to figure out how to use multiple config versions and update them eventually :(
+        /// </summary>
         [JsonProperty("Version")]
         public int Ver { get; private set; }
         [JsonRequired]

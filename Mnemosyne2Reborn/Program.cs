@@ -6,11 +6,11 @@ using RedditSharp;
 using RedditSharp.Things;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
-using System.Diagnostics;
 using System.Net;
+using System.Text.RegularExpressions;
 namespace Mnemosyne2Reborn
 {
     public class Program
@@ -32,6 +32,12 @@ namespace Mnemosyne2Reborn
             "autourbanbot",
             "deepsalter-001"
         };
+        /// <summary>
+        /// Iterates each "thing" you make, subreddit is required for a few of them
+        /// </summary>
+        /// <param name="reddit"></param>
+        /// <param name="state"></param>
+        /// <param name="subbreddit"></param>
         public delegate void IterateThing(Reddit reddit, IBotState state, Subreddit subbreddit);
         public static IterateThing IteratePost;
         public static IterateThing IterateComment;
@@ -52,7 +58,7 @@ namespace Mnemosyne2Reborn
             {
                 AuthProvider provider = new AuthProvider(Config.OAuthClientId, Config.OAuthSecret, "https://www.github.com/Memosyne/Mnemosyne-2.1");
                 AccessToken = provider.GetOAuthToken(Config.UserName, Config.Password);
-                System.Diagnostics.Process.Start(provider.GetAuthUrl(Config.UserName, AuthProvider.Scope.edit | AuthProvider.Scope.submit | AuthProvider.Scope.read | AuthProvider.Scope.privatemessages));
+                Process.Start(provider.GetAuthUrl(Config.UserName, AuthProvider.Scope.edit | AuthProvider.Scope.submit | AuthProvider.Scope.read | AuthProvider.Scope.privatemessages));
             }
 #pragma warning disable CS0618 // Type or member is obsolete
             Reddit reddit = Config.UseOAuth ? new Reddit(AccessToken) : new Reddit(Config.UserName, Config.Password);
@@ -159,11 +165,10 @@ namespace Mnemosyne2Reborn
                     {
                         continue;
                     }
-                    List<string> ArchivedLinks = ArchiveLinks.ArchivePostLinks(ref Links, new Regex[] { exclusions, providers, ImageRegex }, reddit.GetUser(post.AuthorName), new ArchiveService(Config.ArchiveService));
+                    Dictionary<string, int> ArchivedLinks = ArchiveLinks.ArchivePostLinks(ref Links, new Regex[] { exclusions, providers, ImageRegex }, reddit.GetUser(post.AuthorName), new ArchiveService(Config.ArchiveService), false);
                     PostArchives.ArchivePostLinks(Config, state, post, Links, ArchivedLinks);
                     state.AddCheckedComment(post.Id);
                 }
-
             }
         }
         public static void IterateComments(Reddit reddit, IBotState state, Subreddit subreddit)

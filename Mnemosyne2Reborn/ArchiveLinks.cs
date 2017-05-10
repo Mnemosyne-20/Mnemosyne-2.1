@@ -7,16 +7,7 @@ namespace Mnemosyne2Reborn
 {
     public static class ArchiveLinks
     {
-        /// <summary>
-        /// This exists purely because I wanted to make the unit tests work
-        /// </summary>
-        /// <param name="FoundLinks"></param>
-        /// <param name="exclusions"></param>
-        /// <param name="user"></param>
-        /// <param name="service"></param>
-        /// <returns></returns>
-        public static List<string> ArchivePostLinks(ref List<string> FoundLinks, Regex exclusions, RedditSharp.Things.RedditUser user, string service) =>
-            ArchivePostLinks(ref FoundLinks, exclusions, user, new ArchiveService(service));
+        public static List<string> ArchivePostLinks(ref List<string> FoundLinks, Regex exclusions, RedditSharp.Things.RedditUser user, string service) => ArchivePostLinks(ref FoundLinks, exclusions, user, new ArchiveService(service));
         /// <summary>
         /// 
         /// </summary>
@@ -87,6 +78,43 @@ namespace Mnemosyne2Reborn
                 {
                     FoundLinks.Remove(link);
                 }
+            }
+            return ArchiveLinks;
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="FoundLinks"></param>
+        /// <param name="exclusions"></param>
+        /// <param name="user"></param>
+        /// <param name="service"></param>
+        /// <param name="removeCollisions">Exists to remove name collisions</param>
+        /// <returns></returns>
+        public static Dictionary<string, int> ArchivePostLinks(ref List<string> FoundLinks, Regex[] exclusions, RedditSharp.Things.RedditUser user, ArchiveService service, bool removeCollisions)
+        {
+            Dictionary<string, int> ArchiveLinks = new Dictionary<string, int>();
+            int counter = 1;
+            for (int i = 0; i < FoundLinks.Count; i++)
+            {
+                string link = FoundLinks[i];
+                new RedditUserProfile(user, false).AddUrlUsed(link);
+                if (exclusions.Sum(b => b.IsMatch(link) ? 1 : 0) == 0)
+                {
+                    string check = service.Save(link).Result;
+                    int retries = 0;
+                    while (!service.Verify(check) && retries < 10)
+                    {
+                        retries++;
+                        System.Threading.Thread.Sleep(5000);
+                        check = service.Save(link).Result;
+                    }
+                    ArchiveLinks.Add(check, counter);
+                }
+                else
+                {
+                    FoundLinks.Remove(link);
+                }
+                counter++;
             }
             return ArchiveLinks;
         }

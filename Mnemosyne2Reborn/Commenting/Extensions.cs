@@ -9,9 +9,9 @@ namespace Mnemosyne2Reborn.Commenting
         /// </summary>
         /// <param name="comment"></param>
         /// <returns>Post obtained <see cref="Post"/></returns>
-        public static Post GetCommentPost(this Comment comment)
+        public static Post GetCommentPost(this Comment comment, Reddit reddit)
         {
-            return (Post)new Reddit().GetThingByFullname(comment.LinkId);
+            return (Post)reddit.GetThingByFullname(comment.LinkId);
         }
         static string[] types = new string[] { "*", "^", "~~", "[", "]", "_" };
         static string[] replacement = new string[] { "\\*", "\\^", "\\~~", "\\[", "\\]", "\\_" };

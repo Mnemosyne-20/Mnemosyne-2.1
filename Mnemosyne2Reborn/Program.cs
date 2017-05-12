@@ -54,15 +54,17 @@ namespace Mnemosyne2Reborn
             Console.Clear();
             IBotState botstate = Config.SQLite ? (IBotState)new SQLiteBotState() : new FlatBotState();
             string AccessToken = "";
+            WebAgent agent = new WebAgent();
             if (Config.UseOAuth)
             {
-                AuthProvider provider = new AuthProvider(Config.OAuthClientId, Config.OAuthSecret, "https://www.github.com/Memosyne/Mnemosyne-2.1");
+                AuthProvider provider = new AuthProvider(Config.OAuthClientId, Config.OAuthSecret, Config.RedirectURI);
                 AccessToken = provider.GetOAuthToken(Config.UserName, Config.Password);
-                Process.Start(provider.GetAuthUrl(Config.UserName, AuthProvider.Scope.edit | AuthProvider.Scope.submit | AuthProvider.Scope.read | AuthProvider.Scope.privatemessages));
+                agent = new BotWebAgent(Config.UserName, Config.Password, Config.OAuthClientId, Config.OAuthSecret, Config.RedirectURI);
             }
 #pragma warning disable CS0618 // Type or member is obsolete
-            Reddit reddit = Config.UseOAuth ? new Reddit(AccessToken) : new Reddit(Config.UserName, Config.Password);
+            Reddit reddit = Config.UseOAuth ? new Reddit(agent) : new Reddit(Config.UserName, Config.Password);
 #pragma warning restore CS0618 // Type or member is obsolete
+            reddit.InitOrUpdateUser();
             Subreddit[] subs = new Subreddit[Config.Subreddits.Length];
             for (int i = 0; i < Config.Subreddits.Length; i++)
             {

@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 namespace ArchiveApi
 {
     /// <summary>
-    /// Is a class that creates an Archive Service Provider, e.g. archive.is
+    /// Is a class that creates an Archive Service Provider, e.g. archive.is, currently can only use archive.is because URI is weird in C# for some reason
     /// </summary>
     public class ArchiveService
     {

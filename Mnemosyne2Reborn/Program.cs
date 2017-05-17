@@ -53,12 +53,9 @@ namespace Mnemosyne2Reborn
             Console.Title = "Mnemosyne-2.1 by chugga_fan";
             Console.Clear();
             IBotState botstate = Config.SQLite ? (IBotState)new SQLiteBotState() : new FlatBotState();
-            string AccessToken = "";
             WebAgent agent = new WebAgent();
             if (Config.UseOAuth)
             {
-                AuthProvider provider = new AuthProvider(Config.OAuthClientId, Config.OAuthSecret, Config.RedirectURI);
-                AccessToken = provider.GetOAuthToken(Config.UserName, Config.Password);
                 agent = new BotWebAgent(Config.UserName, Config.Password, Config.OAuthClientId, Config.OAuthSecret, Config.RedirectURI);
             }
 #pragma warning disable CS0618 // Type or member is obsolete

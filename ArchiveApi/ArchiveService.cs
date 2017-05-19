@@ -62,7 +62,6 @@ namespace ArchiveApi
                     {"url", Url }
                 });
                 var response = await client.SendAsync(request);
-                Task.Delay(8000).Wait(); // elementary test to make it wait 8 seconds to get around, doesn't work
                 ReturnUrl = response.RequestMessage.RequestUri.ToString();
                 /// <remarks>
                 /// Fixes the bug where archive.is returns a json file that has a url tag

@@ -26,7 +26,7 @@ namespace Mnemosyne2Reborn.Configuration
         public int Ver { get; private set; }
         [JsonRequired]
         [JsonProperty("Subreddit")]
-        public string[] Subreddits { get; set; }
+        public ArchiveSubredditJson[] Subreddits { get; set; }
         [JsonProperty("ArchiveLinks")]
         public bool ArchiveLinks { get; set; }
         [JsonProperty("ArchiveService")]
@@ -44,8 +44,12 @@ namespace Mnemosyne2Reborn.Configuration
         {
 
         }
-        public Config(bool SQLite, string UserName, string[] Subreddits, string Password, bool UseOAuth = false, string OAuthSecret = null, string OAuthClientId = null, bool ArchiveLinks = false, string ArchiveService = "http://www.archive.is", string RedirectURI = "https://github.com/Mnemosyne-20/Mnemosyne-2.1")
+        public Config(bool SQLite, string UserName, ArchiveSubredditJson[] Subreddits, string Password, bool UseOAuth = false, string OAuthSecret = null, string OAuthClientId = null, bool ArchiveLinks = false, string ArchiveService = "http://www.archive.is", string RedirectURI = "https://github.com/Mnemosyne-20/Mnemosyne-2.1")
         {
+            if(!Directory.Exists("./Data/"))
+            {
+                Directory.CreateDirectory("./Data/");
+            }
             this.SQLite = SQLite;
             this.UserName = UserName ?? throw new ArgumentNullException("Username");
             this.UseOAuth = UseOAuth;
@@ -64,7 +68,7 @@ namespace Mnemosyne2Reborn.Configuration
             this.ArchiveLinks = ArchiveLinks;
             FlavorText = new string[] { };
             this.ArchiveService = ArchiveService;
-            Ver = 2;
+            Ver = 3;
             this.RedirectURI = RedirectURI;
             File.WriteAllText("./Data/Settings.json", JsonConvert.SerializeObject(this, Formatting.Indented));
         }

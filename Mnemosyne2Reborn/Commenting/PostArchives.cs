@@ -37,6 +37,62 @@ namespace Mnemosyne2Reborn.Commenting
             }
             PostArchiveLinks(conf, state, Program.Headers[0], post, LinksToPost);
         }
+        /// <summary>
+        /// Archives post links
+        /// </summary>
+        /// <param name="conf">Any configuration file</param>
+        /// <param name="state">An IBotstate <see cref="IBotState"/></param>
+        /// <param name="post">A reddit post to reply to <see cref="Post"/></param>
+        /// <param name="OriginalLinks">A list of the original links</param>
+        /// <param name="ArchivedLinks">A list of pre-archived links that gets formatted for posting</param>
+        public static void ArchivePostLinks(ArchiveSubreddit sub, Config conf, IBotState state, Post post, int[] LinkNumber, List<string> OriginalLinks, List<string> ArchivedLinks)
+        {
+            ArchiveService serv = new ArchiveService(conf.ArchiveService);
+            List<string> LinksToPost = new List<string>();
+            if (sub.ArchivePost)
+            {
+                LinksToPost.Add($"* **Post:** {serv.Save(post.Url)}\n"); // saves post if you want to archive something
+            }
+            for (int i = 0; i < OriginalLinks.Count; i++)
+            {
+                string hostname = new Uri(OriginalLinks[i]).Host.Replace("www.", "");
+                LinksToPost.Add($"* **Link: {(i + 1).ToString()}** ([{hostname}]({OriginalLinks[i]})): {ArchivedLinks[i]}\n");
+            }
+            PostArchiveLinks(conf, state, Program.Headers[0], post, LinksToPost);
+        }
+        /// <summary>
+        /// Posts links that were gotten from a post
+        /// </summary>
+        /// <param name="conf">Configuration <see cref="Config"/></param>
+        /// <param name="state">Used to track replies</param>
+        /// <param name="post">Post to reply to</param>
+        /// <param name="OriginalLinks">Original links so that we format this properly</param>
+        /// <param name="ArchivedLinks">Dictionary of links and the position found</param>
+        public static void ArchivePostLinks(ArchiveSubreddit sub, Config conf, IBotState state, Post post, List<string> OriginalLinks, Dictionary<string, int> ArchivedLinks)
+        {
+            ArchiveService serv = new ArchiveService(conf.ArchiveService);
+            List<string> LinksToPost = new List<string>();
+            if (sub.ArchivePost)
+            {
+                LinksToPost.Add($"* **Post:** {serv.Save(post.Url)}\n"); // saves post if you want to archive something
+            }
+            int i = 0;
+            foreach (var val in ArchivedLinks)
+            {
+                string hostname = new Uri(OriginalLinks[i]).Host.Replace("www.", "");
+                LinksToPost.Add($"* **Link: {val.Value.ToString()}** ([{hostname}]({OriginalLinks[i]})): {val.Key}\n");
+                i++;
+            }
+            PostArchiveLinks(conf, state, Program.Headers[0], post, LinksToPost);
+        }
+        /// <summary>
+        /// Posts links that were gotten from a post
+        /// </summary>
+        /// <param name="conf">Configuration <see cref="Config"/></param>
+        /// <param name="state">Used to track replies</param>
+        /// <param name="post">Post to reply to</param>
+        /// <param name="OriginalLinks">Original links so that we format this properly</param>
+        /// <param name="ArchivedLinks">Dictionary of links and the position found</param>
         public static void ArchivePostLinks(Config conf, IBotState state, Post post, List<string> OriginalLinks, Dictionary<string, int> ArchivedLinks)
         {
             ArchiveService serv = new ArchiveService(conf.ArchiveService);
@@ -46,7 +102,7 @@ namespace Mnemosyne2Reborn.Commenting
                 LinksToPost.Add($"* **Post:** {serv.Save(post.Url)}\n"); // saves post if you want to archive something
             }
             int i = 0;
-            foreach(var val in ArchivedLinks)
+            foreach (var val in ArchivedLinks)
             {
                 string hostname = new Uri(OriginalLinks[i]).Host.Replace("www.", "");
                 LinksToPost.Add($"* **Link: {val.Value.ToString()}** ([{hostname}]({OriginalLinks[i]})): {val.Key}\n");
@@ -78,22 +134,19 @@ namespace Mnemosyne2Reborn.Commenting
                 string commentLink = $"https://www.reddit.com/comments/{postID}/_/{comment.Id}";
                 Links.Add($"* **By [{comment.AuthorName.DeMarkup()}]({commentLink})** ([{hostname}]({OriginalLinks[i]})): {ArchiveLinks[i]}\n");
             }
-            if (Links.Count >= 1)
+            bool HasPostITT = state.DoesCommentExist(postID);
+            if (HasPostITT)
             {
-                bool HasPostITT = state.DoesCommentExist(postID);
-                if (HasPostITT)
-                {
-                    string botCommentThingID = state.GetCommentForPost(postID);
-                    Console.WriteLine($"Already have post in {postID}, getting comment {botCommentThingID.Substring(3)}");
-                    EditArchiveComment((Comment)reddit.GetThingByFullname(botCommentThingID), Links);
-                }
-                else
-                {
-                    Console.WriteLine($"No comment in {postID} to edit, making new one");
-                    PostArchiveLinks(conf, state, Program.Headers[2], comment.GetCommentPost(reddit), Links);
-                }
-                state.AddCheckedComment(commentID);
+                string botCommentThingID = state.GetCommentForPost(postID);
+                Console.WriteLine($"Already have post in {postID}, getting comment {botCommentThingID.Substring(3)}");
+                EditArchiveComment((Comment)reddit.GetThingByFullname(botCommentThingID), Links);
             }
+            else
+            {
+                Console.WriteLine($"No comment in {postID} to edit, making new one");
+                PostArchiveLinks(conf, state, Program.Headers[2], comment.GetCommentPost(reddit), Links);
+            }
+            state.AddCheckedComment(commentID);
         }
         /// <summary>
         /// Archives all of the links in a comment
@@ -112,7 +165,7 @@ namespace Mnemosyne2Reborn.Commenting
             }
             string commentID = comment.Id;
             string postID = comment.LinkId.Substring(3);
-            Task<List<string>> t = Task.Run(()=>
+            Task<List<string>> t = Task.Run(() =>
             {
                 List<string> Links = new List<string>();
                 for (int i = 0; i < ArchiveLinks.Count; i++)
@@ -123,22 +176,20 @@ namespace Mnemosyne2Reborn.Commenting
                 }
                 return Links;
             });
-            if (ArchiveLinks.Count >= 1)
+            bool HasPostITT = state.DoesCommentExist(postID);
+
+            if (HasPostITT)
             {
-                bool HasPostITT = state.DoesCommentExist(postID);
-                if (HasPostITT)
-                {
-                    string botCommentThingID = state.GetCommentForPost(postID);
-                    Console.WriteLine($"Already have post in {postID}, getting comment {botCommentThingID.Substring(3)}");
-                    EditArchiveComment((Comment)reddit.GetThingByFullname(botCommentThingID), await t);
-                }
-                else
-                {
-                    Console.WriteLine($"No comment in {postID} to edit, making new one");
-                    PostArchiveLinks(conf, state, Program.Headers[2], comment.GetCommentPost(reddit), await t);
-                }
-                state.AddCheckedComment(commentID);
+                string botCommentThingID = state.GetCommentForPost(postID);
+                Console.WriteLine($"Already have post in {postID}, getting comment {botCommentThingID.Substring(3)}");
+                EditArchiveComment((Comment)reddit.GetThingByFullname(botCommentThingID), await t);
             }
+            else
+            {
+                Console.WriteLine($"No comment in {postID} to edit, making new one");
+                PostArchiveLinks(conf, state, Program.Headers[2], comment.GetCommentPost(reddit), await t);
+            }
+            state.AddCheckedComment(commentID);
         }
         /// <summary>
         /// Posts all links archived, throws <see cref="ArgumentNullException"/> if you attempt to call this with any null arguments

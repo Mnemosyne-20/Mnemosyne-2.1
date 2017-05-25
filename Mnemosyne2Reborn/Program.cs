@@ -6,7 +6,6 @@ using RedditSharp;
 using RedditSharp.Things;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -38,7 +37,7 @@ namespace Mnemosyne2Reborn
         /// <param name="reddit"></param>
         /// <param name="state"></param>
         /// <param name="subbreddit"></param>
-        public delegate void IterateThing(Reddit reddit, IBotState state, Subreddit subbreddit);
+        public delegate void IterateThing(Reddit reddit, IBotState state, ArchiveSubreddit subbreddit);
         public static IterateThing IteratePost;
         public static IterateThing IterateComment;
         public static IterateThing IterateMessage;
@@ -62,10 +61,15 @@ namespace Mnemosyne2Reborn
             Reddit reddit = Config.UseOAuth ? new Reddit(agent) : new Reddit(Config.UserName, Config.Password);
 #pragma warning restore CS0618 // Type or member is obsolete
             reddit.InitOrUpdateUser();
-            Subreddit[] subs = new Subreddit[Config.Subreddits.Length];
-            for (int i = 0; i < Config.Subreddits.Length; i++)
+            //ArchiveSubreddit[] subs = new ArchiveSubreddit[Config.Subreddits.Length];
+            //for(int i = 0; i < Config.Subreddits.Length; i++)
+            //{
+            //    subs[i] = reddit.GetArchiveSubreddit(Config.Subreddits[i]);
+            //}
+            ArchiveSubreddit[] subs = new ArchiveSubreddit[Config.Subreddits.Length];
+            for(int i = 0; i < Config.Subreddits.Length; i++)
             {
-                subs[i] = reddit.GetSubreddit(Config.Subreddits[i]);
+                subs[i] = reddit.GetArchiveSubreddit(Config.Subreddits[i]);
             }
             IteratePost = IteratePosts;
             IterateComment = IterateComments;
@@ -74,7 +78,7 @@ namespace Mnemosyne2Reborn
             {
                 try
                 {
-                    foreach (Subreddit sub in subs) // Iterates allowed subreddits
+                    foreach (ArchiveSubreddit sub in subs) // Iterates allowed subreddits
                     {
                         IteratePost(reddit, botstate, sub);
                         IterateComment(reddit, botstate, sub);
@@ -104,13 +108,40 @@ namespace Mnemosyne2Reborn
         {
             Console.WriteLine("Would you like to store data using SQLite instead of JSON files? (Yes/No)");
             bool useSQLite = Console.ReadLine().ToLower()[0] == 'y';
+            Console.WriteLine("Would you like to create a new account? (Yes/No)");
+            string Username, Password;
+            if (Console.ReadLine().ToLower()[0] == 'y')
+            {
+                Reddit red = new Reddit();
+                Console.WriteLine("Input a username");
+                Username = Console.ReadLine();
+                Console.WriteLine("Input a password");
+                Password = Console.ReadLine();
+                AuthenticatedUser user = red.RegisterAccount(Username, Password);
+            }
             Console.WriteLine("What is your username?");
-            string Username = Console.ReadLine();
+            Username = Console.ReadLine();
             Console.WriteLine("What is your password? note: required and is stored in plaintext, suggest you use a secure system");
-            string Password = Console.ReadLine();
-            Console.WriteLine("What subreddits do you want to patroll? note: comma separated names without spaces");
-            string[] Subs = Console.ReadLine().Split(',');
-            // TODO: MAKE THIS AVAILIBLE
+            Password = Console.ReadLine();
+            Console.WriteLine("How many subreddits are you watching?");
+            int.TryParse(Console.ReadLine(), out int len);
+            ArchiveSubredditJson[] Subs = new ArchiveSubredditJson[len];
+            for(int i = 0; i < len; i++)
+            {
+                Console.WriteLine("What is the name of the subreddit?");
+                string name = Console.ReadLine();
+                Console.WriteLine("Would you like to archive posts? (Yes/No)");
+                bool ArcPost = Console.ReadLine().ToLower()[0] == 'y';
+                Console.WriteLine("Would you like to archive links in comments? (Yes/No)");
+                bool ArcComments = Console.ReadLine().ToLower()[0] == 'y';
+                ArchiveSubredditJson arcSubJson = new ArchiveSubredditJson()
+                {
+                    ArchiveCommentLinks = ArcComments,
+                    ArchivePost = ArcPost,
+                    Name = name
+                };
+                Subs[i] = arcSubJson;
+            }
             Console.WriteLine("Would you like to use OAuth? (Yes/No)");
             bool wantOAuth = Console.ReadLine().ToLower()[0] == 'y';
             string ClientID = null, ClientSecret = null;
@@ -129,7 +160,7 @@ namespace Mnemosyne2Reborn
             return new Config(useSQLite, Username, Subs, Password, wantOAuth, ClientSecret, ClientID, ArchiveLinks);
         }
         #region IterateThings
-        public static void IterateMessages(Reddit reddit, IBotState state, Subreddit subreddit)
+        public static void IterateMessages(Reddit reddit, IBotState state, ArchiveSubreddit subreddit)
         {
             if (reddit == null || state == null || subreddit == null)
             {
@@ -148,7 +179,7 @@ namespace Mnemosyne2Reborn
                 }
             }
         }
-        public static void IteratePosts(Reddit reddit, IBotState state, Subreddit subreddit)
+        public static void IteratePosts(Reddit reddit, IBotState state, ArchiveSubreddit subreddit)
         {
             if (reddit == null || state == null || subreddit == null)
             {
@@ -165,12 +196,12 @@ namespace Mnemosyne2Reborn
                         continue;
                     }
                     Dictionary<string, int> ArchivedLinks = ArchiveLinks.ArchivePostLinks(ref Links, new Regex[] { exclusions, providers, ImageRegex }, reddit.GetUser(post.AuthorName), new ArchiveService(Config.ArchiveService), false);
-                    PostArchives.ArchivePostLinks(Config, state, post, Links, ArchivedLinks);
+                    PostArchives.ArchivePostLinks( Config, state, post, Links, ArchivedLinks);
                     state.AddCheckedComment(post.Id);
                 }
             }
         }
-        public static void IterateComments(Reddit reddit, IBotState state, Subreddit subreddit)
+        public static void IterateComments(Reddit reddit, IBotState state, ArchiveSubreddit subreddit)
         {
             if (reddit == null || state == null || subreddit == null)
             {
@@ -179,12 +210,8 @@ namespace Mnemosyne2Reborn
             Console.Title = $"Finding comments in {subreddit.Name} New messages: {reddit.User.UnreadMessages.Count() >= 1}";
             foreach (var comment in subreddit.Comments.Take(25))
             {
-                if (state.HasCommentBeenChecked(comment.Id) || ArchiveBots.Contains(comment.AuthorName))
-                {
-                    continue;
-                }
                 List<string> Links = RegularExpressions.FindLinks(comment.BodyHtml);
-                if (Links.Count == 0)
+                if (state.HasCommentBeenChecked(comment.Id) || ArchiveBots.Contains(comment.AuthorName) || Links.Count == 0)
                 {
                     continue;
                 }

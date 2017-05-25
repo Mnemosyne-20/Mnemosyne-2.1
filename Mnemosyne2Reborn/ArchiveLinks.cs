@@ -1,7 +1,10 @@
 ﻿using ArchiveApi;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+
 namespace Mnemosyne2Reborn
 {
     public static class ArchiveLinks
@@ -40,6 +43,43 @@ namespace Mnemosyne2Reborn
                 }
             }
             return ArchiveLinks;
+        }
+        /// <summary>
+        /// THE TUPLE IS IN PLACE OF A REF PARAMETER
+        /// </summary>
+        /// <param name="FoundLinks"></param>
+        /// <param name="exclusions"></param>
+        /// <param name="user"></param>
+        /// <param name="service"></param>
+        /// <param name="removeCollisions">Exists to remove name collisions</param>
+        /// <returns></returns>
+        public static async Task<Tuple<Dictionary<string, int>, List<string>>> ArchivePostLinksAsync(List<string> FoundLinks, Regex[] exclusions, RedditSharp.Things.RedditUser user, ArchiveService service)
+        {
+            Dictionary<string, int> ArchiveLinks = new Dictionary<string, int>();
+            int counter = 1;
+            for (int i = 0; i < FoundLinks.Count; i++)
+            {
+                string link = FoundLinks[i];
+                new RedditUserProfile(user, false).AddUrlUsed(link);
+                if (exclusions.Sum(b => b.IsMatch(link) ? 1 : 0) == 0)
+                {
+                    Task<string> check = service.Save(link);
+                    int retries = 0;
+                    while (!service.Verify(await check) && retries < 10)
+                    {
+                        retries++;
+                        System.Threading.Thread.Sleep(5000);
+                        check = service.Save(link);
+                    }
+                    ArchiveLinks.Add(await check, counter);
+                }
+                else
+                {
+                    FoundLinks.Remove(link);
+                }
+                counter++;
+            }
+            return Tuple.Create(ArchiveLinks, FoundLinks);
         }
         /// <summary>
         /// Returns a dictionary instead of a list, this dictionary has the string + it's order in the post

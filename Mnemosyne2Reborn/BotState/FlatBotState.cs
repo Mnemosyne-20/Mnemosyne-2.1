@@ -25,7 +25,7 @@ namespace Mnemosyne2Reborn.BotState
             return replyDict;
         }
         /// <summary>
-        /// Main constructor, should setup everything on it's own fine
+        /// Main constructor, creates all data files used within this class
         /// </summary>
         public FlatBotState()
         {
@@ -65,12 +65,20 @@ namespace Mnemosyne2Reborn.BotState
         List<string> CheckedComments;
         [JsonProperty("CommentDictionary")]
         Dictionary<string, string> CommentDictionary;
+        /// <summary>
+        /// Adds a dictionary entry of the postID and commentID
+        /// </summary>
+        /// <param name="postID">Post Id to add <see cref="RedditSharp.Things.Comment.LinkId"/></param>
+        /// <param name="commentID">commentID <see cref="RedditSharp.Things.Thing.Id"/></param>
         public void AddBotComment(string postID, string commentID)
         {
             CommentDictionary.Add(postID, commentID);
             DumpDictionary();
         }
-
+        /// <summary>
+        /// Adds a comment to the checked list
+        /// </summary>
+        /// <param name="commentID">Comment Id to add <see cref="RedditSharp.Things.Thing.Id"/></param>
         public void AddCheckedComment(string commentID)
         {
             CheckedComments.Add(commentID);
@@ -85,14 +93,14 @@ namespace Mnemosyne2Reborn.BotState
         /// <summary>
         /// Gets the comment for post
         /// </summary>
-        /// <param name="postID">Post to check if we commented on it.</param>
-        /// <returns>A comment ID</returns>
+        /// <param name="postID">Post that you replied to <seealso cref="RedditSharp.Things.Comment.LinkId"/></param>
+        /// <returns>A comment ID <seealso cref="RedditSharp.Things.Thing.Id"/></returns>
         public string GetCommentForPost(string postID) => CommentDictionary[postID];
         /// <summary>
         /// Checks if the comment is checked
         /// </summary>
         /// <param name="CommentID">Comment ID of comment to check</param>
-        /// <returns></returns>
+        /// <returns>If the comment exists in the checked comments dictionary</returns>
         public bool HasCommentBeenChecked(string CommentID) => CheckedComments.Contains(CommentID);
 
         #region IDisposable Support

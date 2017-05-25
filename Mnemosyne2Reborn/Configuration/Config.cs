@@ -46,7 +46,7 @@ namespace Mnemosyne2Reborn.Configuration
         }
         public Config(bool SQLite, string UserName, ArchiveSubredditJson[] Subreddits, string Password, bool UseOAuth = false, string OAuthSecret = null, string OAuthClientId = null, bool ArchiveLinks = false, string ArchiveService = "http://www.archive.is", string RedirectURI = "https://github.com/Mnemosyne-20/Mnemosyne-2.1")
         {
-            if(!Directory.Exists("./Data/"))
+            if (!Directory.Exists("./Data/"))
             {
                 Directory.CreateDirectory("./Data/");
             }

@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using RedditSharp;
 using RedditSharp.Things;
-using System.Reflection;
 namespace Mnemosyne2Reborn.Configuration
 {
     public static class Extensions
@@ -25,7 +19,7 @@ namespace Mnemosyne2Reborn.Configuration
     {
         [JsonProperty("ArchiveCommentLinks")]
         public bool ArchiveCommentLinks { get; set; }
-        [JsonProperty("ArchivePostLinks")]
+        [JsonProperty("ArchivePostLink")]
         public bool ArchivePost { get; set; }
         [JsonProperty("SubredditName")]
         public string Name { get; set; }

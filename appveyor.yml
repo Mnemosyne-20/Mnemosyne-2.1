@@ -8,7 +8,7 @@ before_build:
 build:
   verbosity: minimal
 artifacts:
-  - path: bins
+  - path: bin
 deploy:
 - provider: GitHub
   auth_token:

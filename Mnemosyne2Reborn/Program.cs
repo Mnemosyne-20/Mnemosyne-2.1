@@ -67,7 +67,7 @@ namespace Mnemosyne2Reborn
             //    subs[i] = reddit.GetArchiveSubreddit(Config.Subreddits[i]);
             //}
             ArchiveSubreddit[] subs = new ArchiveSubreddit[Config.Subreddits.Length];
-            for(int i = 0; i < Config.Subreddits.Length; i++)
+            for (int i = 0; i < Config.Subreddits.Length; i++)
             {
                 subs[i] = reddit.GetArchiveSubreddit(Config.Subreddits[i]);
             }
@@ -82,7 +82,7 @@ namespace Mnemosyne2Reborn
                     {
                         IteratePost(reddit, botstate, sub);
                         IterateComment(reddit, botstate, sub);
-                        IterateMessages(reddit, botstate, sub);
+                        IterateMessage(reddit, botstate, sub);
                     }
                     Console.Title = $"Sleeping, New messages: {reddit.User.UnreadMessages.Count() >= 1}";
                 }
@@ -124,9 +124,16 @@ namespace Mnemosyne2Reborn
             Console.WriteLine("What is your password? note: required and is stored in plaintext, suggest you use a secure system");
             Password = Console.ReadLine();
             Console.WriteLine("How many subreddits are you watching?");
-            int.TryParse(Console.ReadLine(), out int len);
+            if (!int.TryParse(Console.ReadLine(), out int len))
+            {
+                Console.WriteLine("Please input a valid integer");
+                while(!int.TryParse(Console.ReadLine(), out int len2))
+                {
+                    Console.WriteLine("Please input a valid integer, this will continue until you succeed in this task");
+                }
+            }
             ArchiveSubredditJson[] Subs = new ArchiveSubredditJson[len];
-            for(int i = 0; i < len; i++)
+            for (int i = 0; i < len; i++)
             {
                 Console.WriteLine("What is the name of the subreddit?");
                 string name = Console.ReadLine();
@@ -196,13 +203,17 @@ namespace Mnemosyne2Reborn
                         continue;
                     }
                     Dictionary<string, int> ArchivedLinks = ArchiveLinks.ArchivePostLinks(ref Links, new Regex[] { exclusions, providers, ImageRegex }, reddit.GetUser(post.AuthorName), new ArchiveService(Config.ArchiveService), false);
-                    PostArchives.ArchivePostLinks( Config, state, post, Links, ArchivedLinks);
+                    PostArchives.ArchivePostLinks(subreddit, Config, state, post, Links, ArchivedLinks);
                     state.AddCheckedComment(post.Id);
                 }
             }
         }
         public static void IterateComments(Reddit reddit, IBotState state, ArchiveSubreddit subreddit)
         {
+            if(!subreddit.ArchiveCommentLinks)
+            {
+                return;
+            }
             if (reddit == null || state == null || subreddit == null)
             {
                 throw new ArgumentNullException(reddit == null ? nameof(reddit) : state == null ? nameof(state) : nameof(subreddit));

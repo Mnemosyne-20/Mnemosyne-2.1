@@ -61,11 +61,6 @@ namespace Mnemosyne2Reborn
             Reddit reddit = Config.UseOAuth ? new Reddit(agent) : new Reddit(Config.UserName, Config.Password);
 #pragma warning restore CS0618 // Type or member is obsolete
             reddit.InitOrUpdateUser();
-            //ArchiveSubreddit[] subs = new ArchiveSubreddit[Config.Subreddits.Length];
-            //for(int i = 0; i < Config.Subreddits.Length; i++)
-            //{
-            //    subs[i] = reddit.GetArchiveSubreddit(Config.Subreddits[i]);
-            //}
             ArchiveSubreddit[] subs = new ArchiveSubreddit[Config.Subreddits.Length];
             for (int i = 0; i < Config.Subreddits.Length; i++)
             {

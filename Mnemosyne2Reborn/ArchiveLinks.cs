@@ -29,17 +29,17 @@ namespace Mnemosyne2Reborn
                 {
                     string check = service.Save(link).Result;
                     int retries = 0;
-                    while (!service.Verify(check) && retries < 10)
+                    while (!service.Verify(check) && retries < 10) // rechecks in case archive.is failed
                     {
                         retries++;
-                        System.Threading.Thread.Sleep(5000);
+                        System.Threading.Thread.Sleep(5000); // waits so we don't spam archive.is
                         check = service.Save(link).Result;
                     }
                     ArchiveLinks.Add(check);
                 }
                 else
                 {
-                    FoundLinks.Remove(link);
+                    FoundLinks.Remove(link); // removes links that are exlcuded
                 }
             }
             return ArchiveLinks;

@@ -8,7 +8,7 @@ before_build:
 build:
   verbosity: minimal
 artifacts:
-  - path: bin
+  - path: C:\projects\mnemosyne-2-1\ArchiveApiTest\bin
 deploy:
 - provider: GitHub
   auth_token:

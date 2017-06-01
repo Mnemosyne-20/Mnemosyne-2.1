@@ -65,11 +65,6 @@ namespace Mnemosyne2Reborn.BotState
         List<string> CheckedComments;
         [JsonProperty("CommentDictionary")]
         Dictionary<string, string> CommentDictionary;
-        /// <summary>
-        /// Adds a dictionary entry of the postID and commentID
-        /// </summary>
-        /// <param name="postID">Post Id to add <see cref="RedditSharp.Things.Comment.LinkId"/></param>
-        /// <param name="commentID">commentID <see cref="RedditSharp.Things.Thing.Id"/></param>
         public void AddBotComment(string postID, string commentID)
         {
             CommentDictionary.Add(postID, commentID);
@@ -105,7 +100,6 @@ namespace Mnemosyne2Reborn.BotState
 
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls
-
         protected virtual void Dispose(bool disposing)
         {
             if (!disposedValue)

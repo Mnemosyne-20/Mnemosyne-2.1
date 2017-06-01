@@ -165,7 +165,7 @@ namespace Mnemosyne2Reborn.Commenting
             }
             string commentID = comment.Id;
             string postID = comment.LinkId.Substring(3);
-            Task<List<string>> t = Task.Run(() =>
+            Task<List<string>> t = Task.Run(() => // async as this doesn't need t run immediately
             {
                 List<string> Links = new List<string>();
                 for (int i = 0; i < ArchiveLinks.Count; i++)
@@ -177,7 +177,6 @@ namespace Mnemosyne2Reborn.Commenting
                 return Links;
             });
             bool HasPostITT = state.DoesCommentExist(postID);
-
             if (HasPostITT)
             {
                 string botCommentThingID = state.GetCommentForPost(postID);

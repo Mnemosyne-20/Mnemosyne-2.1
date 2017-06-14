@@ -27,13 +27,13 @@ namespace Mnemosyne2Reborn
                 new RedditUserProfile(user, false).AddUrlUsed(link);
                 if (exclusions.Sum(b => b.IsMatch(link) ? 1 : 0) == 0)
                 {
-                    string check = service.Save(link).Result;
+                    string check = service.Save(link);
                     int retries = 0;
                     while (!service.Verify(check) && retries < 10) // rechecks in case archive.is failed
                     {
                         retries++;
                         System.Threading.Thread.Sleep(5000); // waits so we don't spam archive.is
-                        check = service.Save(link).Result;
+                        check = service.Save(link);
                     }
                     ArchiveLinks.Add(check);
                 }
@@ -63,13 +63,13 @@ namespace Mnemosyne2Reborn
                 new RedditUserProfile(user, false).AddUrlUsed(link);
                 if (exclusions.Sum(b => b.IsMatch(link) ? 1 : 0) == 0)
                 {
-                    Task<string> check = service.Save(link);
+                    Task<string> check = service.SaveAsync(link);
                     int retries = 0;
                     while (!service.Verify(await check) && retries < 10)
                     {
                         retries++;
                         System.Threading.Thread.Sleep(5000);
-                        check = service.Save(link);
+                        check = service.SaveAsync(link);
                     }
                     ArchiveLinks.Add(await check, counter);
                 }
@@ -100,13 +100,13 @@ namespace Mnemosyne2Reborn
                 new RedditUserProfile(user, false).AddUrlUsed(link);
                 if (exclusions.Sum(b => b.IsMatch(link) ? 1 : 0) == 0)
                 {
-                    string check = service.Save(link).Result;
+                    string check = service.Save(link);
                     int retries = 0;
                     while (!service.Verify(check) && retries < 10)
                     {
                         retries++;
                         System.Threading.Thread.Sleep(5000);
-                        check = service.Save(link).Result;
+                        check = service.Save(link);
                     }
                     ArchiveLinks.Add(check, counter);
                 }

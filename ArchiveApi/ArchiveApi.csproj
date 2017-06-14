@@ -41,6 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ArchiveService.cs" />
+    <Compile Include="CloudFlareWorkAround.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TimeMap.cs" />
   </ItemGroup>

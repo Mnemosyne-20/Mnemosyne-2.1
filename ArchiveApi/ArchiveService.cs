@@ -41,27 +41,61 @@ namespace ArchiveApi
         /// <param name="ArchiveUrl"></param>
         /// <returns>true if it does not contain "submit" in the uri</returns>
         public bool Verify(Uri ArchiveUrl) => !ArchiveUrl.AbsolutePath.Contains("submit") && ArchiveUrl.ToString() == "http://archive.is";
-
         /// <summary>
         /// Saves a webpage
         /// </summary>
         /// <param name="Url">Url to archive</param>
         /// <returns>Archive link</returns>
-        public async Task<string> Save(string Url)
+        public string Save(string Url)
         {
             string ReturnUrl = "";
-            using (var client = new HttpClient(new HttpClientHandler() { AllowAutoRedirect = true }))
+            using (var client = new HttpClient(new ClearanceHandler() { InnerHandler = new HttpClientHandler() { AllowAutoRedirect = true }, MaxRetries = 5 }))
             {
                 /// <summary>
                 /// This puts a request to the archive site, so yhea...
                 /// </summary>
-                var request = new HttpRequestMessage(HttpMethod.Post, "http://archive.is/submit/");
-                request.Headers.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36");
-                request.Content = new FormUrlEncodedContent(new Dictionary<string, string>
+                var response = client.PostAsync("http://archive.is/submit/", new FormUrlEncodedContent(new Dictionary<string, string>
                 {
-                    {"url", Url }
-                });
-                var response = await client.SendAsync(request);
+                    {"url", Url.ToString() }
+                })).Result;
+                ReturnUrl = response.RequestMessage.RequestUri.ToString();
+                /// <remarks>
+                /// Fixes the bug where archive.is returns a json file that has a url tag
+                /// </remarks>
+                if (ReturnUrl == $"http://archive.is/submit/" && !response.IsSuccessStatusCode)
+                {
+                    #region fixing issues with return because this works somehow!?!?
+                    using (StringReader reader = new StringReader(response.ToString()))
+                    {
+                        for (int i = 0; i < 3; i++)
+                        {
+                            reader.ReadLine();
+                        }
+                        string[] sides = reader.ReadLine().Split('=');
+                        ReturnUrl = sides[1];
+                    }
+                    #endregion
+                }
+            }
+            return ReturnUrl;
+        }
+        /// <summary>
+         /// Saves a webpage
+         /// </summary>
+         /// <param name="Url">Url to archive</param>
+         /// <returns>Archive link</returns>
+        public string Save(Uri Url)
+        {
+            string ReturnUrl = "";
+            using (var client = new HttpClient(new ClearanceHandler() { InnerHandler = new HttpClientHandler() { AllowAutoRedirect = true }, MaxRetries = 5 }))
+            {
+                /// <summary>
+                /// This puts a request to the archive site, so yhea...
+                /// </summary>
+                var response = client.PostAsync("http://archive.is/submit/", new FormUrlEncodedContent(new Dictionary<string, string>
+                {
+                    {"url", Url.ToString() }
+                })).Result;
                 ReturnUrl = response.RequestMessage.RequestUri.ToString();
                 /// <remarks>
                 /// Fixes the bug where archive.is returns a json file that has a url tag
@@ -88,18 +122,58 @@ namespace ArchiveApi
         /// </summary>
         /// <param name="Url">Url to archive</param>
         /// <returns>Archive link</returns>
-        public async Task<string> Save(Uri Url)
+        public async Task<string> SaveAsync(string Url)
         {
             string ReturnUrl = "";
-            using (var client = new HttpClient(new HttpClientHandler() { AllowAutoRedirect = true }))
+            using (var client = new HttpClient(new ClearanceHandler() { InnerHandler = new HttpClientHandler() { AllowAutoRedirect = true }, MaxRetries = 5 }))
             {
-                var request = new HttpRequestMessage(HttpMethod.Post, this.Url.ToString().TrimEnd('/') + submitEndpoint);
-                request.Headers.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.96 Safari/537.36");
-                request.Content = new FormUrlEncodedContent(new Dictionary<string, string>
+                /// <summary>
+                /// This puts a request to the archive site, so yhea...
+                /// </summary>
+                var task = client.PostAsync("http://archive.is/submit/", new FormUrlEncodedContent(new Dictionary<string, string>
                 {
                     {"url", Url.ToString() }
-                });
-                var response = await client.SendAsync(request);
+                }));
+                await Task.Delay(8000);
+                var response = await task;
+                ReturnUrl = response.RequestMessage.RequestUri.ToString();
+                /// <remarks>
+                /// Fixes the bug where archive.is returns a json file that has a url tag
+                /// </remarks>
+                if (ReturnUrl == $"http://archive.is/submit/" && !response.IsSuccessStatusCode)
+                {
+                    #region fixing issues with return because this works somehow!?!?
+                    using (StringReader reader = new StringReader(response.ToString()))
+                    {
+                        for (int i = 0; i < 3; i++)
+                        {
+                            reader.ReadLine();
+                        }
+                        string[] sides = reader.ReadLine().Split('=');
+                        ReturnUrl = sides[1];
+                    }
+                    #endregion
+                }
+            }
+            return ReturnUrl;
+        }
+        /// <summary>
+        /// Saves a webpage
+        /// </summary>
+        /// <param name="Url">Url to archive</param>
+        /// <returns>Archive link</returns>
+        public async Task<string> SaveAsync(Uri Url)
+        {
+            string ReturnUrl = "";
+            using (var client = new HttpClient(new ClearanceHandler() { InnerHandler = new HttpClientHandler() { AllowAutoRedirect = true }, MaxRetries = 5 }))
+            {
+                var request = new HttpRequestMessage(HttpMethod.Post, this.Url.ToString().TrimEnd('/') + submitEndpoint);
+                var task = client.PostAsync("http://archive.is/submit/", new FormUrlEncodedContent(new Dictionary<string, string>
+                {
+                    {"url", Url.ToString() }
+                }));
+                await Task.Delay(8000);
+                var response = await task;
                 ReturnUrl = response.RequestMessage.RequestUri.ToString();
                 if (!response.IsSuccessStatusCode)
                 {

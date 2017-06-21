@@ -85,7 +85,7 @@ namespace Mnemosyne2Reborn
                 {
                     Console.WriteLine("Connect to the internet");
                 }
-                /*catch (Exception e)
+                catch (Exception e)
                 {
                     // Catches errors and documents them, I should switch to a System.Diagnostics logger but I have no experience with it
                     if (!Directory.Exists("./Errors"))
@@ -94,7 +94,7 @@ namespace Mnemosyne2Reborn
                     }
                     File.AppendAllText("./Errors/Failures.txt", $"{e.ToString()}\n");
                     Console.WriteLine($"Caught an exception of type {e.GetType()} output is in ./Errors/Failures.txt");
-                }*/
+                }
                 System.Threading.Thread.Sleep(1000); // sleeps for one second to help with the reddit calls
             }
         }
@@ -122,10 +122,16 @@ namespace Mnemosyne2Reborn
             if (!int.TryParse(Console.ReadLine(), out int len))
             {
                 Console.WriteLine("Please input a valid integer");
-                while (!int.TryParse(Console.ReadLine(), out int len2))
+                while (true)
                 {
                     Console.WriteLine("Please input a valid integer, this will continue until you succeed in this task");
+                    if(int.TryParse(Console.ReadLine(), out int len2))
+                    {
+                        len = len2;
+                        break;
+                    }
                 }
+
             }
             ArchiveSubredditJson[] Subs = new ArchiveSubredditJson[len];
             for (int i = 0; i < len; i++)

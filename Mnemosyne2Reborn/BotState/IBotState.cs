@@ -28,6 +28,12 @@ namespace Mnemosyne2Reborn.BotState
         /// <param name="commentID">Comment ID for the comment</param>
         void AddBotComment(string postID, string commentID);
         /// <summary>
+        /// Updates a bot comment for post ID, adding this as I have run into the 10k character limit...
+        /// </summary>
+        /// <param name="postID"><see cref="AddBotComment(string, string)"/></param>
+        /// <param name="commentID"><see cref="AddBotComment(string, string)"/></param>
+        void UpdateBotComment(string postID, string commentID);
+        /// <summary>
         /// Adds a comment to checked list
         /// </summary>
         /// <param name="commentID">CommentID</param>

@@ -156,6 +156,11 @@ namespace Mnemosyne2Reborn.BotState
             // TODO: uncomment the following line if the finalizer is overridden above.
             // GC.SuppressFinalize(this);
         }
+
+        public void UpdateBotComment(string postID, string commentID)
+        {
+            throw new NotImplementedException();
+        }
         #endregion
     }
 }

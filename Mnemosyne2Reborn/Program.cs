@@ -41,9 +41,15 @@ namespace Mnemosyne2Reborn
         public static IterateThing IteratePost;
         public static IterateThing IterateComment;
         public static IterateThing IterateMessage;
-        public static string[] Headers = new string[] { "Archives for links in this post:\n\n", "Archive for this post:\n\n", "Archives for the links in comments:\n\n", "----\nI am Mnemosyne 2.1, {0} ^^^^/r/botsrights ^^^^[Contribute](https://github.com/Mnemosyne-20/Mnemosyne-2.1) ^^^^message ^^^^me ^^^^suggestions ^^^^at ^^^^any ^^^^time ^^^^Opt ^^^^out ^^^^of ^^^^tracking ^^^^by ^^^^messaging ^^^^me ^^^^\"Opt ^^^^Out\" ^^^^at ^^^^any ^^^^time" };
+        /// <summary>
+        /// This is intentional to be this way, it's so that the editor can get the headers easily
+        /// </summary>
+        public static readonly string[] Headers = new string[] { "Archives for links in this post:\n\n", "Archive for this post:\n\n", "Archives for the links in comments:\n\n", "----\nI am Mnemosyne 2.1, {0} ^^^^/r/botsrights ^^^^[Contribute](https://github.com/Mnemosyne-20/Mnemosyne-2.1) ^^^^message ^^^^me ^^^^suggestions ^^^^at ^^^^any ^^^^time ^^^^Opt ^^^^out ^^^^of ^^^^tracking ^^^^by ^^^^messaging ^^^^me ^^^^\"Opt ^^^^Out\" ^^^^at ^^^^any ^^^^time" };
+        /// <summary>
+        /// These three being separate is important because it is used for data tracking
+        /// </summary>
         public static Regex exclusions = new Regex(@"(youtube\.com|streamable\.com|www\.gobrickindustry\.us|gyazo\.com|sli\.mg|imgur\.com|reddit\.com/message|youtube\.com|youtu\.be|wiki/rules|politics_feedback_results_and_where_it_goes_from|urbandictionary\.com)");
-        public static Regex providers = new Regex(@"archive\.is|archive\.fo|web\.archive\.org|archive\.today|megalodon\.jp|web\.archive\.org|webcache\.googleusercontent\.com|archive\.li");
+        public static Regex providers = new Regex(@"(web-beta.archive.org|archive\.is|archive\.fo|web\.archive\.org|archive\.today|megalodon\.jp|web\.archive\.org|webcache\.googleusercontent\.com|archive\.li)");
         public static Regex ImageRegex = new Regex(@"(\.gif|\.jpg|\.png|\.pdf|\.webm|\.mp4)$");
         public static Config Config = !File.Exists("./Data/Settings.json") ? CreateNewConfig() : Config.GetConfig();
         #endregion
@@ -52,7 +58,7 @@ namespace Mnemosyne2Reborn
             Console.Title = "Mnemosyne-2.1 by chugga_fan";
             Console.Clear();
             IBotState botstate = Config.SQLite ? (IBotState)new SQLiteBotState() : new FlatBotState();
-            WebAgent agent = new WebAgent();
+            WebAgent agent = null;
             if (Config.UseOAuth)
             {
                 agent = new BotWebAgent(Config.UserName, Config.Password, Config.OAuthClientId, Config.OAuthSecret, Config.RedirectURI);
@@ -94,6 +100,7 @@ namespace Mnemosyne2Reborn
                     }
                     File.AppendAllText("./Errors/Failures.txt", $"{e.ToString()}\n");
                     Console.WriteLine($"Caught an exception of type {e.GetType()} output is in ./Errors/Failures.txt");
+                    System.Threading.Thread.Sleep(5000);
                 }
                 System.Threading.Thread.Sleep(1000); // sleeps for one second to help with the reddit calls
             }

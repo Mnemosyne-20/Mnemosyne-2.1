@@ -65,9 +65,16 @@ namespace Mnemosyne2Reborn.BotState
         List<string> CheckedComments;
         [JsonProperty("CommentDictionary")]
         Dictionary<string, string> CommentDictionary;
+        /// <inheritdoc />
         public void AddBotComment(string postID, string commentID)
         {
             CommentDictionary.Add(postID, commentID);
+            DumpDictionary();
+        }
+        /// <inheritdoc />
+        public void UpdateBotComment(string postID, string commentID)
+        {
+            CommentDictionary[postID] = commentID;
             DumpDictionary();
         }
         /// <summary>
@@ -97,7 +104,6 @@ namespace Mnemosyne2Reborn.BotState
         /// <param name="CommentID">Comment ID of comment to check</param>
         /// <returns>If the comment exists in the checked comments dictionary</returns>
         public bool HasCommentBeenChecked(string CommentID) => CheckedComments.Contains(CommentID);
-
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls
         protected virtual void Dispose(bool disposing)

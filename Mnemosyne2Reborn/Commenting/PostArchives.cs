@@ -138,6 +138,10 @@ namespace Mnemosyne2Reborn.Commenting
             if (HasPostITT)
             {
                 string botCommentThingID = state.GetCommentForPost(postID);
+                if (!botCommentThingID.Contains("t1_"))
+                {
+                    botCommentThingID = "t1_" + botCommentThingID;
+                }
                 Console.WriteLine($"Already have post in {postID}, getting comment {botCommentThingID.Substring(3)}");
                 EditArchiveComment((Comment)reddit.GetThingByFullname(botCommentThingID), Links);
             }
@@ -181,7 +185,27 @@ namespace Mnemosyne2Reborn.Commenting
             {
                 string botCommentThingID = state.GetCommentForPost(postID);
                 Console.WriteLine($"Already have post in {postID}, getting comment {botCommentThingID.Substring(3)}");
-                EditArchiveComment((Comment)reddit.GetThingByFullname(botCommentThingID), await t);
+                #region Fixes 10k character limit
+                Comment commentToEdit = (Comment)reddit.GetThingByFullname(botCommentThingID);
+                List<string> ArchivesToInsert = await t;
+                string newCommentText = "";
+                string[] oldCommentLines = commentToEdit.Body.Split("\n".ToArray());
+                string[] head = oldCommentLines.Take(oldCommentLines.Length - 3).ToArray();
+                string[] tail = oldCommentLines.Skip(oldCommentLines.Length - 3).ToArray();
+                newCommentText += string.Join("\n", head);
+                foreach (string str in ArchivesToInsert)
+                {
+                    newCommentText += "\n" + str;
+                }
+                if (newCommentText.Length > 10000)
+                {
+                    Console.WriteLine($"Too many lines for comment {botCommentThingID} making new comment for post {postID}");
+                    PostArchiveLinksToComment(conf, state, Program.Headers[2], commentToEdit, await t);
+                    state.AddCheckedComment(commentID);
+                    return;
+                }
+                #endregion
+                EditArchiveComment((Comment)reddit.GetThingByFullname(botCommentThingID), ArchivesToInsert);
             }
             else
             {
@@ -189,6 +213,39 @@ namespace Mnemosyne2Reborn.Commenting
                 PostArchiveLinks(conf, state, Program.Headers[2], comment.GetCommentPost(reddit), await t);
             }
             state.AddCheckedComment(commentID);
+        }
+        /// <summary>
+        /// Posts all links archived, throws <see cref="ArgumentNullException"/> if you attempt to call this with any null arguments
+        /// </summary>
+        /// <param name="conf"></param>
+        /// <param name="state"></param>
+        /// <param name="head"></param>
+        /// <param name="post"></param>
+        /// <param name="ArchiveList"></param>
+        public static void PostArchiveLinksToComment(Config conf, IBotState state, string head, Comment comment, List<string> ArchiveList)
+        {
+            if (conf == null || state == null || head == null || comment == null || ArchiveList == null)
+            {
+                throw new ArgumentNullException(conf == null ? "conf" : state == null ? "state" : head == null ? "head" : comment == null ? "post" : "ArchiveList");
+            }
+            Console.Title = $"Posting new comment to comment {comment.Id}";
+            string LinksListBody = "";
+            foreach (string str in ArchiveList)
+            {
+                LinksListBody += str;
+            }
+            string c = head + LinksListBody + "\n" + string.Format(Program.Headers[3], conf.FlavorText[rand.Next(0, conf.FlavorText.Length)]);
+            Comment botComment = comment.Reply(c);
+            try
+            {
+                state.AddBotComment(comment.Id, botComment.Id);
+                Console.WriteLine(c);
+            }
+            catch (InvalidOperationException e)
+            {
+                Console.WriteLine($"Caught exception replying to comment {comment.Id} with new comment  {Regex.Replace(botComment.Id, "t1_", "")}: {e.Message}");
+                botComment.Del();
+            }
         }
         /// <summary>
         /// Posts all links archived, throws <see cref="ArgumentNullException"/> if you attempt to call this with any null arguments
@@ -219,12 +276,12 @@ namespace Mnemosyne2Reborn.Commenting
             }
             catch (InvalidOperationException e)
             {
-                Console.WriteLine($"Caught exception replying to {post.Id} with new comment  {Regex.Replace(botComment.Id, "t1_", "")}: {e.Message}");
+                Console.WriteLine($"Caught exception replying to post {post.Id} with new comment  {Regex.Replace(botComment.Id, "t1_", "")}: {e.Message}");
                 botComment.Del();
             }
         }
         /// <summary>
-        ///
+        /// Edits a comment containing found archives
         /// </summary>
         /// <param name="targetComment">Comment to edit, checks what is current and updates it with new archives</param>
         /// <param name="ArchivedToInsert">The list of items to insert, not the archives themselves, this is usually used internally</param>

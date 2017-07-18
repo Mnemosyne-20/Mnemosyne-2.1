@@ -6,21 +6,21 @@ namespace Mnemosyne2Reborn.BotState
         /// <summary>
         /// Checks if a comment exists if given a postID
         /// </summary>
-        /// <param name="postID">Post to check</param>
+        /// <param name="postId">Post to check</param>
         /// <returns>If comment exists for post</returns>
-        bool DoesCommentExist(string postID);
+        bool DoesCommentExist(string postId);
         /// <summary>
         /// Gets the comment ID for a post
         /// </summary>
-        /// <param name="postID">POSTID for comment</param>
+        /// <param name="postId">POSTID for comment</param>
         /// <returns>CommentID</returns>
-        string GetCommentForPost(string postID);
+        string GetCommentForPost(string postId);
         /// <summary>
         /// Checks if a comment has been checked
         /// </summary>
-        /// <param name="CommentID">Checks if comment has been added to checked list</param>
+        /// <param name="commentId">Checks if comment has been added to checked list</param>
         /// <returns>If the comment was checked</returns>
-        bool HasCommentBeenChecked(string CommentID);
+        bool HasCommentBeenChecked(string commentId);
         /// <summary>
         /// Adds a comment for post ID internally
         /// </summary>

@@ -37,20 +37,20 @@ namespace Mnemosyne2Reborn
         /// <summary> 
         /// Adds a url used to a user that you made
         /// </summary>
-        /// <param name="Url">The url to be added</param>
-        public void AddUrlUsed(string Url)
+        /// <param name="url">The url to be added</param>
+        public void AddUrlUsed(Uri url)
         {
             if (OptedOut)
             {
                 return;
             }
-            if (Program.exclusions.IsMatch(Url))
+            if (Program.exclusions.IsMatch(url.ToString()))
             {
                 ExcludedUrlsUsed++;
                 DumpUserData();
                 return;
             }
-            if (Program.providers.IsMatch(Url))
+            if (Program.providers.IsMatch(url.ToString()))
             {
                 ArchivedUrlsUsed++;
             }
@@ -58,7 +58,7 @@ namespace Mnemosyne2Reborn
             {
                 UnArchivedUrlsUsed++;
             }
-            if (Program.ImageRegex.IsMatch(Url))
+            if (Program.ImageRegex.IsMatch(url.ToString()))
             {
                 ImageUrlsUsed++;
             }
@@ -68,10 +68,13 @@ namespace Mnemosyne2Reborn
             }
             DumpUserData();
         }
-        public void AddUrlUsed(Uri Url)
+        /// <summary> 
+        /// Adds a url used to a user that you made
+        /// </summary>
+        /// <param name="Url">The url to be added</param>
+        public void AddUrlUsed(string Url)
         {
-            string url = Url.ToString();
-            AddUrlUsed(url);
+            AddUrlUsed(new Uri(Url));
         }
         public static void DumpUserData()
         {
@@ -82,8 +85,14 @@ namespace Mnemosyne2Reborn
         {
             string query = "create table if not exists Users (Name text unique, ArchiveUrlsUsed int, UnArchivedUrlsUsed int, ExcludedUrlsUsed int, ImageUrlsUsed int, OptedOut bool not null check (OptedOut in (0,1))";
             SQLiteCommand cmd = new SQLiteCommand(query, dbConnection);
-            cmd.ExecuteNonQuery();
-            cmd.Dispose();
+            try
+            {
+                cmd.ExecuteNonQuery();
+            }
+            finally
+            {
+                cmd.Dispose();
+            }
         }
         void InitCommands()
         {
@@ -116,11 +125,11 @@ namespace Mnemosyne2Reborn
         {
 
         }
-        public RedditUserProfile(RedditUser user, bool UseSQLite)
+        public RedditUserProfile(RedditUser user, bool useSQLite)
         {
             this.User = user;
-            this.Name = User.Name;
-            if (UseSQLite)
+            this.Name = User?.Name;
+            if (useSQLite)
             {
                 if (!File.Exists("./Data/UserProfiles.sqlite"))
                 {

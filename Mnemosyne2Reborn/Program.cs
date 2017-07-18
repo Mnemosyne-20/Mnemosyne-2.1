@@ -87,7 +87,7 @@ namespace Mnemosyne2Reborn
                     }
                     Console.Title = $"Sleeping, New messages: {reddit.User.UnreadMessages.Count() >= 1}";
                 }
-                catch (WebException)
+                catch (WebException e) when (!e.Message.Contains("Cannot resolve hostname") || e.Message.Contains("502"))
                 {
                     Console.WriteLine("Connect to the internet");
                 }
@@ -100,7 +100,6 @@ namespace Mnemosyne2Reborn
                     }
                     File.AppendAllText("./Errors/Failures.txt", $"{e.ToString()}\n");
                     Console.WriteLine($"Caught an exception of type {e.GetType()} output is in ./Errors/Failures.txt");
-                    System.Threading.Thread.Sleep(5000);
                 }
                 System.Threading.Thread.Sleep(1000); // sleeps for one second to help with the reddit calls
             }
@@ -132,13 +131,12 @@ namespace Mnemosyne2Reborn
                 while (true)
                 {
                     Console.WriteLine("Please input a valid integer, this will continue until you succeed in this task");
-                    if(int.TryParse(Console.ReadLine(), out int len2))
+                    if (int.TryParse(Console.ReadLine(), out int len2))
                     {
                         len = len2;
                         break;
                     }
                 }
-
             }
             ArchiveSubredditJson[] Subs = new ArchiveSubredditJson[len];
             for (int i = 0; i < len; i++)
@@ -179,7 +177,7 @@ namespace Mnemosyne2Reborn
         {
             if (reddit == null || state == null || subreddit == null)
             {
-                throw new ArgumentNullException(reddit == null ? "reddit" : state == null ? "state" : "subreddit");
+                throw new ArgumentNullException(reddit == null ? nameof(reddit) : state == null ? nameof(state) : nameof(subreddit));
             }
             foreach (var message in reddit.User.PrivateMessages.Take(25))
             {
@@ -198,7 +196,7 @@ namespace Mnemosyne2Reborn
         {
             if (reddit == null || state == null || subreddit == null)
             {
-                throw new ArgumentNullException(reddit == null ? "reddit" : state == null ? "state" : "subreddit");
+                throw new ArgumentNullException(reddit == null ? nameof(reddit) : state == null ? nameof(state) : nameof(subreddit));
             }
             Console.Title = $"Finding posts in {subreddit.Name} New messages: {reddit.User.UnreadMessages.Count() >= 1}";
             foreach (var post in subreddit.Posts.Take(25))

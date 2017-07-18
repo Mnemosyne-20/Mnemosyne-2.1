@@ -108,7 +108,7 @@ namespace Mnemosyne2Reborn
                         System.Threading.Thread.Sleep(5000);
                         check = service.Save(link);
                     }
-                    if(check == "http://archive.is/submit/")
+                    if (check == "http://archive.is/submit/")
                     {
                         Console.WriteLine("Check is the submit location");
                         throw new Exception($"Did not get a proper archive at : {DateTime.Now.ToString()}");

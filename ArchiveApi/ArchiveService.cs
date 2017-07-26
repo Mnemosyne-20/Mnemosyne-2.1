@@ -28,7 +28,7 @@ namespace ArchiveApi
         /// <returns>true if it does not contain "submit" in the uri</returns>
         public bool Verify(string ArchiveUrl)
         {
-            if (ArchiveUrl == null || ArchiveUrl == "http://archive.is/submit/" || ArchiveUrl == "http://archive.fo/submit/" || ArchiveUrl.TrimEnd('/') == "http://archive.is/")
+            if (ArchiveUrl == null || ArchiveUrl == "http://archive.is/submit/" || ArchiveUrl == "http://archive.fo/submit/" || ArchiveUrl.TrimEnd('/') == "http://archive.is/" || ArchiveUrl.Contains("submit"))
             {
                 return false;
             }
@@ -72,7 +72,18 @@ namespace ArchiveApi
                             reader.ReadLine();
                         }
                         string[] sides = reader.ReadLine().Split('=');
-                        ReturnUrl = sides[1];
+                        try
+                        {
+                            ReturnUrl = sides[1];
+                        }
+                        catch(IndexOutOfRangeException) when (response.StatusCode != System.Net.HttpStatusCode.InternalServerError)
+                        {
+                            Console.WriteLine(response.ToString());
+                        }
+                        catch(IndexOutOfRangeException) when (response.StatusCode == System.Net.HttpStatusCode.InternalServerError)
+                        {
+
+                        }
                     }
                     #endregion
                 }

@@ -76,13 +76,9 @@ namespace ArchiveApi
                         {
                             ReturnUrl = sides[1];
                         }
-                        catch(IndexOutOfRangeException) when (response.StatusCode != System.Net.HttpStatusCode.InternalServerError)
+                        catch(Exception e)
                         {
-                            Console.WriteLine(response.ToString());
-                        }
-                        catch(IndexOutOfRangeException) when (response.StatusCode == System.Net.HttpStatusCode.InternalServerError)
-                        {
-
+                            Console.WriteLine("Error from archive.is: \n" + e.Message);
                         }
                     }
                     #endregion

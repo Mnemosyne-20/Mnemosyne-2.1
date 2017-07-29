@@ -87,9 +87,9 @@ namespace Mnemosyne2Reborn
                     }
                     Console.Title = $"Sleeping, New messages: {reddit.User.UnreadMessages.Count() >= 1}";
                 }
-                catch (WebException e) when (!e.Message.Contains("Cannot resolve hostname") || e.Message.Contains("502"))
+                catch (WebException e) when (!e.Message.Contains("Cannot resolve hostname") || e.Message.Contains("(502)"))
                 {
-                    Console.WriteLine("Connect to the internet");
+                    Console.WriteLine("Connect to the internet, Error: " + e.Message);
                 }
                 catch (Exception e)
                 {

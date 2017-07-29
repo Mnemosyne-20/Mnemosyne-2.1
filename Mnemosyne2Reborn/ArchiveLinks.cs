@@ -35,6 +35,11 @@ namespace Mnemosyne2Reborn
                         System.Threading.Thread.Sleep(5000); // waits so we don't spam archive.is
                         check = service.Save(link);
                     }
+                    if (check == "http://archive.is/submit/")
+                    {
+                        Console.WriteLine("Check is the submit location");
+                        throw new Exception($"Did not get a proper archive at : {DateTime.Now.ToString()}, original link: {link}");
+                    }
                     ArchiveLinks.Add(check);
                 }
                 else
@@ -111,7 +116,7 @@ namespace Mnemosyne2Reborn
                     if (check == "http://archive.is/submit/")
                     {
                         Console.WriteLine("Check is the submit location");
-                        throw new Exception($"Did not get a proper archive at : {DateTime.Now.ToString()}");
+                        throw new Exception($"Did not get a proper archive at : {DateTime.Now.ToString()}, original link: {check}");
                     }
                     ArchiveLinks.Add(check, counter);
                 }

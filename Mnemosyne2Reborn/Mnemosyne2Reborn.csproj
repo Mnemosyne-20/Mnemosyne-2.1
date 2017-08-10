@@ -89,6 +89,7 @@
     <Compile Include="BotState\SQLiteBotState.cs" />
     <Compile Include="Commenting\Extensions.cs" />
     <Compile Include="Commenting\PostArchives.cs" />
+    <Compile Include="Commenting\UserLinks.cs" />
     <Compile Include="Configuration\ArchiveSubreddit.cs" />
     <Compile Include="Configuration\Config.cs" />
     <Compile Include="Program.cs" />

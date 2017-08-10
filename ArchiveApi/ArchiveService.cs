@@ -62,7 +62,7 @@ namespace ArchiveApi
                 /// <remarks>
                 /// Fixes the bug where archive.is returns a json file that has a url tag
                 /// </remarks>
-                if (ReturnUrl == $"http://archive.is/submit/" && !response.IsSuccessStatusCode)
+                if (!Verify(ReturnUrl) && !response.IsSuccessStatusCode)
                 {
                     #region fixing issues with return because this works somehow!?!?
                     using (StringReader reader = new StringReader(response.ToString()))
@@ -76,12 +76,16 @@ namespace ArchiveApi
                         {
                             ReturnUrl = sides[1];
                         }
-                        catch(Exception e)
+                        catch (Exception e)
                         {
                             Console.WriteLine("Error from archive.is: \n" + e.Message);
                         }
                     }
                     #endregion
+                }
+                if (!Verify(ReturnUrl))
+                {
+                    throw new ArchiveException($"Archive failed with original link {Url.ToString()} at {DateTime.Now}");
                 }
             }
             return ReturnUrl;
@@ -107,7 +111,7 @@ namespace ArchiveApi
                 /// <remarks>
                 /// Fixes the bug where archive.is returns a json file that has a url tag
                 /// </remarks>
-                if (ReturnUrl == $"http://archive.is/submit/" && !response.IsSuccessStatusCode)
+                if (!Verify(ReturnUrl) && !response.IsSuccessStatusCode)
                 {
                     #region fixing issues with return because this works somehow!?!?
                     using (StringReader reader = new StringReader(response.ToString()))
@@ -120,6 +124,10 @@ namespace ArchiveApi
                         ReturnUrl = sides[1];
                     }
                     #endregion
+                }
+                if (!Verify(ReturnUrl))
+                {
+                    throw new ArchiveException($"Archive failed with original link {Url.ToString()} at {DateTime.Now}");
                 }
             }
             return ReturnUrl;
@@ -147,7 +155,7 @@ namespace ArchiveApi
                 /// <remarks>
                 /// Fixes the bug where archive.is returns a json file that has a url tag
                 /// </remarks>
-                if (ReturnUrl == $"http://archive.is/submit/" && !response.IsSuccessStatusCode)
+                if (!Verify(ReturnUrl) && !response.IsSuccessStatusCode)
                 {
                     #region fixing issues with return because this works somehow!?!?
                     using (StringReader reader = new StringReader(response.ToString()))
@@ -160,6 +168,10 @@ namespace ArchiveApi
                         ReturnUrl = sides[1];
                     }
                     #endregion
+                }
+                if (!Verify(ReturnUrl))
+                {
+                    throw new ArchiveException($"Archive failed with original link {Url.ToString()} at {DateTime.Now}");
                 }
             }
             return ReturnUrl;
@@ -182,8 +194,9 @@ namespace ArchiveApi
                 await Task.Delay(8000);
                 var response = await task;
                 ReturnUrl = response.RequestMessage.RequestUri.ToString();
-                if (!response.IsSuccessStatusCode)
+                if (!Verify(ReturnUrl) && !response.IsSuccessStatusCode)
                 {
+                    #region fixing issues
                     using (StringReader reader = new StringReader(response.ToString()))
                     {
                         for (int i = 0; i < 3; i++)
@@ -193,6 +206,11 @@ namespace ArchiveApi
                         string[] sides = reader.ReadLine().Split('=');
                         ReturnUrl = sides[1];
                     }
+                    #endregion
+                }
+                if (!Verify(ReturnUrl))
+                {
+                    throw new ArchiveException($"Archive failed with original link {Url.ToString()} at {DateTime.Now}");
                 }
             }
             return ReturnUrl;

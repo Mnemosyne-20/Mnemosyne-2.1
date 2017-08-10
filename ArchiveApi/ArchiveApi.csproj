@@ -40,6 +40,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ArchiveException.cs" />
     <Compile Include="ArchiveService.cs" />
     <Compile Include="CloudFlareWorkAround.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

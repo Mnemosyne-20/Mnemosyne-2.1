@@ -48,7 +48,7 @@ namespace Mnemosyne2Reborn
         /// <summary>
         /// These three being separate is important because it is used for data tracking
         /// </summary>
-        public static Regex exclusions = new Regex(@"(youtube\.com|streamable\.com|www\.gobrickindustry\.us|gyazo\.com|sli\.mg|imgur\.com|reddit\.com/message|youtube\.com|youtu\.be|wiki/rules|politics_feedback_results_and_where_it_goes_from|urbandictionary\.com)");
+        public static Regex exclusions = new Regex(@"(giphy\.com|youtube\.com|streamable\.com|www\.gobrickindustry\.us|gyazo\.com|sli\.mg|imgur\.com|reddit\.com/message|youtube\.com|youtu\.be|wiki/rules|politics_feedback_results_and_where_it_goes_from|urbandictionary\.com)");
         public static Regex providers = new Regex(@"(web-beta.archive.org|archive\.is|archive\.fo|web\.archive\.org|archive\.today|megalodon\.jp|web\.archive\.org|webcache\.googleusercontent\.com|archive\.li)");
         public static Regex ImageRegex = new Regex(@"(\.gif|\.jpg|\.png|\.pdf|\.webm|\.mp4)$");
         public static Config Config = !File.Exists("./Data/Settings.json") ? CreateNewConfig() : Config.GetConfig();
@@ -87,12 +87,13 @@ namespace Mnemosyne2Reborn
                     }
                     Console.Title = $"Sleeping, New messages: {reddit.User.UnreadMessages.Count() >= 1}";
                 }
-                catch (WebException e) when (!e.Message.Contains("Cannot resolve hostname") || e.Message.Contains("(502)"))
+                catch (WebException e) when (!e.Message.Contains("Cannot resolve hostname") && (int)((HttpWebResponse)e.Response).StatusCode <= 500 && (int)((HttpWebResponse)e.Response).StatusCode >= 600)
                 {
                     Console.WriteLine("Connect to the internet, Error: " + e.Message);
                 }
                 catch (Exception e)
                 {
+                    if (e.Message.Contains("Cannot resolve hostname") || e.Message.Contains("(502)")) continue;
                     // Catches errors and documents them, I should switch to a System.Diagnostics logger but I have no experience with it
                     if (!Directory.Exists("./Errors"))
                     {

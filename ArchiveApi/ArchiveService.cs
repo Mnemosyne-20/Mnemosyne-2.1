@@ -59,6 +59,17 @@ namespace ArchiveApi
                     {"url", Url.ToString() }
                 })).Result;
                 ReturnUrl = response.RequestMessage.RequestUri.ToString();
+                if (!Verify(ReturnUrl) && response.Headers.TryGetValues("Refresh", out var headers))
+                {
+                    foreach (var header in headers)
+                    {
+                        if (header.Contains("http://archive.is"))
+                        {
+                            ReturnUrl = header.Split('=')[1];
+                        }
+                    }
+                }
+
                 /// <remarks>
                 /// Fixes the bug where archive.is returns a json file that has a url tag
                 /// </remarks>
@@ -108,6 +119,16 @@ namespace ArchiveApi
                     {"url", Url.ToString() }
                 })).Result;
                 ReturnUrl = response.RequestMessage.RequestUri.ToString();
+                if (!Verify(ReturnUrl) && response.Headers.TryGetValues("Refresh", out var headers))
+                {
+                    foreach (var header in headers)
+                    {
+                        if (header.Contains("http://archive.is"))
+                        {
+                            ReturnUrl = header.Split('=')[1];
+                        }
+                    }
+                }
                 /// <remarks>
                 /// Fixes the bug where archive.is returns a json file that has a url tag
                 /// </remarks>
@@ -152,6 +173,16 @@ namespace ArchiveApi
                 await Task.Delay(8000);
                 var response = await task;
                 ReturnUrl = response.RequestMessage.RequestUri.ToString();
+                if (!Verify(ReturnUrl) && response.Headers.TryGetValues("Refresh", out var headers))
+                {
+                    foreach (var header in headers)
+                    {
+                        if (header.Contains("http://archive.is"))
+                        {
+                            ReturnUrl = header.Split('=')[1];
+                        }
+                    }
+                }
                 /// <remarks>
                 /// Fixes the bug where archive.is returns a json file that has a url tag
                 /// </remarks>
@@ -194,6 +225,16 @@ namespace ArchiveApi
                 await Task.Delay(8000);
                 var response = await task;
                 ReturnUrl = response.RequestMessage.RequestUri.ToString();
+                if (!Verify(ReturnUrl) && response.Headers.TryGetValues("Refresh", out var headers))
+                {
+                    foreach (var header in headers)
+                    {
+                        if (header.Contains("http://archive.is"))
+                        {
+                            ReturnUrl = header.Split('=')[1];
+                        }
+                    }
+                }
                 if (!Verify(ReturnUrl) && !response.IsSuccessStatusCode)
                 {
                     #region fixing issues

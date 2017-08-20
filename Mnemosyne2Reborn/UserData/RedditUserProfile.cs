@@ -31,9 +31,16 @@ namespace Mnemosyne2Reborn
         [JsonProperty("ImageUrlsUsed")]
         public int ImageUrlsUsed;
         [JsonProperty("OptedOut")]
-        public bool OptedOut { get => optedOut; set { optedOut = value; DumpUserData(); } }
-        [JsonIgnore]
-        private bool optedOut;
+        public bool OptedOut;
+        public void OptOut(bool val)
+        {
+            OptedOut = val;
+            if (Users.ContainsKey(User.Name))
+            {
+                Users[User.Name] = this;
+            }
+            DumpUserData();
+        }
         /// <summary> 
         /// Adds a url used to a user that you made
         /// </summary>

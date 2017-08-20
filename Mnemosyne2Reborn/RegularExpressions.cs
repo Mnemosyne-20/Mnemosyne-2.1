@@ -26,5 +26,14 @@ namespace Mnemosyne2Reborn
             }
             return LinksList;
         }
+        public static IEnumerable<string> FindLinksE(string PostBody)
+        {
+            Match match = Regex.Match(PostBody, @"""(http|ftp|https)://([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?"""); // Same voodoo black demon magic from last repo
+            while (match.Success)
+            {
+                yield return match.Value.TrimStart('"').TrimEnd('"');
+                match = match.NextMatch(); // iterates it so it yeilds a new result each time
+            }
+        }
     }
 }

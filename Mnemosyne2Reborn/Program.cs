@@ -188,7 +188,8 @@ namespace Mnemosyne2Reborn
                 }
                 if (message.Body.ToLower().Contains("opt out"))
                 {
-                    new RedditUserProfile(reddit.GetUser(message.Author), false).OptedOut = true;
+                    Console.WriteLine($"User {message.Author} has opted out.");
+                    new RedditUserProfile(reddit.GetUser(message.Author), false).OptOut(true);
                     message.SetAsRead();
                 }
             }

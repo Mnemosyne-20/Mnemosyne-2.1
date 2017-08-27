@@ -55,16 +55,28 @@ namespace Mnemosyne2Reborn.BotState
             {
                 CheckedComments = JsonConvert.DeserializeObject<List<string>>(File.ReadAllText("./Data/CheckedComments.json")) ?? new List<string>();
             }
+            if(!File.Exists("./Data/CheckedPosts.json"))
+            {
+                CheckedPosts = new List<string>();
+                File.Create("./Data/CheckedPosts.json");
+            }
+            else
+            {
+                CheckedPosts = JsonConvert.DeserializeObject<List<string>>(File.ReadAllText("./Data/CheckedPosts.json")) ?? new List<string>();
+            }
         }
         private void DumpDictionary()
         {
             File.WriteAllText("./Data/Dictionary.json", JsonConvert.SerializeObject(CommentDictionary));
             File.WriteAllText("./Data/CheckedComments.json", JsonConvert.SerializeObject(CheckedComments));
+            File.WriteAllText("./Data/CheckedPosts.json", JsonConvert.SerializeObject(CheckedPosts));
         }
         [JsonProperty("CheckedComments")]
         List<string> CheckedComments;
         [JsonProperty("CommentDictionary")]
         Dictionary<string, string> CommentDictionary;
+        [JsonProperty("CheckedPosts")]
+        List<string> CheckedPosts;
         /// <inheritdoc />
         public void AddBotComment(string postID, string commentID)
         {
@@ -104,6 +116,22 @@ namespace Mnemosyne2Reborn.BotState
         /// <param name="CommentID">Comment ID of comment to check</param>
         /// <returns>If the comment exists in the checked comments dictionary</returns>
         public bool HasCommentBeenChecked(string CommentID) => CheckedComments.Contains(CommentID);
+
+        /// <summary>
+        /// Adds a post to the checked list
+        /// </summary>
+        /// <param name="postId">Post ID to add to checked list</param>
+        public void AddCheckedPost(string postId)
+        {
+            CheckedPosts.Add(postId);
+            DumpDictionary();
+        }
+        /// <summary>
+        /// Checks if a post has been checked
+        /// </summary>
+        /// <param name="postId">Post ID to check</param>
+        /// <returns>If the post has been checked</returns>
+        public bool HasPostBeenChecked(string postId) => CheckedPosts.Contains(postId);
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls
         protected virtual void Dispose(bool disposing)

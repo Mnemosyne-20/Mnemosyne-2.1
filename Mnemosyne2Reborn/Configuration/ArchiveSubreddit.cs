@@ -46,6 +46,7 @@ namespace Mnemosyne2Reborn.Configuration
         {
             this.sub = sub;
         }
+        public Listing<Post> New => sub.New;
         public Listing<Post> Posts => sub.Posts;
         public Listing<Comment> Comments => sub.Comments;
         public string Name => sub.Name;

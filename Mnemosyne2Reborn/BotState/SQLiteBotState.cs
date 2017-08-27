@@ -6,7 +6,7 @@ namespace Mnemosyne2Reborn.BotState
     public class SQLiteBotState : IBotState
     {
         SQLiteConnection dbConnection;
-        SQLiteCommand SQLCmd_AddBotComment, SQLCmd_AddCheckedComment, SQLCmd_DoesBotCommentExist, SQLCmd_GetBotComment, SQLCmd_HasCommentBeenChecked;
+        SQLiteCommand SQLCmd_AddBotComment, SQLCmd_AddCheckedComment, SQLCmd_DoesBotCommentExist, SQLCmd_GetBotComment, SQLCmd_HasCommentBeenChecked, SQLCmd_HasPostBeenChecked, SQLCmd_AddCheckedPost;
         public SQLiteBotState(string filename = "botstate.sqlite")
         {
             if (!File.Exists(filename))
@@ -158,6 +158,16 @@ namespace Mnemosyne2Reborn.BotState
         }
 
         public void UpdateBotComment(string postID, string commentID)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void AddCheckedPost(string postId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool HasPostBeenChecked(string postId)
         {
             throw new NotImplementedException();
         }

@@ -4,6 +4,17 @@ namespace Mnemosyne2Reborn.BotState
     public interface IBotState : IDisposable
     {
         /// <summary>
+        /// Adds a post to the checked list
+        /// </summary>
+        /// <param name="postId">Post ID to add to checked list</param>
+        void AddCheckedPost(string postId);
+        /// <summary>
+        /// Checks if a post has been checked
+        /// </summary>
+        /// <param name="postId">Post ID to check</param>
+        /// <returns>If the post has been checked</returns>
+        bool HasPostBeenChecked(string postId);
+        /// <summary>
         /// Checks if a comment exists if given a postID
         /// </summary>
         /// <param name="postId">Post to check</param>

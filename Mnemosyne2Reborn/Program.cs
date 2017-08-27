@@ -29,7 +29,8 @@ namespace Mnemosyne2Reborn
             "thelinkfixerbot",
             "gifv-bot",
             "autourbanbot",
-            "deepsalter-001"
+            "deepsalter-001",
+            "GoodBot_BadBot"
         };
         /// <summary>
         /// Iterates each "thing" you make, subreddit is required for a few of them
@@ -48,7 +49,7 @@ namespace Mnemosyne2Reborn
         /// <summary>
         /// These three being separate is important because it is used for data tracking
         /// </summary>
-        public static Regex exclusions = new Regex(@"(giphy\.com|youtube\.com|streamable\.com|www\.gobrickindustry\.us|gyazo\.com|sli\.mg|imgur\.com|reddit\.com/message|youtube\.com|youtu\.be|wiki/rules|politics_feedback_results_and_where_it_goes_from|urbandictionary\.com)");
+        public static Regex exclusions = new Regex(@"(facebook\.com|giphy\.com|youtube\.com|streamable\.com|www\.gobrickindustry\.us|gyazo\.com|sli\.mg|imgur\.com|reddit\.com/message|youtube\.com|youtu\.be|wiki/rules|politics_feedback_results_and_where_it_goes_from|urbandictionary\.com)");
         public static Regex providers = new Regex(@"(web-beta.archive.org|archive\.is|archive\.fo|web\.archive\.org|archive\.today|megalodon\.jp|web\.archive\.org|webcache\.googleusercontent\.com|archive\.li)");
         public static Regex ImageRegex = new Regex(@"(\.gif|\.jpg|\.png|\.pdf|\.webm|\.mp4)$");
         public static Config Config = !File.Exists("./Data/Settings.json") ? CreateNewConfig() : Config.GetConfig();
@@ -93,7 +94,7 @@ namespace Mnemosyne2Reborn
                 }
                 catch (Exception e)
                 {
-                    if (e.Message.Contains("Cannot resolve hostname") || e.Message.Contains("(502)")) continue;
+                    if (e.Message.Contains("Cannot resolve hostname") || e.Message.Contains("(502)") || e.Message.Contains("(503)") || e.Message.Contains("The remote name could not be resolved")) continue;
                     // Catches errors and documents them, I should switch to a System.Diagnostics logger but I have no experience with it
                     if (!Directory.Exists("./Errors"))
                     {
@@ -201,19 +202,33 @@ namespace Mnemosyne2Reborn
                 throw new ArgumentNullException(reddit == null ? nameof(reddit) : state == null ? nameof(state) : nameof(subreddit));
             }
             Console.Title = $"Finding posts in {subreddit.Name} New messages: {reddit.User.UnreadMessages.Count() >= 1}";
-            foreach (var post in subreddit.Posts.Take(25))
+            foreach (var post in subreddit.New.Take(25))
             {
-                if (!state.DoesCommentExist(post.Id) && state.HasCommentBeenChecked(post.Id))
+                if (!state.DoesCommentExist(post.Id) && !state.HasCommentBeenChecked(post.Id) && !state.HasPostBeenChecked(post.Id))
                 {
-                    List<string> Links = RegularExpressions.FindLinks(post.SelfTextHtml);
-                    if (Links.Count == 0)
+                    Dictionary<string, int> ArchivedLinks = new Dictionary<string, int>();
+                    List<string> Links = new List<string>();
+                    if (post.IsSelfPost && post.SelfTextHtml != null && post.SelfTextHtml.Length != 0)
+                    {
+                        Links = RegularExpressions.FindLinks(post.SelfTextHtml);
+                    }
+                    if (Links.Count == 0 && !subreddit.ArchivePost)
                     {
                         continue;
                     }
-                    Dictionary<string, int> ArchivedLinks = ArchiveLinks.ArchivePostLinks(ref Links, new Regex[] { exclusions, providers, ImageRegex }, reddit.GetUser(post.AuthorName), new ArchiveService(Config.ArchiveService), false);
+                    else if (Links.Count == 0 && subreddit.ArchivePost)
+                    {
+                        goto ArchivePost;
+                    }
+                    foreach (string s in Links)
+                    {
+                        Console.WriteLine($"Found {s} in post {post.Id}");
+                    }
+                    ArchivedLinks = ArchiveLinks.ArchivePostLinks(ref Links, new Regex[] { exclusions, providers, ImageRegex }, reddit.GetUser(post.AuthorName), new ArchiveService(Config.ArchiveService), false);
+                    ArchivePost:;
                     PostArchives.ArchivePostLinks(subreddit, Config, state, post, Links, ArchivedLinks);
-                    state.AddCheckedComment(post.Id);
                 }
+                state.AddCheckedPost(post.Id);
             }
         }
         public static void IterateComments(Reddit reddit, IBotState state, ArchiveSubreddit subreddit)

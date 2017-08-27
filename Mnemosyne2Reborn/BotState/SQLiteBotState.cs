@@ -65,6 +65,10 @@ namespace Mnemosyne2Reborn.BotState
             cmd = new SQLiteCommand(query, dbConnection);
             cmd.ExecuteNonQuery();
             cmd.Dispose();
+            query = "create table if not exists posts (postID text unique)";
+            cmd = new SQLiteCommand(query, dbConnection);
+            cmd.ExecuteNonQuery();
+            cmd.Dispose();
         }
 
         void InitializeCommands()
@@ -76,6 +80,9 @@ namespace Mnemosyne2Reborn.BotState
             SQLCmd_AddCheckedComment = new SQLiteCommand("insert or abort into comments (commentID) values (@commentID)", dbConnection);
             SQLCmd_AddCheckedComment.Parameters.Add(new SQLiteParameter("@commentID"));
 
+            SQLCmd_AddCheckedPost = new SQLiteCommand("insert or abort into posts (postID) values (@postID)", dbConnection);
+            SQLCmd_AddCheckedPost.Parameters.Add(new SQLiteParameter("@postID"));
+
             SQLCmd_DoesBotCommentExist = new SQLiteCommand("select count(*) from replies where postID = @postID", dbConnection);
             SQLCmd_DoesBotCommentExist.Parameters.Add(new SQLiteParameter("@postID"));
 
@@ -84,6 +91,9 @@ namespace Mnemosyne2Reborn.BotState
 
             SQLCmd_HasCommentBeenChecked = new SQLiteCommand("select count(commentID) from comments where commentID = @commentID", dbConnection);
             SQLCmd_HasCommentBeenChecked.Parameters.Add(new SQLiteParameter("@commentID"));
+
+            SQLCmd_HasPostBeenChecked = new SQLiteCommand("select count(postID) from posts where postID = @postID", dbConnection);
+            SQLCmd_HasPostBeenChecked.Parameters.Add(new SQLiteParameter("@postID"));
         }
         public void AddBotComment(string postID, string commentID)
         {
@@ -117,6 +127,20 @@ namespace Mnemosyne2Reborn.BotState
             return botReplyID;
         }
 
+        public void UpdateBotComment(string postID, string commentID)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void AddCheckedPost(string postId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool HasPostBeenChecked(string postId)
+        {
+            throw new NotImplementedException();
+        }
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls
 
@@ -155,21 +179,6 @@ namespace Mnemosyne2Reborn.BotState
             Dispose(true);
             // TODO: uncomment the following line if the finalizer is overridden above.
             // GC.SuppressFinalize(this);
-        }
-
-        public void UpdateBotComment(string postID, string commentID)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void AddCheckedPost(string postId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool HasPostBeenChecked(string postId)
-        {
-            throw new NotImplementedException();
         }
         #endregion
     }

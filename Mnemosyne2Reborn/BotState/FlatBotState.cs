@@ -65,11 +65,32 @@ namespace Mnemosyne2Reborn.BotState
                 CheckedPosts = JsonConvert.DeserializeObject<List<string>>(File.ReadAllText("./Data/CheckedPosts.json")) ?? new List<string>();
             }
         }
-        private void DumpDictionary()
+        private enum DictionaryEnum
         {
-            File.WriteAllText("./Data/Dictionary.json", JsonConvert.SerializeObject(CommentDictionary));
-            File.WriteAllText("./Data/CheckedComments.json", JsonConvert.SerializeObject(CheckedComments));
-            File.WriteAllText("./Data/CheckedPosts.json", JsonConvert.SerializeObject(CheckedPosts));
+            Dictionary,
+            Comments,
+            Posts,
+            All
+        }
+        private void DumpDictionary(DictionaryEnum en)
+        {
+            switch(en)
+            {
+                case DictionaryEnum.All:
+                    File.WriteAllText("./Data/Dictionary.json", JsonConvert.SerializeObject(CommentDictionary));
+                    File.WriteAllText("./Data/CheckedComments.json", JsonConvert.SerializeObject(CheckedComments));
+                    File.WriteAllText("./Data/CheckedPosts.json", JsonConvert.SerializeObject(CheckedPosts));
+                    break;
+                case DictionaryEnum.Comments:
+                    File.WriteAllText("./Data/CheckedComments.json", JsonConvert.SerializeObject(CheckedComments));
+                    break;
+                case DictionaryEnum.Posts:
+                    File.WriteAllText("./Data/CheckedPosts.json", JsonConvert.SerializeObject(CheckedPosts));
+                    break;
+                case DictionaryEnum.Dictionary:
+                    File.WriteAllText("./Data/Dictionary.json", JsonConvert.SerializeObject(CommentDictionary));
+                    break;
+            }
         }
         [JsonProperty("CheckedComments")]
         List<string> CheckedComments;
@@ -81,13 +102,13 @@ namespace Mnemosyne2Reborn.BotState
         public void AddBotComment(string postID, string commentID)
         {
             CommentDictionary.Add(postID, commentID);
-            DumpDictionary();
+            DumpDictionary(DictionaryEnum.Dictionary);
         }
         /// <inheritdoc />
         public void UpdateBotComment(string postID, string commentID)
         {
             CommentDictionary[postID] = commentID;
-            DumpDictionary();
+            DumpDictionary(DictionaryEnum.Dictionary);
         }
         /// <summary>
         /// Adds a comment to the checked list
@@ -96,7 +117,7 @@ namespace Mnemosyne2Reborn.BotState
         public void AddCheckedComment(string commentID)
         {
             CheckedComments.Add(commentID);
-            DumpDictionary();
+            DumpDictionary(DictionaryEnum.Comments);
         }
         /// <summary>
         /// COMMENT EXISTING FOR POST
@@ -124,7 +145,7 @@ namespace Mnemosyne2Reborn.BotState
         public void AddCheckedPost(string postId)
         {
             CheckedPosts.Add(postId);
-            DumpDictionary();
+            DumpDictionary(DictionaryEnum.Posts);
         }
         /// <summary>
         /// Checks if a post has been checked
@@ -140,7 +161,7 @@ namespace Mnemosyne2Reborn.BotState
             {
                 if (disposing)
                 {
-                    DumpDictionary();
+                    DumpDictionary(DictionaryEnum.All);
                     // TODO: dispose managed state (managed objects).
                 }
 

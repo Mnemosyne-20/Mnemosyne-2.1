@@ -35,6 +35,10 @@ namespace Mnemosyne2Reborn.Commenting
                 string hostname = new Uri(OriginalLinks[i]).Host.Replace("www.", "");
                 LinksToPost.Add($"* **Link: {(i + 1).ToString()}** ([{hostname}]({OriginalLinks[i]})): {ArchivedLinks[i]}\n");
             }
+            if (LinksToPost.Count == 0)
+            {
+                return;
+            }
             PostArchiveLinks(conf, state, Program.Headers[0], post, LinksToPost);
         }
         /// <summary>
@@ -57,6 +61,10 @@ namespace Mnemosyne2Reborn.Commenting
             {
                 string hostname = new Uri(OriginalLinks[i]).Host.Replace("www.", "");
                 LinksToPost.Add($"* **Link: {(i + 1).ToString()}** ([{hostname}]({OriginalLinks[i]})): {ArchivedLinks[i]}\n");
+            }
+            if(LinksToPost.Count == 0)
+            {
+                return;
             }
             PostArchiveLinks(conf, state, Program.Headers[0], post, LinksToPost);
         }
@@ -83,6 +91,10 @@ namespace Mnemosyne2Reborn.Commenting
                 LinksToPost.Add($"* **Link: {val.Value.ToString()}** ([{hostname}]({OriginalLinks[i]})): {val.Key}\n");
                 i++;
             }
+            if (LinksToPost.Count == 0)
+            {
+                return;
+            }
             PostArchiveLinks(conf, state, Program.Headers[0], post, LinksToPost);
         }
         /// <summary>
@@ -107,6 +119,10 @@ namespace Mnemosyne2Reborn.Commenting
                 string hostname = new Uri(OriginalLinks[i]).Host.Replace("www.", "");
                 LinksToPost.Add($"* **Link: {val.Value.ToString()}** ([{hostname}]({OriginalLinks[i]})): {val.Key}\n");
                 i++;
+            }
+            if (LinksToPost.Count == 0)
+            {
+                return;
             }
             PostArchiveLinks(conf, state, Program.Headers[0], post, LinksToPost);
         }

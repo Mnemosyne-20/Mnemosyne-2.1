@@ -6,16 +6,16 @@ namespace Mnemosyne2Reborn.BotState
     public class SQLiteBotState : IBotState
     {
         SQLiteConnection dbConnection;
-        SQLiteCommand SQLCmd_AddBotComment, SQLCmd_AddCheckedComment, SQLCmd_DoesBotCommentExist, SQLCmd_GetBotComment, SQLCmd_HasCommentBeenChecked, SQLCmd_HasPostBeenChecked, SQLCmd_AddCheckedPost;
+        SQLiteCommand SQLCmd_AddBotComment, SQLCmd_AddCheckedComment, SQLCmd_DoesBotCommentExist, SQLCmd_GetBotComment, SQLCmd_HasCommentBeenChecked, SQLCmd_HasPostBeenChecked, SQLCmd_AddCheckedPost, SQLCmd_UpdateBotComment;
         public SQLiteBotState(string filename = "botstate.sqlite")
         {
             if (!File.Exists(filename))
             {
                 SQLiteConnection.CreateFile(filename);
             }
-            string assemblyPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            string assemblyPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location.TrimEnd('/') + "/Data/");
             AppDomain.CurrentDomain.SetData("DataDirectory", assemblyPath);
-            dbConnection = new SQLiteConnection($"Data Source=|DataDirectory|/Data/{filename};Version=3;");
+            dbConnection = new SQLiteConnection($"Data Source=|DataDirectory|/{filename};Version=3;");
             dbConnection.Open();
             InitializeDatabase();
             InitializeCommands();
@@ -94,6 +94,10 @@ namespace Mnemosyne2Reborn.BotState
 
             SQLCmd_HasPostBeenChecked = new SQLiteCommand("select count(postID) from posts where postID = @postID", dbConnection);
             SQLCmd_HasPostBeenChecked.Parameters.Add(new SQLiteParameter("@postID"));
+
+            SQLCmd_UpdateBotComment = new SQLiteCommand("update replies set botReplyID = @botReplyID where postID = @postID", dbConnection);
+            SQLCmd_UpdateBotComment.Parameters.Add(new SQLiteParameter("@botReplyID"));
+            SQLCmd_UpdateBotComment.Parameters.Add(new SQLiteParameter("@postID"));
         }
         public void AddBotComment(string postID, string commentID)
         {
@@ -129,17 +133,32 @@ namespace Mnemosyne2Reborn.BotState
 
         public void UpdateBotComment(string postID, string commentID)
         {
-            throw new NotImplementedException();
+            SQLCmd_UpdateBotComment.Parameters["@postID"].Value = postID;
+            SQLCmd_UpdateBotComment.Parameters["@botReplyID"].Value = commentID;
+            SQLCmd_UpdateBotComment.ExecuteNonQuery();
         }
 
         public void AddCheckedPost(string postId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                SQLCmd_AddCheckedPost.Parameters["@postID"].Value = postId;
+                SQLCmd_AddCheckedPost.ExecuteNonQuery();
+            }
+            catch (SQLiteException ex)
+            {
+                if (ex.ResultCode == SQLiteErrorCode.Constraint)
+                {
+                    throw new InvalidOperationException($"the post {postId} already exists in the database");
+                }
+            }
         }
 
         public bool HasPostBeenChecked(string postId)
         {
-            throw new NotImplementedException();
+            SQLCmd_HasPostBeenChecked.Parameters["@postID"].Value = postId;
+            long count = SQLCmd_HasPostBeenChecked.ExecuteScalar() as long? ?? 0;
+            return count != 0;
         }
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls
@@ -155,6 +174,9 @@ namespace Mnemosyne2Reborn.BotState
                     SQLCmd_DoesBotCommentExist.Dispose();
                     SQLCmd_GetBotComment.Dispose();
                     SQLCmd_HasCommentBeenChecked.Dispose();
+                    SQLCmd_HasPostBeenChecked.Dispose();
+                    SQLCmd_AddCheckedPost.Dispose();
+                    SQLCmd_UpdateBotComment.Dispose();
                     dbConnection.Dispose();
                     // TODO: dispose managed state (managed objects).
                 }

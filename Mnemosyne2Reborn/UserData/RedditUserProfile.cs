@@ -13,11 +13,13 @@ namespace Mnemosyne2Reborn
         /// string is the name of the User, and the Profile is the profile
         /// </summary>
         [JsonIgnore]
+        static bool UseSQLite;
+        [JsonIgnore]
         public static Dictionary<string, RedditUserProfile> Users;
         [JsonIgnore]
         static SQLiteConnection dbConnection;
         [JsonIgnore]
-        static SQLiteCommand InsertCommand, ExtractCommand;
+        static SQLiteCommand SQLCmd_InsertNewListing, SQLCmd_AddExcluded, SQLCmd_AddImage, SQLCmd_AddArchived, SQLCmd_AddUnarchived, SQLCmd_OptOut;
         [JsonIgnore]
         public RedditUser User;
         [JsonProperty("Name")]
@@ -103,13 +105,10 @@ namespace Mnemosyne2Reborn
         }
         void InitCommands()
         {
-            InsertCommand = new SQLiteCommand("insert or abort into Users (Name, ArchiveUrlsUsed, UnArchivedUrlsUsed, ExcludedUrlsUsed, ImageUrlsUsed, OptedOut) values (@Name, @ArchiveUrlsUsed, @UnArchivedUrlsUsed, @ExcludedUrlsUsed, @ImageUrlsUsed, @OptedOut)");
-            InsertCommand.Parameters.Add(new SQLiteParameter("@Name"));
-            InsertCommand.Parameters.Add(new SQLiteParameter("@ArchiveUrlsUsed"));
-            InsertCommand.Parameters.Add(new SQLiteParameter("@UnArchivedUrlsUsed"));
-            InsertCommand.Parameters.Add(new SQLiteParameter("@ExcludedUrlsUsed"));
-            InsertCommand.Parameters.Add(new SQLiteParameter("@ImageUrlsUsed"));
-            InsertCommand.Parameters.Add(new SQLiteParameter("@OptedOut"));
+            SQLCmd_OptOut = new SQLiteCommand("Update Users set OptedOut = @OptedOut where Name = @Name");
+            SQLCmd_OptOut.Parameters.Add(new SQLiteParameter("@OptedOut"));
+            SQLCmd_OptOut.Parameters.Add(new SQLiteParameter("@Name"));
+
         }
         static RedditUserProfile()
         {
@@ -142,9 +141,9 @@ namespace Mnemosyne2Reborn
                 {
                     SQLiteConnection.CreateFile("./Data/UserProfiles.sqlite");
                 }
-                string assemblyPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+                string assemblyPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location + "/Data/");
                 AppDomain.CurrentDomain.SetData("DataDirectory", assemblyPath);
-                dbConnection = new SQLiteConnection($"Data Source=|DataDirectory|/Data/UserProfiles.sqlite;Version=3;");
+                dbConnection = new SQLiteConnection($"Data Source=|DataDirectory|/UserProfiles.sqlite;Version=3;");
                 dbConnection.Open();
                 InitDatabase();
                 InitCommands();

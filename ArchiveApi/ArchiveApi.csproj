@@ -42,9 +42,12 @@
   <ItemGroup>
     <Compile Include="ArchiveException.cs" />
     <Compile Include="ArchiveService.cs" />
+    <Compile Include="ArchiveServices\ArchiveServiceFactory.cs" />
     <Compile Include="CloudFlareWorkAround.cs" />
+    <Compile Include="Interfaces\IArchiveService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TimeMap.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

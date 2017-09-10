@@ -227,8 +227,8 @@ namespace Mnemosyne2Reborn
                     ArchivedLinks = ArchiveLinks.ArchivePostLinks(ref Links, new Regex[] { exclusions, providers, ImageRegex }, reddit.GetUser(post.AuthorName), new ArchiveService(Config.ArchiveService), false);
                     ArchivePost:;
                     PostArchives.ArchivePostLinks(subreddit, Config, state, post, Links, ArchivedLinks);
+                    state.AddCheckedPost(post.Id);
                 }
-                state.AddCheckedPost(post.Id);
             }
         }
         public static void IterateComments(Reddit reddit, IBotState state, ArchiveSubreddit subreddit)

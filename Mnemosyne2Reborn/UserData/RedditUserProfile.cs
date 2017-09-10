@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
 using System.IO;
+using System.Data.SQLite.Linq;
 namespace Mnemosyne2Reborn
 {
     [JsonObject]
@@ -19,7 +20,7 @@ namespace Mnemosyne2Reborn
         [JsonIgnore]
         static SQLiteConnection dbConnection;
         [JsonIgnore]
-        static SQLiteCommand SQLCmd_InsertNewListing, SQLCmd_AddExcluded, SQLCmd_AddImage, SQLCmd_AddArchived, SQLCmd_AddUnarchived, SQLCmd_OptOut;
+        static SQLiteCommand SQLCmd_InsertNewListing, SQLCmd_AddExcluded, SQLCmd_GetExcluded, SQLCmd_AddImage, SQLCmd_GetImage, SQLCmd_AddArchived, SQLCmd_GetArchived, SQLCmd_AddUnarchived, SQLCmd_GetUnarchived, SQLCmd_OptOut;
         [JsonIgnore]
         public RedditUser User;
         [JsonProperty("Name")]
@@ -90,7 +91,7 @@ namespace Mnemosyne2Reborn
             string val = JsonConvert.SerializeObject(Users, Formatting.Indented);
             File.WriteAllText("./Data/Users.json", val);
         }
-        void InitDatabase()
+        static void InitDatabase()
         {
             string query = "create table if not exists Users (Name text unique, ArchiveUrlsUsed int, UnArchivedUrlsUsed int, ExcludedUrlsUsed int, ImageUrlsUsed int, OptedOut bool not null check (OptedOut in (0,1))";
             SQLiteCommand cmd = new SQLiteCommand(query, dbConnection);
@@ -103,12 +104,39 @@ namespace Mnemosyne2Reborn
                 cmd.Dispose();
             }
         }
-        void InitCommands()
+        static void InitCommands()
         {
             SQLCmd_OptOut = new SQLiteCommand("Update Users set OptedOut = @OptedOut where Name = @Name");
             SQLCmd_OptOut.Parameters.Add(new SQLiteParameter("@OptedOut"));
             SQLCmd_OptOut.Parameters.Add(new SQLiteParameter("@Name"));
 
+            SQLCmd_GetArchived = new SQLiteCommand("select ArchivedUrlsUsed from Users where Name = @Name");
+            SQLCmd_GetArchived.Parameters.Add(new SQLiteParameter("@Name"));
+
+            SQLCmd_AddArchived = new SQLiteCommand("Update Users set ArchviedUrlsUsed = @ArchivedUrlsUsed where Name = @Name");
+            SQLCmd_AddArchived.Parameters.Add(new SQLiteParameter("@ArchivedUrlsUsed"));
+            SQLCmd_AddArchived.Parameters.Add(new SQLiteParameter("@Name"));
+
+            SQLCmd_GetUnarchived = new SQLiteCommand("select UnArchivedUrlsUsed from Users where Name = @Name");
+            SQLCmd_GetUnarchived.Parameters.Add(new SQLiteParameter("@Name"));
+
+            SQLCmd_AddUnarchived = new SQLiteCommand("Update Users set UnArchivedUrlsUsed = @UnArchivedUrlsUsed where Name = @Name");
+            SQLCmd_GetUnarchived.Parameters.Add(new SQLiteParameter("@UnArchivedUrlsUsed"));
+            SQLCmd_GetUnarchived.Parameters.Add(new SQLiteParameter("@Name"));
+
+            SQLCmd_GetImage = new SQLiteCommand("select ImageUrlsUsed from Users where Name = @Name");
+            SQLCmd_GetImage.Parameters.Add(new SQLiteParameter("@Name"));
+
+            SQLCmd_AddImage = new SQLiteCommand("Update Users set ImageUrlsUsed = @ImageUrlsUsed where Name = @Name");
+            SQLCmd_AddImage.Parameters.Add(new SQLiteParameter("@ImageUrlsUsed"));
+            SQLCmd_AddImage.Parameters.Add(new SQLiteParameter("@Name"));
+
+            SQLCmd_GetExcluded = new SQLiteCommand("select ExcludedUrlsUsed from Users where Name = @Name");
+            SQLCmd_GetExcluded.Parameters.Add(new SQLiteParameter("@Name"));
+
+            SQLCmd_AddExcluded = new SQLiteCommand("Update Users set ExcludedUrlsUsed = @ExcludedUrlsUsed where Name = @Name");
+            SQLCmd_AddExcluded.Parameters.Add(new SQLiteParameter("@ExcludedUrlsUsed"));
+            SQLCmd_AddExcluded.Parameters.Add(new SQLiteParameter("@ExcludedUrlsUsed"));
         }
         static RedditUserProfile()
         {

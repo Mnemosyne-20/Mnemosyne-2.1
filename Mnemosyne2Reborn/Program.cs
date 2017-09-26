@@ -1,4 +1,5 @@
-﻿using ArchiveApi;
+﻿using ArchiveApi.Interfaces;
+using ArchiveApi.Services;
 using Mnemosyne2Reborn.BotState;
 using Mnemosyne2Reborn.Commenting;
 using Mnemosyne2Reborn.Configuration;
@@ -10,6 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
+using System.Threading;
 namespace Mnemosyne2Reborn
 {
     public class Program
@@ -76,7 +78,8 @@ namespace Mnemosyne2Reborn
             IteratePost = IteratePosts;
             IterateComment = IterateComments;
             IterateMessage = IterateMessages;
-            while (true) // main loop, calls delegates that move through every subreddit allowed iteratively
+            ArchiveLinks.SetArchiveService(new ArchiveIsFactory());
+            while (true) // main loop, calls delegates that move thrugh every subreddit allowed iteratively
             {
                 try
                 {
@@ -103,7 +106,7 @@ namespace Mnemosyne2Reborn
                     File.AppendAllText("./Errors/Failures.txt", $"{e.ToString()}\n");
                     Console.WriteLine($"Caught an exception of type {e.GetType()} output is in ./Errors/Failures.txt");
                 }
-                System.Threading.Thread.Sleep(1000); // sleeps for one second to help with the reddit calls
+                Thread.Sleep(1000); // sleeps for one second to help with the reddit calls
             }
         }
 
@@ -171,7 +174,8 @@ namespace Mnemosyne2Reborn
             Console.WriteLine("Do you want to archive post links? (Yes/No)");
             bool ArchiveLinks = Console.ReadLine().ToLower()[0] == 'y';
             Console.WriteLine("To add flavortext, you must manually add it in as an array in the ./Data/Settings.json file");
-            System.Threading.Thread.Sleep(10000);
+            Console.Title = "Sleeping for 10000 ms";
+            Thread.Sleep(10000);
             return new Config(useSQLite, Username, Subs, Password, wantOAuth, ClientSecret, ClientID, ArchiveLinks);
         }
         #region IterateThings
@@ -224,7 +228,7 @@ namespace Mnemosyne2Reborn
                     {
                         Console.WriteLine($"Found {s} in post {post.Id}");
                     }
-                    ArchivedLinks = ArchiveLinks.ArchivePostLinks(ref Links, new Regex[] { exclusions, providers, ImageRegex }, reddit.GetUser(post.AuthorName), new ArchiveService(Config.ArchiveService), false);
+                    ArchivedLinks = ArchiveLinks.ArchivePostLinks(ref Links, new Regex[] { exclusions, providers, ImageRegex }, reddit.GetUser(post.AuthorName), false);
                     ArchivePost:;
                     PostArchives.ArchivePostLinks(subreddit, Config, state, post, Links, ArchivedLinks);
                     state.AddCheckedPost(post.Id);
@@ -253,7 +257,7 @@ namespace Mnemosyne2Reborn
                 {
                     Console.WriteLine($"Found {s} in comment {comment.Id}");
                 }
-                List<string> ArchivedLinks = ArchiveLinks.ArchivePostLinks(ref Links, new Regex[] { exclusions, providers, ImageRegex }, reddit.GetUser(comment.AuthorName), new ArchiveService(Config.ArchiveService));
+                List<string> ArchivedLinks = ArchiveLinks.ArchivePostLinks(ref Links, new Regex[] { exclusions, providers, ImageRegex }, reddit.GetUser(comment.AuthorName));
                 PostArchives.ArchiveCommentLinks(Config, state, reddit, comment, ArchivedLinks, Links);
                 state.AddCheckedComment(comment.Id);
             }

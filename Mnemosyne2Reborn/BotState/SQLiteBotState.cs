@@ -99,7 +99,7 @@ namespace Mnemosyne2Reborn.BotState
             SQLCmd_UpdateBotComment.Parameters.Add(new SQLiteParameter("@botReplyID"));
             SQLCmd_UpdateBotComment.Parameters.Add(new SQLiteParameter("@postID"));
 
-            
+
         }
         public void AddBotComment(string postID, string commentID)
         {

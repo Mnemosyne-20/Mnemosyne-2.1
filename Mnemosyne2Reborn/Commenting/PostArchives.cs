@@ -1,4 +1,4 @@
-﻿using ArchiveApi;
+﻿using ArchiveApi.Services;
 using Mnemosyne2Reborn.BotState;
 using Mnemosyne2Reborn.Configuration;
 using RedditSharp;
@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-
 namespace Mnemosyne2Reborn.Commenting
 {
     public static class PostArchives
@@ -24,7 +23,7 @@ namespace Mnemosyne2Reborn.Commenting
         /// <param name="ArchivedLinks">A list of pre-archived links that gets formatted for posting</param>
         public static void ArchivePostLinks(Config conf, IBotState state, Post post, int[] LinkNumber, List<string> OriginalLinks, List<string> ArchivedLinks)
         {
-            ArchiveService serv = new ArchiveService(conf.ArchiveService);
+            ArchiveService serv = new ArchiveService();
             List<string> LinksToPost = new List<string>();
             if (conf.ArchiveLinks)
             {
@@ -51,7 +50,7 @@ namespace Mnemosyne2Reborn.Commenting
         /// <param name="ArchivedLinks">A list of pre-archived links that gets formatted for posting</param>
         public static void ArchivePostLinks(ArchiveSubreddit sub, Config conf, IBotState state, Post post, int[] LinkNumber, List<string> OriginalLinks, List<string> ArchivedLinks)
         {
-            ArchiveService serv = new ArchiveService(conf.ArchiveService);
+            ArchiveService serv = new ArchiveService();
             List<string> LinksToPost = new List<string>();
             if (sub.ArchivePost)
             {
@@ -62,7 +61,7 @@ namespace Mnemosyne2Reborn.Commenting
                 string hostname = new Uri(OriginalLinks[i]).Host.Replace("www.", "");
                 LinksToPost.Add($"* **Link: {(i + 1).ToString()}** ([{hostname}]({OriginalLinks[i]})): {ArchivedLinks[i]}\n");
             }
-            if(LinksToPost.Count == 0)
+            if (LinksToPost.Count == 0)
             {
                 return;
             }
@@ -78,7 +77,7 @@ namespace Mnemosyne2Reborn.Commenting
         /// <param name="ArchivedLinks">Dictionary of links and the position found</param>
         public static void ArchivePostLinks(ArchiveSubreddit sub, Config conf, IBotState state, Post post, List<string> OriginalLinks, Dictionary<string, int> ArchivedLinks)
         {
-            ArchiveService serv = new ArchiveService(conf.ArchiveService);
+            ArchiveService serv = new ArchiveService();
             List<string> LinksToPost = new List<string>();
             if (sub.ArchivePost)
             {
@@ -107,7 +106,7 @@ namespace Mnemosyne2Reborn.Commenting
         /// <param name="ArchivedLinks">Dictionary of links and the position found</param>
         public static void ArchivePostLinks(Config conf, IBotState state, Post post, List<string> OriginalLinks, Dictionary<string, int> ArchivedLinks)
         {
-            ArchiveService serv = new ArchiveService(conf.ArchiveService);
+            ArchiveService serv = new ArchiveService();
             List<string> LinksToPost = new List<string>();
             if (conf.ArchiveLinks)
             {
@@ -275,7 +274,7 @@ namespace Mnemosyne2Reborn.Commenting
         {
             if (conf == null || state == null || head == null || post == null || ArchiveList == null)
             {
-                throw new ArgumentNullException(conf == null ? "conf" : state == null ? "state" : head == null ? "head" : post == null ? "post" : "ArchiveList");
+                throw new ArgumentNullException(conf == null ? nameof(conf) : state == null ? nameof(state) : head == null ? nameof(head) : post == null ? nameof(post) : nameof(ArchiveList));
             }
             Console.Title = $"Posting new comment to post {post.Id}";
             string LinksListBody = "";

@@ -55,7 +55,7 @@ namespace Mnemosyne2Reborn.BotState
             {
                 CheckedComments = JsonConvert.DeserializeObject<List<string>>(File.ReadAllText("./Data/CheckedComments.json")) ?? new List<string>();
             }
-            if(!File.Exists("./Data/CheckedPosts.json"))
+            if (!File.Exists("./Data/CheckedPosts.json"))
             {
                 CheckedPosts = new List<string>();
                 File.Create("./Data/CheckedPosts.json");
@@ -74,7 +74,7 @@ namespace Mnemosyne2Reborn.BotState
         }
         private void DumpDictionary(DictionaryEnum en)
         {
-            switch(en)
+            switch (en)
             {
                 case DictionaryEnum.All:
                     File.WriteAllText("./Data/Dictionary.json", JsonConvert.SerializeObject(CommentDictionary));

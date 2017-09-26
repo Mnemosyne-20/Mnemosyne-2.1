@@ -1,16 +1,19 @@
 ﻿using ArchiveApi;
+using ArchiveApi.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-
 namespace Mnemosyne2Reborn
 {
     public static class ArchiveLinks
     {
-        public static List<string> ArchivePostLinks(ref List<string> FoundLinks, Regex[] exclusions, RedditSharp.Things.RedditUser user, string service) =>
-            ArchivePostLinks(ref FoundLinks, exclusions, user, new ArchiveService(service));
+        static IArchiveService service;
+        public static void SetArchiveService(IArchiveServiceFactory factory)
+        {
+            service = factory.GetArchiveService();
+        }
         /// <summary>
         /// Returns two lists, one contains the links that have been archived, the other the links found that aren't excluded
         /// </summary>
@@ -18,7 +21,7 @@ namespace Mnemosyne2Reborn
         /// <param name="exclusions">This is an array of regexes that you use to not archive certain types, exists so that I have orginized exlusions</param>
         /// <param name="user"></param>
         /// <returns>A list of archives in order, no tuple anymore!</returns>
-        public static List<string> ArchivePostLinks(ref List<string> FoundLinks, Regex[] exclusions, RedditSharp.Things.RedditUser user, ArchiveService service)
+        public static List<string> ArchivePostLinks(ref List<string> FoundLinks, Regex[] exclusions, RedditSharp.Things.RedditUser user)
         {
             List<string> ArchiveLinks = new List<string>();
             for (int i = 0; i < FoundLinks.Count; i++)
@@ -53,7 +56,7 @@ namespace Mnemosyne2Reborn
         /// <param name="service"></param>
         /// <param name="removeCollisions">Exists to remove name collisions</param>
         /// <returns></returns>
-        public static async Task<Tuple<Dictionary<string, int>, List<string>>> ArchivePostLinksAsync(List<string> FoundLinks, Regex[] exclusions, RedditSharp.Things.RedditUser user, ArchiveService service)
+        public static async Task<Tuple<Dictionary<string, int>, List<string>>> ArchivePostLinksAsync(List<string> FoundLinks, Regex[] exclusions, RedditSharp.Things.RedditUser user)
         {
             Dictionary<string, int> ArchiveLinks = new Dictionary<string, int>();
             int counter = 1;
@@ -90,7 +93,7 @@ namespace Mnemosyne2Reborn
         /// <param name="service"></param>
         /// <param name="removeCollisions">Exists to remove name collisions</param>
         /// <returns></returns>
-        public static Dictionary<string, int> ArchivePostLinks(ref List<string> FoundLinks, Regex[] exclusions, RedditSharp.Things.RedditUser user, ArchiveService service, bool removeCollisions)
+        public static Dictionary<string, int> ArchivePostLinks(ref List<string> FoundLinks, Regex[] exclusions, RedditSharp.Things.RedditUser user, bool removeCollisions)
         {
             Dictionary<string, int> ArchiveLinks = new Dictionary<string, int>();
             int counter = 1;

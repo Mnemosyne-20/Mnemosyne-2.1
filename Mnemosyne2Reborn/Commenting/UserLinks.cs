@@ -1,6 +1,5 @@
-﻿using ArchiveApi;
+﻿using ArchiveApi.Services;
 using System.Collections.Generic;
-
 namespace Mnemosyne2Reborn.Commenting
 {
     /// <summary>
@@ -101,19 +100,19 @@ namespace Mnemosyne2Reborn.Commenting
         {
             foreach (KeyValuePair<string, int> keyval in ArchivedIntDict)
             {
-                ArchivedFoundNumber.Add(keyval.Value);
                 ArchivedLinks.Add(keyval.Key);
+                ArchivedFoundNumber.Add(keyval.Value);
             }
         }
         public void AddArchived(KeyValuePair<string, int> ArchivedIntKeyVal)
         {
-            ArchivedFoundNumber.Add(ArchivedIntKeyVal.Value);
             ArchivedLinks.Add(ArchivedIntKeyVal.Key);
+            ArchivedFoundNumber.Add(ArchivedIntKeyVal.Value);
         }
         public void AddArchived(string archive, int appearance)
         {
-            ArchivedFoundNumber.Add(appearance);
             ArchivedLinks.Add(archive);
+            ArchivedFoundNumber.Add(appearance);
         }
         #endregion
         #endregion
@@ -124,10 +123,10 @@ namespace Mnemosyne2Reborn.Commenting
         /// <returns>ArchivedLinks, just in case you want it</returns>
         public List<string> ArchiveUnarchivedLinks()
         {
-            for(int i = 0; i < UnarchivedLinks.Count; i++)
+            for (int i = 0; i < UnarchivedLinks.Count; i++)
             {
-                ArchivedFoundNumber.Add(i);
                 ArchivedLinks.Add(service.Save(UnarchivedLinks[i]));
+                ArchivedFoundNumber.Add(i);
             }
             return ArchivedLinks;
         }

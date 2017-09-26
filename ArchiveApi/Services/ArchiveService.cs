@@ -1,26 +1,19 @@
-﻿using System;
+﻿using ArchiveApi.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
-namespace ArchiveApi
+namespace ArchiveApi.Services
 {
     /// <summary>
     /// Is a class that creates an Archive Service Provider, e.g. archive.is, currently can only use archive.is because URI is weird in C# for some reason
     /// </summary>
-    public class ArchiveService
+    public class ArchiveService : IArchiveService
     {
         string submitEndpoint = "/submit/";
         string timeMapEndpoint = "/timemap/";
-        public Uri Url;
-        public ArchiveService(string Url)
-        {
-            this.Url = new Uri(Url);
-        }
-        public ArchiveService(Uri Url)
-        {
-            this.Url = Url;
-        }
+        public Uri Url = new Uri("http://www.archive.is");
         /// <summary>
         /// Checks if the ArchiveUrl is a successful URL
         /// </summary>
@@ -255,6 +248,23 @@ namespace ArchiveApi
                 }
             }
             return ReturnUrl;
+        }
+
+        Uri IArchiveService.Save(Uri Url)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<Uri> IArchiveService.SaveAsync(Uri Url)
+        {
+            throw new NotImplementedException();
+        }
+    }
+    public class ArchiveIsFactory : IArchiveServiceFactory
+    {
+        public override IArchiveService GetArchiveService()
+        {
+            return new ArchiveService();
         }
     }
 }

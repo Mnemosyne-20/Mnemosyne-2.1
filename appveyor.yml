@@ -12,7 +12,7 @@ build:
   parallel: true
   verbosity: minimal
 artifacts:
-- path: C:\projects\mnemosyne-2-1\Mnemosyne2Reborn\bin\Release
+- path: Mnemosyne2Reborn\bin\Release
   name: Mnemosyne-Reborn
 deploy:
 - provider: GitHub

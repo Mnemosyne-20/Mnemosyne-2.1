@@ -3,14 +3,24 @@ pull_requests:
   do_not_increment_build_number: true
 skip_non_tags: true
 image: Visual Studio 2017
+configuration: Release
+platform: Any CPU
+cache: packages -> **\packages.config
 before_build:
-  - cmd: nuget restore
+- cmd: nuget restore
 build:
+  parallel: true
   verbosity: minimal
 artifacts:
-  - path: C:\projects\mnemosyne-2-1\ArchiveApiTest\bin
+- path: C:\projects\mnemosyne-2-1\Mnemosyne2Reborn\bin\Release
+  name: Mnemosyne-Reborn
 deploy:
 - provider: GitHub
+  release: Mnemosyne-reborn
   auth_token:
     secure: f47v+SsAj4FXY3D5EQX449lYVmm2rP20prLGvTefDG0SICNHqE7OK9xMuABjJlH1
+  artifact: Mnemosyne-Reborn
   draft: true
+  force_update: true
+  on:
+    branch: master

@@ -12,11 +12,13 @@ build:
   parallel: true
   verbosity: minimal
 artifacts:
-- path: Mnemosyne2Reborn\bin\Release
+- path: Mnemosyne2Reborn\bin\Release\*.exe
   name: Mnemosyne-Reborn
+- path: ArchiveApi\bin\Release\*.dll
+  name: ArchiveApi
 deploy:
 - provider: GitHub
-  release: Mnemosyne-reborn
+  release: Mnemosyne-reborn-v$(appveyor_build_version)
   auth_token:
     secure: f47v+SsAj4FXY3D5EQX449lYVmm2rP20prLGvTefDG0SICNHqE7OK9xMuABjJlH1
   artifact: Mnemosyne-Reborn

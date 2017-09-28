@@ -9,7 +9,7 @@ namespace ArchiveApi.Services
     /// <summary>
     /// Is a class that creates an Archive Service Provider, e.g. archive.is, currently can only use archive.is because URI is weird in C# for some reason
     /// </summary>
-    public class ArchiveService : IArchiveService
+    public class ArchiveIsService : IArchiveService
     {
         string submitEndpoint = "/submit/";
         string timeMapEndpoint = "/timemap/";
@@ -264,7 +264,7 @@ namespace ArchiveApi.Services
     {
         public override IArchiveService GetArchiveService()
         {
-            return new ArchiveService();
+            return new ArchiveIsService();
         }
     }
 }

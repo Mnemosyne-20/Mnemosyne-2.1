@@ -8,11 +8,23 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using ArchiveApi.Interfaces;
 namespace Mnemosyne2Reborn.Commenting
 {
     public static class PostArchives
     {
+        #region Static values and setters
+        static IArchiveService service;
+        public static void SetArchiveServiceFromFactory(IArchiveServiceFactory factory)
+        {
+            service = factory.GetArchiveService();
+        }
+        public static void SetArchiveService(IArchiveService service)
+        {
+            PostArchives.service = service;
+        }
         static Random rand = new Random();
+        #endregion
         /// <summary>
         /// Archives post links
         /// </summary>
@@ -23,11 +35,10 @@ namespace Mnemosyne2Reborn.Commenting
         /// <param name="ArchivedLinks">A list of pre-archived links that gets formatted for posting</param>
         public static void ArchivePostLinks(Config conf, IBotState state, Post post, int[] LinkNumber, List<string> OriginalLinks, List<string> ArchivedLinks)
         {
-            ArchiveService serv = new ArchiveService();
             List<string> LinksToPost = new List<string>();
             if (conf.ArchiveLinks)
             {
-                LinksToPost.Add($"* **Post:** {serv.Save(post.Url)}\n"); // saves post if you want to archive something
+                LinksToPost.Add($"* **Post:** {service.Save(post.Url)}\n"); // saves post if you want to archive something
             }
             for (int i = 0; i < OriginalLinks.Count; i++)
             {
@@ -50,11 +61,10 @@ namespace Mnemosyne2Reborn.Commenting
         /// <param name="ArchivedLinks">A list of pre-archived links that gets formatted for posting</param>
         public static void ArchivePostLinks(ArchiveSubreddit sub, Config conf, IBotState state, Post post, int[] LinkNumber, List<string> OriginalLinks, List<string> ArchivedLinks)
         {
-            ArchiveService serv = new ArchiveService();
             List<string> LinksToPost = new List<string>();
             if (sub.ArchivePost)
             {
-                LinksToPost.Add($"* **Post:** {serv.Save(post.Url)}\n"); // saves post if you want to archive something
+                LinksToPost.Add($"* **Post:** {service.Save(post.Url)}\n"); // saves post if you want to archive something
             }
             for (int i = 0; i < OriginalLinks.Count; i++)
             {
@@ -77,11 +87,10 @@ namespace Mnemosyne2Reborn.Commenting
         /// <param name="ArchivedLinks">Dictionary of links and the position found</param>
         public static void ArchivePostLinks(ArchiveSubreddit sub, Config conf, IBotState state, Post post, List<string> OriginalLinks, Dictionary<string, int> ArchivedLinks)
         {
-            ArchiveService serv = new ArchiveService();
             List<string> LinksToPost = new List<string>();
             if (sub.ArchivePost)
             {
-                LinksToPost.Add($"* **Post:** {serv.Save(post.Url)}\n"); // saves post if you want to archive something
+                LinksToPost.Add($"* **Post:** {service.Save(post.Url)}\n"); // saves post if you want to archive something
             }
             int i = 0;
             foreach (var val in ArchivedLinks)
@@ -106,11 +115,10 @@ namespace Mnemosyne2Reborn.Commenting
         /// <param name="ArchivedLinks">Dictionary of links and the position found</param>
         public static void ArchivePostLinks(Config conf, IBotState state, Post post, List<string> OriginalLinks, Dictionary<string, int> ArchivedLinks)
         {
-            ArchiveService serv = new ArchiveService();
             List<string> LinksToPost = new List<string>();
             if (conf.ArchiveLinks)
             {
-                LinksToPost.Add($"* **Post:** {serv.Save(post.Url)}\n"); // saves post if you want to archive something
+                LinksToPost.Add($"* **Post:** {service.Save(post.Url)}\n"); // saves post if you want to archive something
             }
             int i = 0;
             foreach (var val in ArchivedLinks)

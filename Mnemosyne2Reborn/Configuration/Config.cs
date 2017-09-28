@@ -3,6 +3,7 @@ using System;
 using System.IO;
 namespace Mnemosyne2Reborn.Configuration
 {
+    [Serializable]
     public class Config
     {
         [JsonProperty("OAuthSecert")]

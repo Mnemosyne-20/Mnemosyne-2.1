@@ -37,10 +37,10 @@ namespace Mnemosyne2Reborn.Commenting
                 }
             }
         }
-        private ArchiveService service;
+        private ArchiveIsService service;
         #endregion
         #region Constructors
-        public UserLinks(string Name, ArchiveService service)
+        public UserLinks(string Name, ArchiveIsService service)
         {
             this.Name = Name;
             this.service = service;
@@ -48,11 +48,11 @@ namespace Mnemosyne2Reborn.Commenting
             ArchivedLinks = ArchivedLinks ?? new List<string>();
             ArchivedFoundNumber = ArchivedFoundNumber ?? new List<int>();
         }
-        public UserLinks(string Name, List<string> UnarchivedLinks, ArchiveService service) : this(Name, service)
+        public UserLinks(string Name, List<string> UnarchivedLinks, ArchiveIsService service) : this(Name, service)
         {
             this.UnarchivedLinks = UnarchivedLinks;
         }
-        public UserLinks(string Name, List<string> UnarchivedLinks, List<string> ArchivedLinks, ArchiveService service) : this(Name, UnarchivedLinks, service)
+        public UserLinks(string Name, List<string> UnarchivedLinks, List<string> ArchivedLinks, ArchiveIsService service) : this(Name, UnarchivedLinks, service)
         {
             this.ArchivedLinks = ArchivedLinks;
         }

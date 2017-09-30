@@ -24,45 +24,51 @@ namespace Mnemosyne2Reborn.BotState
             }
             return replyDict;
         }
+        private string DataDir;
         /// <summary>
         /// Main constructor, creates all data files used within this class
         /// </summary>
-        public FlatBotState()
+        public FlatBotState(string dataDir = "./Data/")
         {
-            if (File.Exists("./Data/ReplyTracker.txt"))
+            if(!Directory.Exists(dataDir))
+            {
+                Directory.CreateDirectory(dataDir);
+            }
+            DataDir = dataDir;
+            if (File.Exists(dataDir + "ReplyTracker.txt"))
             { // takes the old reply checking file and updates it to the new format
-                CommentDictionary = ReadReplyTrackingFile("./Data/ReplyTracker.txt");
-                File.Delete("./Data/ReplyTracker.txt");
+                CommentDictionary = ReadReplyTrackingFile(dataDir + "ReplyTracker.txt");
+                File.Delete(dataDir + "ReplyTracker.txt");
             }
             else
             { //Dictonary of replies
-                if (!File.Exists("./Data/Dictionary.json"))
+                if (!File.Exists(dataDir + "Dictionary.json"))
                 {
                     CommentDictionary = new Dictionary<string, string>();
-                    File.Create("./Data/Dictionary.json").Dispose();
+                    File.Create(dataDir + "Dictionary.json").Dispose();
                 }
                 else
                 {
-                    CommentDictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText("./Data/Dictionary.json")) ?? new Dictionary<string, string>();
+                    CommentDictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(dataDir + "Dictionary.json")) ?? new Dictionary<string, string>();
                 }
             }
-            if (!File.Exists("./Data/CheckedComments.json"))
+            if (!File.Exists(dataDir + "CheckedComments.json"))
             {
                 CheckedComments = new List<string>();
-                File.Create("./Data/CheckedComments.json").Dispose();
+                File.Create(dataDir + "CheckedComments.json").Dispose();
             }
             else
             {
-                CheckedComments = JsonConvert.DeserializeObject<List<string>>(File.ReadAllText("./Data/CheckedComments.json")) ?? new List<string>();
+                CheckedComments = JsonConvert.DeserializeObject<List<string>>(File.ReadAllText(dataDir + "CheckedComments.json")) ?? new List<string>();
             }
-            if (!File.Exists("./Data/CheckedPosts.json"))
+            if (!File.Exists(dataDir + "CheckedPosts.json"))
             {
                 CheckedPosts = new List<string>();
-                File.Create("./Data/CheckedPosts.json");
+                File.Create(dataDir + "CheckedPosts.json").Dispose();
             }
             else
             {
-                CheckedPosts = JsonConvert.DeserializeObject<List<string>>(File.ReadAllText("./Data/CheckedPosts.json")) ?? new List<string>();
+                CheckedPosts = JsonConvert.DeserializeObject<List<string>>(File.ReadAllText(dataDir + "CheckedPosts.json")) ?? new List<string>();
             }
         }
         private enum DictionaryEnum
@@ -77,18 +83,18 @@ namespace Mnemosyne2Reborn.BotState
             switch (en)
             {
                 case DictionaryEnum.All:
-                    File.WriteAllText("./Data/Dictionary.json", JsonConvert.SerializeObject(CommentDictionary));
-                    File.WriteAllText("./Data/CheckedComments.json", JsonConvert.SerializeObject(CheckedComments));
-                    File.WriteAllText("./Data/CheckedPosts.json", JsonConvert.SerializeObject(CheckedPosts));
+                    File.WriteAllText(DataDir + "Dictionary.json", JsonConvert.SerializeObject(CommentDictionary));
+                    File.WriteAllText(DataDir + "CheckedComments.json", JsonConvert.SerializeObject(CheckedComments));
+                    File.WriteAllText(DataDir + "CheckedPosts.json", JsonConvert.SerializeObject(CheckedPosts));
                     break;
                 case DictionaryEnum.Comments:
-                    File.WriteAllText("./Data/CheckedComments.json", JsonConvert.SerializeObject(CheckedComments));
+                    File.WriteAllText(DataDir + "CheckedComments.json", JsonConvert.SerializeObject(CheckedComments));
                     break;
                 case DictionaryEnum.Posts:
-                    File.WriteAllText("./Data/CheckedPosts.json", JsonConvert.SerializeObject(CheckedPosts));
+                    File.WriteAllText(DataDir + "CheckedPosts.json", JsonConvert.SerializeObject(CheckedPosts));
                     break;
                 case DictionaryEnum.Dictionary:
-                    File.WriteAllText("./Data/Dictionary.json", JsonConvert.SerializeObject(CommentDictionary));
+                    File.WriteAllText(DataDir + "Dictionary.json", JsonConvert.SerializeObject(CommentDictionary));
                     break;
             }
         }

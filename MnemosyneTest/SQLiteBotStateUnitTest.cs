@@ -25,5 +25,24 @@ namespace MnemosyneTest
             sqliteBotState.AddCheckedComment("postcomment");
             Assert.IsTrue(sqliteBotState.HasCommentBeenChecked("postcomment"));
         }
+        [TestMethod]
+        [DeploymentItem("Test.sqlite", "Data\\3")]
+        [TestCategory("SQLiteBotState")]
+        public void TestCheckPostSqlite()
+        {
+            SQLiteBotState sqliteBotState = new SQLiteBotState("3\\Test.sqlite");
+            sqliteBotState.AddCheckedPost("postpost");
+            Assert.IsTrue(sqliteBotState.HasPostBeenChecked("postpost"));
+        }
+        [TestMethod]
+        [DeploymentItem("Test.sqlite", "Data\\4")]
+        [TestCategory("SQLiteBotState")]
+        public void TestUpdateCommentSqlite()
+        {
+            SQLiteBotState sqliteBotState = new SQLiteBotState("4\\Test.sqlite");
+            sqliteBotState.AddBotComment("post", "postcomment");
+            sqliteBotState.UpdateBotComment("post", "postcomment2");
+            Assert.IsTrue(sqliteBotState.GetCommentForPost("post") == "postcomment2");
+        }
     }
 }

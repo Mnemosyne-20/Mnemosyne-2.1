@@ -3,6 +3,8 @@ using Mnemosyne2Reborn.BotState;
 namespace MnemosyneTest
 {
     [TestClass]
+    [DeploymentItem("x64\\SQLite.Interop.dll", "x64")] //it's half a bit stupid that this is even necessary, and another half a bit stupid that this specifically isn't deleted afterwards
+    [DeploymentItem("x86\\SQLite.Interop.dll", "x86")]
     public class SQLiteBotStateUnitTest
     {
         [TestMethod]

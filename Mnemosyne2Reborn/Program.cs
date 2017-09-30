@@ -32,7 +32,8 @@ namespace Mnemosyne2Reborn
             "gifv-bot",
             "autourbanbot",
             "deepsalter-001",
-            "GoodBot_BadBot"
+            "GoodBot_BadBot",
+            "PORTMANTEAU-BOT"
         };
         /// <summary>
         /// Iterates each "thing" you make, subreddit is required for a few of them

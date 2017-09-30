@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Data.SQLite;
 using System.IO;
+using System.Data;
+using System.Threading;
+
 namespace Mnemosyne2Reborn.BotState
 {
     public class SQLiteBotState : IBotState
@@ -11,11 +14,10 @@ namespace Mnemosyne2Reborn.BotState
         {
             if (!File.Exists(filename))
             {
-                SQLiteConnection.CreateFile(filename);
+                SQLiteConnection.CreateFile(AppDomain.CurrentDomain.BaseDirectory.TrimEnd('/') + "/Data/" + filename);
             }
-            string assemblyPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location.TrimEnd('/') + "/Data/");
-            AppDomain.CurrentDomain.SetData("DataDirectory", assemblyPath);
-            dbConnection = new SQLiteConnection($"Data Source=|DataDirectory|/{filename};Version=3;");
+            AppDomain.CurrentDomain.SetData("DataDirectory", AppDomain.CurrentDomain.BaseDirectory.TrimEnd('/') + "/Data/");
+            dbConnection = new SQLiteConnection($"Data Source=|DataDirectory|{filename};Version=3;");
             dbConnection.Open();
             InitializeDatabase();
             InitializeCommands();
@@ -73,18 +75,19 @@ namespace Mnemosyne2Reborn.BotState
 
         void InitializeCommands()
         {
+            var PostParam = new SQLiteParameter("@postID", DbType.String);
             SQLCmd_AddBotComment = new SQLiteCommand("insert or abort into replies(postID, botReplyID) values(@postID, @botReplyID)", dbConnection);
-            SQLCmd_AddBotComment.Parameters.Add(new SQLiteParameter("@postID"));
-            SQLCmd_AddBotComment.Parameters.Add(new SQLiteParameter("@botReplyID"));
+            SQLCmd_AddBotComment.Parameters.Add(PostParam);
+            SQLCmd_AddBotComment.Parameters.Add(new SQLiteParameter("@botReplyID", DbType.String));
 
             SQLCmd_AddCheckedComment = new SQLiteCommand("insert or abort into comments (commentID) values (@commentID)", dbConnection);
-            SQLCmd_AddCheckedComment.Parameters.Add(new SQLiteParameter("@commentID"));
+            SQLCmd_AddCheckedComment.Parameters.Add(new SQLiteParameter("@commentID", DbType.String));
 
             SQLCmd_AddCheckedPost = new SQLiteCommand("insert or abort into posts (postID) values (@postID)", dbConnection);
-            SQLCmd_AddCheckedPost.Parameters.Add(new SQLiteParameter("@postID"));
+            SQLCmd_AddCheckedPost.Parameters.Add(PostParam);
 
             SQLCmd_DoesBotCommentExist = new SQLiteCommand("select count(*) from replies where postID = @postID", dbConnection);
-            SQLCmd_DoesBotCommentExist.Parameters.Add(new SQLiteParameter("@postID"));
+            SQLCmd_DoesBotCommentExist.Parameters.Add(PostParam);
 
             SQLCmd_GetBotComment = new SQLiteCommand("select botReplyID from replies where postID = @postID", dbConnection);
             SQLCmd_GetBotComment.Parameters.Add(new SQLiteParameter("@postID"));
@@ -93,11 +96,11 @@ namespace Mnemosyne2Reborn.BotState
             SQLCmd_HasCommentBeenChecked.Parameters.Add(new SQLiteParameter("@commentID"));
 
             SQLCmd_HasPostBeenChecked = new SQLiteCommand("select count(postID) from posts where postID = @postID", dbConnection);
-            SQLCmd_HasPostBeenChecked.Parameters.Add(new SQLiteParameter("@postID"));
+            SQLCmd_HasPostBeenChecked.Parameters.Add(PostParam);
 
             SQLCmd_UpdateBotComment = new SQLiteCommand("update replies set botReplyID = @botReplyID where postID = @postID", dbConnection);
             SQLCmd_UpdateBotComment.Parameters.Add(new SQLiteParameter("@botReplyID"));
-            SQLCmd_UpdateBotComment.Parameters.Add(new SQLiteParameter("@postID"));
+            SQLCmd_UpdateBotComment.Parameters.Add(PostParam);
 
 
         }

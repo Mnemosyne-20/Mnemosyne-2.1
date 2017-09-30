@@ -1,7 +1,6 @@
 version: 1.0.{build}
 pull_requests:
   do_not_increment_build_number: true
-skip_non_tags: true
 image: Visual Studio 2017
 configuration: Release
 platform: Any CPU
@@ -12,17 +11,17 @@ build:
   parallel: true
   verbosity: minimal
 artifacts:
-- path: Mnemosyne2Reborn\bin\Release\*.exe
+- path: Mnemosyne2Reborn\bin\Release\
   name: Mnemosyne-Reborn
-- path: ArchiveApi\bin\Release\*.dll
-  name: ArchiveApi
+  type: zip
 deploy:
 - provider: GitHub
-  release: Mnemosyne-reborn-v$(appveyor_build_version)
+  release: Mnemosyne-2.0 v$(appveyor_tag_name)
   auth_token:
     secure: f47v+SsAj4FXY3D5EQX449lYVmm2rP20prLGvTefDG0SICNHqE7OK9xMuABjJlH1
   artifact: Mnemosyne-Reborn
-  draft: true
-  force_update: true
+  draft: false
+  force_update: false
   on:
     branch: master
+    appveyor_repo_tag: true

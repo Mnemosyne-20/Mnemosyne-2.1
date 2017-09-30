@@ -14,6 +14,7 @@ namespace ArchiveApi
     /// <summary>
     /// The exception that is thrown if CloudFlare clearance failed after the declared number of attempts.
     /// </summary>
+    [Serializable]
     public class CloudFlareClearanceException : HttpRequestException
     {
         public CloudFlareClearanceException(int attempts) : this(attempts, $"Clearance failed after {attempts} attempt(s).") { }
@@ -27,7 +28,6 @@ namespace ArchiveApi
         {
             Attempts = attempts;
         }
-
         /// <summary>
         /// Returns the number of failed clearance attempts.
         /// </summary>

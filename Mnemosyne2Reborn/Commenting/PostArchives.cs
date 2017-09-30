@@ -15,7 +15,7 @@ namespace Mnemosyne2Reborn.Commenting
     {
         #region Static values and setters
         static IArchiveService service;
-        public static void SetArchiveServiceFromFactory(IArchiveServiceFactory factory)
+        public static void SetArchiveService(IArchiveServiceFactory factory)
         {
             service = factory.GetArchiveService();
         }

@@ -20,7 +20,7 @@ namespace Mnemosyne2Reborn.Commenting
         /// </summary>
         /// <param name="str">String to remove markup from</param>
         /// <returns>anti-markup backslashes</returns>
-        internal static string DeMarkup(this string str)
+        public static string DeMarkup(this string str)
         {
             for (int i = 0; i < types.Length; i++)
             {

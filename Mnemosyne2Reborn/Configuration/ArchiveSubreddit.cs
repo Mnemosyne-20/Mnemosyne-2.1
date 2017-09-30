@@ -6,7 +6,7 @@ namespace Mnemosyne2Reborn.Configuration
     public static class Extensions
     {
         /// <summary>
-        /// Takes an <seealso cref="ArchiveSubredditJson"/> and makes a <see cref="ArchiveSubreddit"/>
+        /// Takes an <seealso cref="ArchiveSubredditJson"/> and makes a <seealso cref="ArchiveSubreddit"/>
         /// </summary>
         /// <param name="reddit">Reddit used to get the subreddit instance used in ArchiveSubreddit</param>
         /// <param name="json">ArchiveSubredditJson used to pass data to the ArchiveSubreddit</param>

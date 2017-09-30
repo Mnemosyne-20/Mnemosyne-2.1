@@ -122,6 +122,7 @@ namespace ArchiveApi.Services
                         }
                     }
                 }
+
                 /// <remarks>
                 /// Fixes the bug where archive.is returns a json file that has a url tag
                 /// </remarks>
@@ -135,7 +136,14 @@ namespace ArchiveApi.Services
                             reader.ReadLine();
                         }
                         string[] sides = reader.ReadLine().Split('=');
-                        ReturnUrl = sides[1];
+                        try
+                        {
+                            ReturnUrl = sides[1];
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine("Error from archive.is: \n" + e.Message);
+                        }
                     }
                     #endregion
                 }
@@ -159,12 +167,10 @@ namespace ArchiveApi.Services
                 /// <summary>
                 /// This puts a request to the archive site, so yhea...
                 /// </summary>
-                var task = client.PostAsync("http://archive.is/submit/", new FormUrlEncodedContent(new Dictionary<string, string>
+                var response = await client.PostAsync("http://archive.is/submit/", new FormUrlEncodedContent(new Dictionary<string, string>
                 {
                     {"url", Url.ToString() }
                 }));
-                await Task.Delay(8000);
-                var response = await task;
                 ReturnUrl = response.RequestMessage.RequestUri.ToString();
                 if (!Verify(ReturnUrl) && response.Headers.TryGetValues("Refresh", out var headers))
                 {
@@ -189,7 +195,14 @@ namespace ArchiveApi.Services
                             reader.ReadLine();
                         }
                         string[] sides = reader.ReadLine().Split('=');
-                        ReturnUrl = sides[1];
+                        try
+                        {
+                            ReturnUrl = sides[1];
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine("Error from archive.is: \n" + e.Message);
+                        }
                     }
                     #endregion
                 }
@@ -210,13 +223,13 @@ namespace ArchiveApi.Services
             string ReturnUrl = "";
             using (var client = new HttpClient(new ClearanceHandler() { InnerHandler = new HttpClientHandler() { AllowAutoRedirect = true }, MaxRetries = 5 }))
             {
-                var request = new HttpRequestMessage(HttpMethod.Post, this.Url.ToString().TrimEnd('/') + submitEndpoint);
-                var task = client.PostAsync("http://archive.is/submit/", new FormUrlEncodedContent(new Dictionary<string, string>
+                /// <summary>
+                /// This puts a request to the archive site, so yhea...
+                /// </summary>
+                var response = await client.PostAsync("http://archive.is/submit/", new FormUrlEncodedContent(new Dictionary<string, string>
                 {
                     {"url", Url.ToString() }
                 }));
-                await Task.Delay(8000);
-                var response = await task;
                 ReturnUrl = response.RequestMessage.RequestUri.ToString();
                 if (!Verify(ReturnUrl) && response.Headers.TryGetValues("Refresh", out var headers))
                 {
@@ -228,9 +241,13 @@ namespace ArchiveApi.Services
                         }
                     }
                 }
+
+                /// <remarks>
+                /// Fixes the bug where archive.is returns a json file that has a url tag
+                /// </remarks>
                 if (!Verify(ReturnUrl) && !response.IsSuccessStatusCode)
                 {
-                    #region fixing issues
+                    #region fixing issues with return because this works somehow!?!?
                     using (StringReader reader = new StringReader(response.ToString()))
                     {
                         for (int i = 0; i < 3; i++)
@@ -238,7 +255,14 @@ namespace ArchiveApi.Services
                             reader.ReadLine();
                         }
                         string[] sides = reader.ReadLine().Split('=');
-                        ReturnUrl = sides[1];
+                        try
+                        {
+                            ReturnUrl = sides[1];
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine("Error from archive.is: \n" + e.Message);
+                        }
                     }
                     #endregion
                 }
@@ -250,15 +274,9 @@ namespace ArchiveApi.Services
             return ReturnUrl;
         }
 
-        Uri IArchiveService.Save(Uri Url)
-        {
-            throw new NotImplementedException();
-        }
+        Uri IArchiveService.Save(Uri Url) => new Uri(Save(Url));
 
-        Task<Uri> IArchiveService.SaveAsync(Uri Url)
-        {
-            throw new NotImplementedException();
-        }
+        Task<Uri> IArchiveService.SaveAsync(Uri Url) => throw new NotImplementedException();
     }
     public class ArchiveIsFactory : IArchiveServiceFactory
     {

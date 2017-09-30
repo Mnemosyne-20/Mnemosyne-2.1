@@ -162,7 +162,8 @@ namespace Mnemosyne2Reborn
         {
             this.User = user;
             this.Name = User?.Name;
-            if (useSQLite)
+            UseSQLite = useSQLite;
+            if (UseSQLite)
             {
                 if (!File.Exists("./Data/UserProfiles.sqlite"))
                 {

@@ -1,5 +1,4 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.VisualStudio.TestTools;
 using Mnemosyne2Reborn.BotState;
 namespace MnemosyneTest
 {

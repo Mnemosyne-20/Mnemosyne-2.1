@@ -13,15 +13,15 @@ build:
 artifacts:
 - path: Mnemosyne2Reborn\bin\Release\
   name: Mnemosyne-Reborn
-  type: zip
 deploy:
 - provider: GitHub
-  release: Mnemosyne-2.0 v$(appveyor_tag_name)
+  tag: $(APPVEYOR_REPO_TAG_NAME)
+  release: Mnemosyne-2.0 v$(APPVEYOR_REPO_TAG_NAME)
   auth_token:
     secure: f47v+SsAj4FXY3D5EQX449lYVmm2rP20prLGvTefDG0SICNHqE7OK9xMuABjJlH1
   artifact: Mnemosyne-Reborn
   draft: false
-  force_update: false
+  force_update: true
   on:
     branch: master
     appveyor_repo_tag: true

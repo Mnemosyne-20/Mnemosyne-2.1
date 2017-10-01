@@ -42,6 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ArchiveException.cs" />
+    <Compile Include="Services\ArchiveFoService.cs" />
     <Compile Include="Services\ArchiveIsService.cs" />
     <Compile Include="Interfaces\ArchiveServiceFactory.cs" />
     <Compile Include="CloudFlareWorkAround.cs" />

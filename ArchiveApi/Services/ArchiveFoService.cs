@@ -7,13 +7,13 @@ using System.Threading.Tasks;
 namespace ArchiveApi.Services
 {
     /// <summary>
-    /// Is a class that creates an Archive Service Provider, e.g. archive.is, currently can only use archive.is because URI is weird in C# for some reason
+    /// Is a class that creates an Archive Service Provider, e.g. archive.fo, currently can only use archive.fo because URI is weird in C# for some reason
     /// </summary>
-    public class ArchiveIsService : IArchiveService
+    public class ArchiveFoService : IArchiveService
     {
         string submitEndpoint = "/submit/";
         string timeMapEndpoint = "/timemap/";
-        public Uri Url => new Uri("http://www.archive.is");
+        public Uri Url => new Uri("http://www.archive.fo");
         /// <summary>
         /// Checks if the ArchiveUrl is a successful URL
         /// </summary>
@@ -21,7 +21,7 @@ namespace ArchiveApi.Services
         /// <returns>true if it does not contain "submit" in the uri</returns>
         public bool Verify(string ArchiveUrl)
         {
-            if (ArchiveUrl == null || ArchiveUrl == "http://archive.is/submit/" || ArchiveUrl == "http://archive.fo/submit/" || ArchiveUrl.TrimEnd('/') == "http://archive.is/" || ArchiveUrl.Contains("submit"))
+            if (ArchiveUrl == null || ArchiveUrl == "http://archive.fo/submit/" || ArchiveUrl.TrimEnd('/') == "http://archive.fo/" || ArchiveUrl.Contains("submit"))
             {
                 return false;
             }
@@ -33,7 +33,7 @@ namespace ArchiveApi.Services
         /// <remarks>Yes I know the internals of this are actually stupid, but the unit test passed, that is what matters here</remarks>
         /// <param name="ArchiveUrl"></param>
         /// <returns>true if it does not contain "submit" in the uri</returns>
-        public bool Verify(Uri ArchiveUrl) => !ArchiveUrl.AbsolutePath.Contains("submit") && ArchiveUrl.ToString() == "http://archive.is";
+        public bool Verify(Uri ArchiveUrl) => !ArchiveUrl.AbsolutePath.Contains("submit") && ArchiveUrl.ToString() == "http://archive.fo";
         /// <summary>
         /// Saves a webpage
         /// </summary>
@@ -47,7 +47,7 @@ namespace ArchiveApi.Services
                 /// <summary>
                 /// This puts a request to the archive site, so yhea...
                 /// </summary>
-                var response = client.PostAsync("http://archive.is/submit/", new FormUrlEncodedContent(new Dictionary<string, string>
+                var response = client.PostAsync("http://archive.fo/submit/", new FormUrlEncodedContent(new Dictionary<string, string>
                 {
                     {"url", Url.ToString() }
                 })).Result;
@@ -56,7 +56,7 @@ namespace ArchiveApi.Services
                 {
                     foreach (var header in headers)
                     {
-                        if (header.Contains("http://archive.is"))
+                        if (header.Contains("http://archive.fo"))
                         {
                             ReturnUrl = header.Split('=')[1];
                         }
@@ -64,7 +64,7 @@ namespace ArchiveApi.Services
                 }
 
                 /// <remarks>
-                /// Fixes the bug where archive.is returns a json file that has a url tag
+                /// Fixes the bug where archive.fo returns a json file that has a url tag
                 /// </remarks>
                 if (!Verify(ReturnUrl) && !response.IsSuccessStatusCode)
                 {
@@ -82,7 +82,7 @@ namespace ArchiveApi.Services
                         }
                         catch (Exception e)
                         {
-                            Console.WriteLine("Error from archive.is: \n" + e.Message);
+                            Console.WriteLine("Error from archive.fo: \n" + e.Message);
                         }
                     }
                     #endregion
@@ -107,7 +107,7 @@ namespace ArchiveApi.Services
                 /// <summary>
                 /// This puts a request to the archive site, so yhea...
                 /// </summary>
-                var response = client.PostAsync("http://archive.is/submit/", new FormUrlEncodedContent(new Dictionary<string, string>
+                var response = client.PostAsync("http://archive.fo/submit/", new FormUrlEncodedContent(new Dictionary<string, string>
                 {
                     {"url", Url.ToString() }
                 })).Result;
@@ -116,7 +116,7 @@ namespace ArchiveApi.Services
                 {
                     foreach (var header in headers)
                     {
-                        if (header.Contains("http://archive.is"))
+                        if (header.Contains("http://archive.fo"))
                         {
                             ReturnUrl = header.Split('=')[1];
                         }
@@ -124,7 +124,7 @@ namespace ArchiveApi.Services
                 }
 
                 /// <remarks>
-                /// Fixes the bug where archive.is returns a json file that has a url tag
+                /// Fixes the bug where archive.fo returns a json file that has a url tag
                 /// </remarks>
                 if (!Verify(ReturnUrl) && !response.IsSuccessStatusCode)
                 {
@@ -142,7 +142,7 @@ namespace ArchiveApi.Services
                         }
                         catch (Exception e)
                         {
-                            Console.WriteLine("Error from archive.is: \n" + e.Message);
+                            Console.WriteLine("Error from archive.fo: \n" + e.Message);
                         }
                     }
                     #endregion
@@ -167,7 +167,7 @@ namespace ArchiveApi.Services
                 /// <summary>
                 /// This puts a request to the archive site, so yhea...
                 /// </summary>
-                var response = await client.PostAsync("http://archive.is/submit/", new FormUrlEncodedContent(new Dictionary<string, string>
+                var response = await client.PostAsync("http://archive.fo/submit/", new FormUrlEncodedContent(new Dictionary<string, string>
                 {
                     {"url", Url.ToString() }
                 }));
@@ -176,14 +176,14 @@ namespace ArchiveApi.Services
                 {
                     foreach (var header in headers)
                     {
-                        if (header.Contains("http://archive.is"))
+                        if (header.Contains("http://archive.fo"))
                         {
                             ReturnUrl = header.Split('=')[1];
                         }
                     }
                 }
                 /// <remarks>
-                /// Fixes the bug where archive.is returns a json file that has a url tag
+                /// Fixes the bug where archive.fo returns a json file that has a url tag
                 /// </remarks>
                 if (!Verify(ReturnUrl) && !response.IsSuccessStatusCode)
                 {
@@ -201,7 +201,7 @@ namespace ArchiveApi.Services
                         }
                         catch (Exception e)
                         {
-                            Console.WriteLine("Error from archive.is: \n" + e.Message);
+                            Console.WriteLine("Error from archive.fo: \n" + e.Message);
                         }
                     }
                     #endregion
@@ -226,7 +226,7 @@ namespace ArchiveApi.Services
                 /// <summary>
                 /// This puts a request to the archive site, so yhea...
                 /// </summary>
-                var response = await client.PostAsync("http://archive.is/submit/", new FormUrlEncodedContent(new Dictionary<string, string>
+                var response = await client.PostAsync("http://archive.fo/submit/", new FormUrlEncodedContent(new Dictionary<string, string>
                 {
                     {"url", Url.ToString() }
                 }));
@@ -235,7 +235,7 @@ namespace ArchiveApi.Services
                 {
                     foreach (var header in headers)
                     {
-                        if (header.Contains("http://archive.is"))
+                        if (header.Contains("http://archive.fo"))
                         {
                             ReturnUrl = header.Split('=')[1];
                         }
@@ -243,7 +243,7 @@ namespace ArchiveApi.Services
                 }
 
                 /// <remarks>
-                /// Fixes the bug where archive.is returns a json file that has a url tag
+                /// Fixes the bug where archive.fo returns a json file that has a url tag
                 /// </remarks>
                 if (!Verify(ReturnUrl) && !response.IsSuccessStatusCode)
                 {
@@ -261,7 +261,7 @@ namespace ArchiveApi.Services
                         }
                         catch (Exception e)
                         {
-                            Console.WriteLine("Error from archive.is: \n" + e.Message);
+                            Console.WriteLine("Error from archive.fo: \n" + e.Message);
                         }
                     }
                     #endregion
@@ -278,11 +278,11 @@ namespace ArchiveApi.Services
 
         Task<Uri> IArchiveService.SaveAsync(Uri Url) => throw new NotImplementedException();
     }
-    public class ArchiveIsFactory : IArchiveServiceFactory
+    public class ArchiveFoFactory : IArchiveServiceFactory
     {
         public override IArchiveService GetArchiveService()
         {
-            return new ArchiveIsService();
+            return new ArchiveFoService();
         }
     }
 }

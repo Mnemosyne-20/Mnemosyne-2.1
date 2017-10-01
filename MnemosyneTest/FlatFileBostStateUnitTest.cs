@@ -6,6 +6,7 @@ namespace MnemosyneTest
     [TestClass]
     public class FlatFileBostStateUnitTest
     {
+        [TestCategory("FlatFileBotState")]
         [TestMethod]
         public void TestAddBotCommentFlatFile()
         {
@@ -13,6 +14,7 @@ namespace MnemosyneTest
             flatBotState.AddBotComment("post", "postcomment");
             Assert.IsTrue(flatBotState.GetCommentForPost("post") == "postcomment");
         }
+        [TestCategory("FlatFileBotState")]
         [TestMethod]
         public void TestCheckCommentFlatFile()
         {
@@ -20,6 +22,7 @@ namespace MnemosyneTest
             flatBotState.AddCheckedComment("postcomment");
             Assert.IsTrue(flatBotState.HasCommentBeenChecked("postcomment"));
         }
+        [TestCategory("FlatFileBotState")]
         [TestMethod]
         public void TestCheckPostFlatFile()
         {
@@ -27,6 +30,7 @@ namespace MnemosyneTest
             flatBotState.AddCheckedPost("post");
             Assert.IsTrue(flatBotState.HasPostBeenChecked("post"));
         }
+        [TestCategory("FlatFileBotState")]
         [TestMethod]
         public void TestUpdateCommentFlatFile()
         {

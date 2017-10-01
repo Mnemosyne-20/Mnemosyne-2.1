@@ -133,19 +133,9 @@ namespace Mnemosyne2Reborn
             Console.WriteLine("What is your password? note: required and is stored in plaintext, suggest you use a secure system");
             Password = Console.ReadLine();
             Console.WriteLine("How many subreddits are you watching?");
-            if (!int.TryParse(Console.ReadLine(), out int len))
-            {
-                Console.WriteLine("Please input a valid integer");
-                while (true)
-                {
-                    Console.WriteLine("Please input a valid integer, this will continue until you succeed in this task");
-                    if (int.TryParse(Console.ReadLine(), out int len2))
-                    {
-                        len = len2;
-                        break;
-                    }
-                }
-            }
+            int len;
+            while (!int.TryParse(Console.ReadLine(), out len))
+                Console.WriteLine("Please input a valid integer.");
             ArchiveSubredditJson[] Subs = new ArchiveSubredditJson[len];
             for (int i = 0; i < len; i++)
             {

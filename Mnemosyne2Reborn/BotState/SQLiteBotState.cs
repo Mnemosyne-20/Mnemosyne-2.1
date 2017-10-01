@@ -1,8 +1,7 @@
 ﻿using System;
+using System.Data;
 using System.Data.SQLite;
 using System.IO;
-using System.Data;
-using System.Threading;
 
 namespace Mnemosyne2Reborn.BotState
 {
@@ -14,9 +13,9 @@ namespace Mnemosyne2Reborn.BotState
         {
             if (!File.Exists(filename))
             {
-                SQLiteConnection.CreateFile(AppDomain.CurrentDomain.BaseDirectory.TrimEnd('/') + "/Data/" + filename);
+                SQLiteConnection.CreateFile($"{AppDomain.CurrentDomain.BaseDirectory.TrimEnd('/')}/Data/{filename}");
             }
-            AppDomain.CurrentDomain.SetData("DataDirectory", AppDomain.CurrentDomain.BaseDirectory.TrimEnd('/') + "/Data/");
+            AppDomain.CurrentDomain.SetData("DataDirectory", $"{AppDomain.CurrentDomain.BaseDirectory.TrimEnd('/')}/Data/");
             dbConnection = new SQLiteConnection($"Data Source=|DataDirectory|{filename};Version=3;");
             dbConnection.Open();
             InitializeDatabase();
@@ -35,16 +34,9 @@ namespace Mnemosyne2Reborn.BotState
                 SQLCmd_AddCheckedComment.Parameters["@commentID"].Value = commentID;
                 SQLCmd_AddCheckedComment.ExecuteNonQuery();
             }
-            catch (SQLiteException ex)
+            catch (SQLiteException ex) when (ex.ResultCode == SQLiteErrorCode.Constraint)
             {
-                if (ex.ResultCode == SQLiteErrorCode.Constraint)
-                {
-                    Console.WriteLine($"The comment {commentID} already exists in database");
-                }
-                else
-                {
-                    throw;
-                }
+                throw new InvalidOperationException($"The comment {commentID} already exists in database");
             }
         }
         public bool HasCommentBeenChecked(string commentID)
@@ -56,21 +48,25 @@ namespace Mnemosyne2Reborn.BotState
         void InitializeDatabase()
         {
             string query = "create table if not exists replies (postID text unique, botReplyID text)";
-            SQLiteCommand cmd = new SQLiteCommand(query, dbConnection);
-            cmd.ExecuteNonQuery();
-            cmd.Dispose();
+            using (SQLiteCommand cmd = new SQLiteCommand(query, dbConnection))
+            {
+                cmd.ExecuteNonQuery();
+            }
             query = "create table if not exists comments (commentID text unique)"; // yes this is a table with one column and eventually along with the reply table won't even be needed at all
-            cmd = new SQLiteCommand(query, dbConnection);
-            cmd.ExecuteNonQuery();
-            cmd.Dispose();
+            using (SQLiteCommand cmd = new SQLiteCommand(query, dbConnection))
+            {
+                cmd.ExecuteNonQuery();
+            }
             query = "create table if not exists archives (originalURL text unique, numArchives integer)";
-            cmd = new SQLiteCommand(query, dbConnection);
-            cmd.ExecuteNonQuery();
-            cmd.Dispose();
+            using (SQLiteCommand cmd = new SQLiteCommand(query, dbConnection))
+            {
+                cmd.ExecuteNonQuery();
+            }
             query = "create table if not exists posts (postID text unique)";
-            cmd = new SQLiteCommand(query, dbConnection);
-            cmd.ExecuteNonQuery();
-            cmd.Dispose();
+            using (SQLiteCommand cmd = new SQLiteCommand(query, dbConnection))
+            {
+                cmd.ExecuteNonQuery();
+            }
         }
 
         void InitializeCommands()
@@ -90,16 +86,16 @@ namespace Mnemosyne2Reborn.BotState
             SQLCmd_DoesBotCommentExist.Parameters.Add(PostParam);
 
             SQLCmd_GetBotComment = new SQLiteCommand("select botReplyID from replies where postID = @postID", dbConnection);
-            SQLCmd_GetBotComment.Parameters.Add(new SQLiteParameter("@postID"));
+            SQLCmd_GetBotComment.Parameters.Add(new SQLiteParameter("@postID", DbType.String));
 
             SQLCmd_HasCommentBeenChecked = new SQLiteCommand("select count(commentID) from comments where commentID = @commentID", dbConnection);
-            SQLCmd_HasCommentBeenChecked.Parameters.Add(new SQLiteParameter("@commentID"));
+            SQLCmd_HasCommentBeenChecked.Parameters.Add(new SQLiteParameter("@commentID", DbType.String));
 
             SQLCmd_HasPostBeenChecked = new SQLiteCommand("select count(postID) from posts where postID = @postID", dbConnection);
             SQLCmd_HasPostBeenChecked.Parameters.Add(PostParam);
 
             SQLCmd_UpdateBotComment = new SQLiteCommand("update replies set botReplyID = @botReplyID where postID = @postID", dbConnection);
-            SQLCmd_UpdateBotComment.Parameters.Add(new SQLiteParameter("@botReplyID"));
+            SQLCmd_UpdateBotComment.Parameters.Add(new SQLiteParameter("@botReplyID", DbType.String));
             SQLCmd_UpdateBotComment.Parameters.Add(PostParam);
 
 
@@ -112,16 +108,9 @@ namespace Mnemosyne2Reborn.BotState
                 SQLCmd_AddBotComment.Parameters["@botReplyID"].Value = commentID;
                 SQLCmd_AddBotComment.ExecuteNonQuery();
             }
-            catch (SQLiteException ex)
+            catch (SQLiteException ex) when (ex.ResultCode == SQLiteErrorCode.Constraint)
             {
-                if (ex.ResultCode == SQLiteErrorCode.Constraint)
-                {
-                    throw new InvalidOperationException($"The post {postID} already exists in database");
-                }
-                else
-                {
-                    throw;
-                }
+                throw new InvalidOperationException($"The post {postID} already exists in database");
             }
         }
 
@@ -150,12 +139,9 @@ namespace Mnemosyne2Reborn.BotState
                 SQLCmd_AddCheckedPost.Parameters["@postID"].Value = postId;
                 SQLCmd_AddCheckedPost.ExecuteNonQuery();
             }
-            catch (SQLiteException ex)
+            catch (SQLiteException ex) when (ex.ResultCode == SQLiteErrorCode.Constraint)
             {
-                if (ex.ResultCode == SQLiteErrorCode.Constraint)
-                {
-                    throw new InvalidOperationException($"the post {postId} already exists in the database");
-                }
+                throw new InvalidOperationException($"the post {postId} already exists in the database");
             }
         }
 

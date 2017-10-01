@@ -1,4 +1,4 @@
-﻿using ArchiveApi.Services;
+﻿using ArchiveApi.Interfaces;
 using System.Collections.Generic;
 namespace Mnemosyne2Reborn.Commenting
 {
@@ -37,10 +37,10 @@ namespace Mnemosyne2Reborn.Commenting
                 }
             }
         }
-        private ArchiveIsService service;
+        private IArchiveService service;
         #endregion
         #region Constructors
-        public UserLinks(string Name, ArchiveIsService service)
+        public UserLinks(string Name, IArchiveService service)
         {
             this.Name = Name;
             this.service = service;
@@ -48,11 +48,11 @@ namespace Mnemosyne2Reborn.Commenting
             ArchivedLinks = ArchivedLinks ?? new List<string>();
             ArchivedFoundNumber = ArchivedFoundNumber ?? new List<int>();
         }
-        public UserLinks(string Name, List<string> UnarchivedLinks, ArchiveIsService service) : this(Name, service)
+        public UserLinks(string Name, List<string> UnarchivedLinks, IArchiveService service) : this(Name, service)
         {
             this.UnarchivedLinks = UnarchivedLinks;
         }
-        public UserLinks(string Name, List<string> UnarchivedLinks, List<string> ArchivedLinks, ArchiveIsService service) : this(Name, UnarchivedLinks, service)
+        public UserLinks(string Name, List<string> UnarchivedLinks, List<string> ArchivedLinks, IArchiveService service) : this(Name, UnarchivedLinks, service)
         {
             this.ArchivedLinks = ArchivedLinks;
         }

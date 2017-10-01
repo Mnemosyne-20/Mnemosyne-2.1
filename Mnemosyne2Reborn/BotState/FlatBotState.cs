@@ -30,7 +30,7 @@ namespace Mnemosyne2Reborn.BotState
         /// </summary>
         public FlatBotState(string dataDir = "./Data/")
         {
-            if(!Directory.Exists(dataDir))
+            if (!Directory.Exists(dataDir))
             {
                 Directory.CreateDirectory(dataDir);
             }

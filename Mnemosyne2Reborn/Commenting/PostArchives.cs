@@ -1,4 +1,4 @@
-﻿using ArchiveApi.Services;
+﻿using ArchiveApi.Interfaces;
 using Mnemosyne2Reborn.BotState;
 using Mnemosyne2Reborn.Configuration;
 using RedditSharp;
@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using ArchiveApi.Interfaces;
 namespace Mnemosyne2Reborn.Commenting
 {
     public static class PostArchives

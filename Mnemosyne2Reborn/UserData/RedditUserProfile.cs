@@ -93,15 +93,8 @@ namespace Mnemosyne2Reborn
         static void InitDatabase()
         {
             string query = "create table if not exists Users (Name text unique, ArchiveUrlsUsed int, UnArchivedUrlsUsed int, ExcludedUrlsUsed int, ImageUrlsUsed int, OptedOut bool not null check (OptedOut in (0,1))";
-            SQLiteCommand cmd = new SQLiteCommand(query, dbConnection);
-            try
-            {
+            using (SQLiteCommand cmd = new SQLiteCommand(query, dbConnection))
                 cmd.ExecuteNonQuery();
-            }
-            finally
-            {
-                cmd.Dispose();
-            }
         }
         static void InitCommands()
         {

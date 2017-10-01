@@ -134,14 +134,7 @@ namespace Mnemosyne2Reborn
         {
             if (!Directory.Exists("./Data"))
                 Directory.CreateDirectory("./Data/");
-            if (File.Exists("./Data/Users.json"))
-            {
-                Users = JsonConvert.DeserializeObject<Dictionary<string, RedditUserProfile>>(File.ReadAllText("./Data/Users.json"));
-            }
-            else
-            {
-                Users = new Dictionary<string, RedditUserProfile>();
-            }
+            Users = File.Exists("./Data/Users.json") ? JsonConvert.DeserializeObject<Dictionary<string, RedditUserProfile>>(File.ReadAllText("./Data/Users.json")) : new Dictionary<string, RedditUserProfile>();
         }
         /// <summary>
         /// ONLY EXISTS FOR JSON SERIALIZATION

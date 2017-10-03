@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Data.SQLite;
-using RedditSharp.Things;
-using System.IO;
-using RedditSharp;
+﻿using RedditSharp.Things;
+using System;
 using System.Data;
-using System.Data.SQLite.Generic;
+using System.Data.SQLite;
+using System.IO;
 namespace Mnemosyne2Reborn.UserData
 {
     public class RedditUserProfileSqlite

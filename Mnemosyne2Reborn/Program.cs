@@ -79,7 +79,7 @@ namespace Mnemosyne2Reborn
             IteratePost = IteratePosts;
             IterateComment = IterateComments;
             IterateMessage = IterateMessages;
-            IArchiveServiceFactory archiveServiceFactory = new ArchiveIsFactory();
+            IArchiveServiceFactory archiveServiceFactory = new ArchiveFoFactory();
             ArchiveLinks.SetArchiveService(archiveServiceFactory);
             PostArchives.SetArchiveService(archiveServiceFactory);
             while (true) // main loop, calls delegates that move thrugh every subreddit allowed iteratively

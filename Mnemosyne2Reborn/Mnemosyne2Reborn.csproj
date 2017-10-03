@@ -99,6 +99,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RegularExpressions.cs" />
     <Compile Include="UserData\RedditUserProfile.cs" />
+    <Compile Include="UserData\RedditUserProfileSqlite.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

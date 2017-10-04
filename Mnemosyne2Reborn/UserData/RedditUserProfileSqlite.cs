@@ -3,6 +3,8 @@ using System;
 using System.Data;
 using System.Data.SQLite;
 using System.IO;
+using System.Collections.Generic;
+using System.Linq;
 namespace Mnemosyne2Reborn.UserData
 {
     public class RedditUserProfileSqlite
@@ -10,6 +12,21 @@ namespace Mnemosyne2Reborn.UserData
         static SQLiteCommand SQLiteSetUnarchived, SQLiteSetArchived, SQLiteSetExcluded, SQLiteSetImage, SQLiteGetImage, SQLiteAddUser, SQLiteGetArchived, SQLiteGetUnarchived, SQLiteGetExcluded, SQLiteGetOptOut, SQLiteSetOptOut, SQLiteGetUserExists;
         public static SQLiteConnection connection;
         static bool Initialized = false;
+#pragma warning disable CS0618 // Type or member is obsolete
+        public static void TransferProfilesToSqlite(Dictionary<string, RedditUserProfile> dict)
+#pragma warning restore CS0618 // Type or member is obsolete
+        {
+            if(!Initialized)
+                throw new InvalidOperationException("You must initialize using the string based constructor first, then you may use the class later on");
+            var optedOut = from a in dict where a.Value.OptedOut == true select a;
+            foreach(var user in optedOut)
+            {
+                var profile = new RedditUserProfileSqlite(user.Value.User)
+                {
+                    OptedOut = true
+                };
+            }
+        }
         public bool UserExists(string User)
         {
             SQLiteGetUserExists.Parameters["@Name"].Value = User;

@@ -8,12 +8,12 @@ namespace Mnemosyne2Reborn.UserData
     public class RedditUserProfileSqlite
     {
         static SQLiteCommand SQLiteSetUnarchived, SQLiteSetArchived, SQLiteSetExcluded, SQLiteSetImage, SQLiteGetImage, SQLiteAddUser, SQLiteGetArchived, SQLiteGetUnarchived, SQLiteGetExcluded, SQLiteGetOptOut, SQLiteSetOptOut, SQLiteGetUserExists;
-        static SQLiteConnection connection;
+        public static SQLiteConnection connection;
         static bool Initialized = false;
-        bool UserExists(RedditUser user)
+        public bool UserExists(RedditUser user)
         {
             SQLiteGetUserExists.Parameters["@Name"].Value = user.Name;
-            return SQLiteGetUserExists.ExecuteScalar() as int? != null ? true : false;
+            return Convert.ToBoolean(SQLiteGetUserExists.ExecuteScalar());
         }
         public bool OptedOut
         {
@@ -43,6 +43,17 @@ namespace Mnemosyne2Reborn.UserData
                 SQLiteSetImage.ExecuteNonQuery();
             }
         }
+        public int GetUnarchived(string Name)
+        {
+            SQLiteGetUnarchived.Parameters["@Name"].Value = Name;
+            return SQLiteGetUnarchived.ExecuteScalar() as int? ?? 0;
+        }
+        public void SetUnarchived(string Name, int ArchivedUrls)
+        {
+            SQLiteSetUnarchived.Parameters["@Name"].Value = Name;
+            SQLiteSetUnarchived.Parameters["@UnarchivedUrls"].Value = ArchivedUrls;
+            SQLiteSetUnarchived.ExecuteNonQuery();
+        }
         public int Unarchived
         {
             get
@@ -67,7 +78,8 @@ namespace Mnemosyne2Reborn.UserData
             set
             {
                 SQLiteSetArchived.Parameters["@Name"].Value = User.Name;
-
+                SQLiteSetArchived.Parameters["@ArchivedUrls"].Value = value;
+                SQLiteSetArchived.ExecuteNonQuery();
             }
         }
         public int Excluded
@@ -122,7 +134,7 @@ namespace Mnemosyne2Reborn.UserData
             SQLiteGetUserExists = new SQLiteCommand("select count(*) from Users where Name = @Name", connection);
             SQLiteGetUserExists.Parameters.Add(UserNameParam);
 
-            SQLiteAddUser = new SQLiteCommand("insert or abort into Users(Name, UnarchivedUrls, ImageUrls, ArchivedUrls, ExcludedUrls, OptedOut) values (@Name, 0, 0, 0, 0, 0)", connection);
+            SQLiteAddUser = new SQLiteCommand("insert or abort into Users(Name, UnarchivedUrls, ImageUrls, ArchivedUrls, ExcludedUrls, OptedOut) values(@Name, 0, 0, 0, 0, 0)", connection);
             SQLiteAddUser.Parameters.Add(UserNameParam);
 
             SQLiteGetUnarchived = new SQLiteCommand("select UnarchivedUrls from Users where Name = @Name", connection);
@@ -142,22 +154,22 @@ namespace Mnemosyne2Reborn.UserData
             SQLiteSetArchived.Parameters.Add(UserNameParam);
 
             SQLiteSetExcluded = new SQLiteCommand("update Users set ExcludedUrls = @ExcludedUrls where Name = @Name", connection);
-            SQLiteSetExcluded.Parameters.Add(new SQLiteParameter("@ExcludedUrls", DbType.Int32));
+            SQLiteSetExcluded.Parameters.Add(new SQLiteParameter("@ExcludedUrls"));
             SQLiteSetExcluded.Parameters.Add(UserNameParam);
 
             SQLiteSetUnarchived = new SQLiteCommand("update Users set UnarchivedUrls = @UnarchivedUrls where Name = @Name", connection);
-            SQLiteSetUnarchived.Parameters.Add(new SQLiteParameter("@UnarchivedUrls", DbType.Int32));
+            SQLiteSetUnarchived.Parameters.Add(new SQLiteParameter("@UnarchivedUrls"));
             SQLiteSetUnarchived.Parameters.Add(UserNameParam);
 
             SQLiteSetOptOut = new SQLiteCommand("update Users set OptedOut = @OptedOut where Name = @Name", connection);
-            SQLiteSetOptOut.Parameters.Add(new SQLiteParameter("@OptedOut", DbType.Int32));
+            SQLiteSetOptOut.Parameters.Add(new SQLiteParameter("@OptedOut"));
             SQLiteSetOptOut.Parameters.Add(UserNameParam);
 
             SQLiteSetImage = new SQLiteCommand("update Users set ImageUrls = @ImageUrls where Name = @Name", connection);
-            SQLiteSetImage.Parameters.Add(new SQLiteParameter("@ImageUrls", DbType.Int32));
+            SQLiteSetImage.Parameters.Add(new SQLiteParameter("@ImageUrls"));
             SQLiteSetImage.Parameters.Add(UserNameParam);
 
-            SQLiteGetImage = new SQLiteCommand("select ImageUrls from Users where Name = @Name");
+            SQLiteGetImage = new SQLiteCommand("select ImageUrls from Users where Name = @Name", connection);
             SQLiteGetImage.Parameters.Add(UserNameParam);
         }
         public RedditUserProfileSqlite(string filename = "redditusers.sqlite")
@@ -178,6 +190,11 @@ namespace Mnemosyne2Reborn.UserData
             if (!Initialized)
                 throw new InvalidOperationException("You must initialize using the string based constructor first, then you may use the class later on");
             User = user;
+            if(!UserExists(user))
+            {
+                SQLiteAddUser.Parameters["@Name"].Value = user.Name;
+                SQLiteAddUser.ExecuteNonQuery();
+            }
         }
     }
 }

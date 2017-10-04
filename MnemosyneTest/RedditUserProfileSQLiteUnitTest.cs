@@ -63,15 +63,5 @@ namespace MnemosyneTest
             var next = redditUserProfileSqlite.Image;
             Assert.IsFalse(next == current);
         }
-        [TestMethod]
-        public void TestAddUrlUsed()
-        {
-            System.IO.Directory.CreateDirectory(".\\Data\\6");
-            new RedditUserProfileSqlite("6\\redditusers.sqlite");
-            var red = new Reddit();
-            RedditUserProfileSqlite redditUserProfileSqlite = new RedditUserProfileSqlite(red.GetUser("chugga_fan"));
-            redditUserProfileSqlite.AddUrlUsed("http://archive.is/adserd");
-            Assert.IsTrue(redditUserProfileSqlite.Archived == 1);
-        }
     }
 }

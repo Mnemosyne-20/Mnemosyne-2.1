@@ -10,6 +10,11 @@ namespace Mnemosyne2Reborn.UserData
         static SQLiteCommand SQLiteSetUnarchived, SQLiteSetArchived, SQLiteSetExcluded, SQLiteSetImage, SQLiteGetImage, SQLiteAddUser, SQLiteGetArchived, SQLiteGetUnarchived, SQLiteGetExcluded, SQLiteGetOptOut, SQLiteSetOptOut, SQLiteGetUserExists;
         public static SQLiteConnection connection;
         static bool Initialized = false;
+        public bool UserExists(string User)
+        {
+            SQLiteGetUserExists.Parameters["@Name"].Value = User;
+            return Convert.ToBoolean(SQLiteGetUserExists.ExecuteScalar());
+        }
         public bool UserExists(RedditUser user)
         {
             SQLiteGetUserExists.Parameters["@Name"].Value = user.Name;
@@ -19,12 +24,12 @@ namespace Mnemosyne2Reborn.UserData
         {
             get
             {
-                SQLiteGetOptOut.Parameters["@Name"].Value = User.Name;
-                return SQLiteGetOptOut.ExecuteScalar() as int? == 0 ? false : true;
+                SQLiteGetOptOut.Parameters["@Name"].Value = User;
+                return Convert.ToBoolean(SQLiteGetOptOut.ExecuteScalar());
             }
             set
             {
-                SQLiteSetOptOut.Parameters["@Name"].Value = User.Name;
+                SQLiteSetOptOut.Parameters["@Name"].Value = User;
                 SQLiteSetOptOut.Parameters["@OptedOut"].Value = value ? 1 : 0;
                 SQLiteSetOptOut.ExecuteNonQuery();
             }
@@ -33,37 +38,26 @@ namespace Mnemosyne2Reborn.UserData
         {
             get
             {
-                SQLiteGetImage.Parameters["@Name"].Value = User.Name;
-                return SQLiteGetImage.ExecuteScalar() as int? ?? 0;
+                SQLiteGetImage.Parameters["@Name"].Value = User;
+                return Convert.ToInt32(SQLiteGetImage.ExecuteScalar());
             }
             set
             {
-                SQLiteSetImage.Parameters["@Name"].Value = User.Name;
+                SQLiteSetImage.Parameters["@Name"].Value = User;
                 SQLiteSetImage.Parameters["@ImageUrls"].Value = value;
                 SQLiteSetImage.ExecuteNonQuery();
             }
-        }
-        public int GetUnarchived(string Name)
-        {
-            SQLiteGetUnarchived.Parameters["@Name"].Value = Name;
-            return SQLiteGetUnarchived.ExecuteScalar() as int? ?? 0;
-        }
-        public void SetUnarchived(string Name, int ArchivedUrls)
-        {
-            SQLiteSetUnarchived.Parameters["@Name"].Value = Name;
-            SQLiteSetUnarchived.Parameters["@UnarchivedUrls"].Value = ArchivedUrls;
-            SQLiteSetUnarchived.ExecuteNonQuery();
         }
         public int Unarchived
         {
             get
             {
-                SQLiteGetUnarchived.Parameters["@Name"].Value = User.Name;
-                return SQLiteGetUnarchived.ExecuteScalar() as int? ?? 0;
+                SQLiteGetUnarchived.Parameters["@Name"].Value = User;
+                return Convert.ToInt32(SQLiteGetUnarchived.ExecuteScalar());
             }
             set
             {
-                SQLiteSetUnarchived.Parameters["@Name"].Value = User.Name;
+                SQLiteSetUnarchived.Parameters["@Name"].Value = User;
                 SQLiteSetUnarchived.Parameters["@UnarchivedUrls"].Value = value;
                 SQLiteSetUnarchived.ExecuteNonQuery();
             }
@@ -72,12 +66,13 @@ namespace Mnemosyne2Reborn.UserData
         {
             get
             {
-                SQLiteGetArchived.Parameters["@Name"].Value = User.Name;
-                return SQLiteGetArchived.ExecuteScalar() as int? ?? 0;
+                
+                SQLiteGetArchived.Parameters["@Name"].Value = User;
+                return Convert.ToInt32(SQLiteGetArchived.ExecuteScalar());
             }
             set
             {
-                SQLiteSetArchived.Parameters["@Name"].Value = User.Name;
+                SQLiteSetArchived.Parameters["@Name"].Value = User;
                 SQLiteSetArchived.Parameters["@ArchivedUrls"].Value = value;
                 SQLiteSetArchived.ExecuteNonQuery();
             }
@@ -86,17 +81,17 @@ namespace Mnemosyne2Reborn.UserData
         {
             get
             {
-                SQLiteGetExcluded.Parameters["@Name"].Value = User.Name;
-                return SQLiteGetExcluded.ExecuteScalar() as int? ?? 0;
+                SQLiteGetExcluded.Parameters["@Name"].Value = User;
+                return Convert.ToInt32(SQLiteGetExcluded.ExecuteScalar());
             }
             set
             {
-                SQLiteSetExcluded.Parameters["@Name"].Value = User.Name;
+                SQLiteSetExcluded.Parameters["@Name"].Value = User;
                 SQLiteSetExcluded.Parameters["@ExcludedUrls"].Value = value;
                 SQLiteSetExcluded.ExecuteNonQuery();
             }
         }
-        RedditUser User;
+        string User;
         public void AddUrlUsed(string url)
         {
             if (OptedOut)
@@ -189,7 +184,7 @@ namespace Mnemosyne2Reborn.UserData
         {
             if (!Initialized)
                 throw new InvalidOperationException("You must initialize using the string based constructor first, then you may use the class later on");
-            User = user;
+            User = user.Name;
             if(!UserExists(user))
             {
                 SQLiteAddUser.Parameters["@Name"].Value = user.Name;

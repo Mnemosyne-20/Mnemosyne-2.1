@@ -248,7 +248,7 @@ namespace Mnemosyne2Reborn.Commenting
         {
             if (conf == null || state == null || head == null || comment == null || ArchiveList == null)
             {
-                throw new ArgumentNullException(conf == null ? "conf" : state == null ? "state" : head == null ? "head" : comment == null ? "post" : "ArchiveList");
+                throw new ArgumentNullException(conf == null ? nameof(conf) : state == null ? nameof(state) : head == null ? nameof(head) : comment == null ? nameof(comment) : nameof(ArchiveList));
             }
             Console.Title = $"Posting new comment to comment {comment.Id}";
             string LinksListBody = "";

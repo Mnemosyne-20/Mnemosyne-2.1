@@ -23,6 +23,7 @@ namespace Mnemosyne2Reborn.Configuration
         /// <summary>
         /// This exists so that we know what version of the filesystem we're on, I'm going to attempt to figure out how to use multiple config versions and update them eventually :(
         /// </summary>
+        [JsonRequired]
         [JsonProperty("Version")]
         public int Ver { get; private set; }
         [JsonRequired]
@@ -32,6 +33,7 @@ namespace Mnemosyne2Reborn.Configuration
         public bool ArchiveLinks { get; set; }
         [JsonProperty("ArchiveService")]
         public string ArchiveService { get; set; }
+        [JsonRequired]
         [JsonProperty("UseOAuth")]
         public bool UseOAuth { get; set; }
         [JsonProperty("RedirectURI")]
@@ -41,6 +43,7 @@ namespace Mnemosyne2Reborn.Configuration
         /// EXISTS ONLY FOR JSONCONVERT
         /// DO NOT USE
         /// </summary>
+        [Obsolete("Don't use this unless you're doing jsonconvert")]
         public Config()
         {
 

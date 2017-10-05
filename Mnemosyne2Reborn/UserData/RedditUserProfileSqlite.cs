@@ -24,7 +24,7 @@ namespace Mnemosyne2Reborn.UserData
             {
                 try
                 {
-                    var profile = new RedditUserProfileSqlite(new Reddit().GetUser(user.Key))
+                    new RedditUserProfileSqlite(new Reddit().GetUser(user.Key))
                     {
                         OptedOut = true
                     };
@@ -174,19 +174,19 @@ namespace Mnemosyne2Reborn.UserData
             SQLiteSetArchived.Parameters.Add(UserNameParam);
 
             SQLiteSetExcluded = new SQLiteCommand("update Users set ExcludedUrls = @ExcludedUrls where Name = @Name", connection);
-            SQLiteSetExcluded.Parameters.Add(new SQLiteParameter("@ExcludedUrls"));
+            SQLiteSetExcluded.Parameters.Add(new SQLiteParameter("@ExcludedUrls", DbType.Int32));
             SQLiteSetExcluded.Parameters.Add(UserNameParam);
 
             SQLiteSetUnarchived = new SQLiteCommand("update Users set UnarchivedUrls = @UnarchivedUrls where Name = @Name", connection);
-            SQLiteSetUnarchived.Parameters.Add(new SQLiteParameter("@UnarchivedUrls"));
+            SQLiteSetUnarchived.Parameters.Add(new SQLiteParameter("@UnarchivedUrls", DbType.Int32));
             SQLiteSetUnarchived.Parameters.Add(UserNameParam);
 
             SQLiteSetOptOut = new SQLiteCommand("update Users set OptedOut = @OptedOut where Name = @Name", connection);
-            SQLiteSetOptOut.Parameters.Add(new SQLiteParameter("@OptedOut"));
+            SQLiteSetOptOut.Parameters.Add(new SQLiteParameter("@OptedOut", DbType.Int32));
             SQLiteSetOptOut.Parameters.Add(UserNameParam);
 
             SQLiteSetImage = new SQLiteCommand("update Users set ImageUrls = @ImageUrls where Name = @Name", connection);
-            SQLiteSetImage.Parameters.Add(new SQLiteParameter("@ImageUrls"));
+            SQLiteSetImage.Parameters.Add(new SQLiteParameter("@ImageUrls", DbType.Int32));
             SQLiteSetImage.Parameters.Add(UserNameParam);
 
             SQLiteGetImage = new SQLiteCommand("select ImageUrls from Users where Name = @Name", connection);

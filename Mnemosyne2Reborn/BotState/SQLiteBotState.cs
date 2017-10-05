@@ -11,7 +11,7 @@ namespace Mnemosyne2Reborn.BotState
         SQLiteCommand SQLCmd_AddBotComment, SQLCmd_AddCheckedComment, SQLCmd_DoesBotCommentExist, SQLCmd_GetBotComment, SQLCmd_HasCommentBeenChecked, SQLCmd_HasPostBeenChecked, SQLCmd_AddCheckedPost, SQLCmd_UpdateBotComment;
         public SQLiteBotState(string filename = "botstate.sqlite")
         {
-            if (!File.Exists(filename))
+            if (!File.Exists($"{AppDomain.CurrentDomain.BaseDirectory.TrimEnd('/')}/Data/{filename}"))
             {
                 SQLiteConnection.CreateFile($"{AppDomain.CurrentDomain.BaseDirectory.TrimEnd('/')}/Data/{filename}");
             }

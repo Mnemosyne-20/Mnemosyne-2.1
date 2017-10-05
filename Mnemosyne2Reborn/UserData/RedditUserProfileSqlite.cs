@@ -5,6 +5,7 @@ using System.Data.SQLite;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
+using RedditSharp;
 namespace Mnemosyne2Reborn.UserData
 {
     public class RedditUserProfileSqlite
@@ -16,15 +17,22 @@ namespace Mnemosyne2Reborn.UserData
         public static void TransferProfilesToSqlite(Dictionary<string, RedditUserProfile> dict)
 #pragma warning restore CS0618 // Type or member is obsolete
         {
-            if(!Initialized)
+            if (!Initialized)
                 throw new InvalidOperationException("You must initialize using the string based constructor first, then you may use the class later on");
             var optedOut = from a in dict where a.Value.OptedOut == true select a;
-            foreach(var user in optedOut)
+            foreach (var user in optedOut)
             {
-                var profile = new RedditUserProfileSqlite(user.Value.User)
+                try
                 {
-                    OptedOut = true
-                };
+                    var profile = new RedditUserProfileSqlite(new Reddit().GetUser(user.Key))
+                    {
+                        OptedOut = true
+                    };
+                }
+                catch (System.Net.WebException e) when (e.Message.Contains("(404)"))
+                {
+                    Console.WriteLine($"User {user.Key} no longer exists");
+                }
             }
         }
         public bool UserExists(string User)
@@ -83,7 +91,7 @@ namespace Mnemosyne2Reborn.UserData
         {
             get
             {
-                
+
                 SQLiteGetArchived.Parameters["@Name"].Value = User;
                 return Convert.ToInt32(SQLiteGetArchived.ExecuteScalar());
             }
@@ -186,7 +194,7 @@ namespace Mnemosyne2Reborn.UserData
         }
         public RedditUserProfileSqlite(string filename = "redditusers.sqlite")
         {
-            if (!File.Exists(filename))
+            if (!File.Exists($"{AppDomain.CurrentDomain.BaseDirectory.TrimEnd('/')}/Data/{filename}"))
             {
                 SQLiteConnection.CreateFile($"{AppDomain.CurrentDomain.BaseDirectory.TrimEnd('/')}/Data/{filename}");
             }
@@ -202,7 +210,7 @@ namespace Mnemosyne2Reborn.UserData
             if (!Initialized)
                 throw new InvalidOperationException("You must initialize using the string based constructor first, then you may use the class later on");
             User = user.Name;
-            if(!UserExists(user))
+            if (!UserExists(user))
             {
                 SQLiteAddUser.Parameters["@Name"].Value = user.Name;
                 SQLiteAddUser.ExecuteNonQuery();

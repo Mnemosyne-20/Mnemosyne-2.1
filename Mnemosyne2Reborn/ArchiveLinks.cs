@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Mnemosyne2Reborn.UserData;
 namespace Mnemosyne2Reborn
 {
     public static class ArchiveLinks
@@ -26,7 +27,7 @@ namespace Mnemosyne2Reborn
             for (int i = 0; i < FoundLinks.Count; i++)
             {
                 string link = FoundLinks[i];
-                new RedditUserProfile(user, false).AddUrlUsed(link);
+                new RedditUserProfileSqlite(user).AddUrlUsed(link);
                 if (exclusions.Sum(b => b.IsMatch(link) ? 1 : 0) == 0)
                 {
                     string check = service.Save(link);
@@ -62,7 +63,7 @@ namespace Mnemosyne2Reborn
             for (int i = 0; i < FoundLinks.Count; i++)
             {
                 string link = FoundLinks[i];
-                new RedditUserProfile(user, false).AddUrlUsed(link);
+                new RedditUserProfileSqlite(user).AddUrlUsed(link);
                 if (exclusions.Sum(b => b.IsMatch(link) ? 1 : 0) == 0)
                 {
                     Task<string> check = service.SaveAsync(link);
@@ -99,7 +100,7 @@ namespace Mnemosyne2Reborn
             for (int i = 0; i < FoundLinks.Count; i++)
             {
                 string link = FoundLinks[i];
-                new RedditUserProfile(user, false).AddUrlUsed(link);
+                new RedditUserProfileSqlite(user).AddUrlUsed(link);
                 if (exclusions.Sum(b => b.IsMatch(link) ? 1 : 0) == 0)
                 {
                     string check = service.Save(link);

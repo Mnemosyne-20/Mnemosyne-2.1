@@ -3,7 +3,7 @@ using RedditSharp.Things;
 using System;
 using System.Collections.Generic;
 using System.IO;
-namespace Mnemosyne2Reborn
+namespace Mnemosyne2Reborn.UserData
 {
     [JsonObject]
     [Obsolete("Use the new RedditUserProfileSqlite class instead", false)]

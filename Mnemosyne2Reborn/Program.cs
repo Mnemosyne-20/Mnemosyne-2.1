@@ -12,6 +12,7 @@ using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading;
+using Mnemosyne2Reborn.UserData;
 namespace Mnemosyne2Reborn
 {
     public class Program
@@ -79,6 +80,14 @@ namespace Mnemosyne2Reborn
             IteratePost = IteratePosts;
             IterateComment = IterateComments;
             IterateMessage = IterateMessages;
+            new RedditUserProfileSqlite();
+#pragma warning disable CS0618 // Type or member is obsolete
+            if (File.Exists("./Data/Users.json"))
+            {
+                RedditUserProfileSqlite.TransferProfilesToSqlite(RedditUserProfile.Users);
+                File.Delete("./Data/Users.json");
+            }
+#pragma warning restore CS0618 // Type or member is obsolete
             IArchiveServiceFactory archiveServiceFactory = new ArchiveFoFactory();
             ArchiveLinks.SetArchiveService(archiveServiceFactory);
             PostArchives.SetArchiveService(archiveServiceFactory);
@@ -187,7 +196,13 @@ namespace Mnemosyne2Reborn
                 if (message.Body.ToLower().Contains("opt out"))
                 {
                     Console.WriteLine($"User {message.Author} has opted out.");
-                    new RedditUserProfile(reddit.GetUser(message.Author), false).OptOut(true);
+                    new RedditUserProfileSqlite(reddit.GetUser(message.Author)).OptedOut = true;
+                    message.SetAsRead();
+                }
+                if(message.Body.ToLower().Contains("opt in"))
+                {
+                    Console.WriteLine($"User {message.Author} has opted in");
+                    new RedditUserProfileSqlite(reddit.GetUser(message.Author)).OptedOut = true;
                     message.SetAsRead();
                 }
             }

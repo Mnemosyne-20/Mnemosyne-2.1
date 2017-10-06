@@ -193,17 +193,18 @@ namespace Mnemosyne2Reborn
                 {
                     break;
                 }
-                if (message.Body.ToLower().Contains("opt out"))
+                switch (message.Body.ToLower())
                 {
-                    Console.WriteLine($"User {message.Author} has opted out.");
-                    new RedditUserProfileSqlite(reddit.GetUser(message.Author)).OptedOut = true;
-                    message.SetAsRead();
-                }
-                if (message.Body.ToLower().Contains("opt in"))
-                {
-                    Console.WriteLine($"User {message.Author} has opted in");
-                    new RedditUserProfileSqlite(reddit.GetUser(message.Author)).OptedOut = true;
-                    message.SetAsRead();
+                    case "out out":
+                        Console.WriteLine($"User {message.Author} has opted out.");
+                        new RedditUserProfileSqlite(reddit.GetUser(message.Author)).OptedOut = true;
+                        message.SetAsRead();
+                        break;
+                    case "opt in":
+                        Console.WriteLine($"User {message.Author} has opted in");
+                        new RedditUserProfileSqlite(reddit.GetUser(message.Author)).OptedOut = false;
+                        message.SetAsRead();
+                        break;
                 }
             }
         }

@@ -97,8 +97,6 @@ namespace Mnemosyne2Reborn.BotState
             SQLCmd_UpdateBotComment = new SQLiteCommand("update replies set botReplyID = @botReplyID where postID = @postID", dbConnection);
             SQLCmd_UpdateBotComment.Parameters.Add(new SQLiteParameter("@botReplyID", DbType.String));
             SQLCmd_UpdateBotComment.Parameters.Add(PostParam);
-
-
         }
         public void AddBotComment(string postID, string commentID)
         {

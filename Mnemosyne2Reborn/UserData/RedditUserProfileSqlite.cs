@@ -1,11 +1,11 @@
-﻿using RedditSharp.Things;
+﻿using RedditSharp;
+using RedditSharp.Things;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.SQLite;
 using System.IO;
-using System.Collections.Generic;
 using System.Linq;
-using RedditSharp;
 namespace Mnemosyne2Reborn.UserData
 {
     public class RedditUserProfileSqlite

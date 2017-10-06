@@ -1,10 +1,10 @@
 ﻿using ArchiveApi.Interfaces;
+using Mnemosyne2Reborn.UserData;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Mnemosyne2Reborn.UserData;
 namespace Mnemosyne2Reborn
 {
     public static class ArchiveLinks

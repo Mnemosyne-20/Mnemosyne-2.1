@@ -3,6 +3,7 @@ using ArchiveApi.Services;
 using Mnemosyne2Reborn.BotState;
 using Mnemosyne2Reborn.Commenting;
 using Mnemosyne2Reborn.Configuration;
+using Mnemosyne2Reborn.UserData;
 using RedditSharp;
 using RedditSharp.Things;
 using System;
@@ -12,7 +13,6 @@ using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading;
-using Mnemosyne2Reborn.UserData;
 namespace Mnemosyne2Reborn
 {
     public class Program
@@ -199,7 +199,7 @@ namespace Mnemosyne2Reborn
                     new RedditUserProfileSqlite(reddit.GetUser(message.Author)).OptedOut = true;
                     message.SetAsRead();
                 }
-                if(message.Body.ToLower().Contains("opt in"))
+                if (message.Body.ToLower().Contains("opt in"))
                 {
                     Console.WriteLine($"User {message.Author} has opted in");
                     new RedditUserProfileSqlite(reddit.GetUser(message.Author)).OptedOut = true;

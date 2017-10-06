@@ -84,7 +84,7 @@ namespace Mnemosyne2Reborn.BotState
 
             SQLCmd_DoesBotCommentExist = new SQLiteCommand("select count(*) from replies where postID = @postID", dbConnection);
             SQLCmd_DoesBotCommentExist.Parameters.Add(PostParam);
-            
+
             SQLCmd_GetBotComment = new SQLiteCommand("select botReplyID from replies where postID = @postID", dbConnection);
             SQLCmd_GetBotComment.Parameters.Add(new SQLiteParameter("@postID", DbType.String));
 

@@ -1,9 +1,6 @@
 ﻿using ArchiveApi.Interfaces;
 using ArchiveApi.Services;
-using ArchiveApi;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Collections.Generic;
-using CoAP;
 
 namespace ArchiveApiTest
 {

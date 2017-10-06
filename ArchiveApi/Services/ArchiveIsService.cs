@@ -19,14 +19,7 @@ namespace ArchiveApi.Services
         /// </summary>
         /// <param name="ArchiveUrl"></param>
         /// <returns>true if it does not contain "submit" in the uri</returns>
-        public bool Verify(string ArchiveUrl)
-        {
-            if (ArchiveUrl == null || ArchiveUrl.TrimEnd('/') == "http://archive.is/submit" || ArchiveUrl.TrimEnd('/') == "http://archive.is" || ArchiveUrl.Contains("submit"))
-            {
-                return false;
-            }
-            return true;
-        }
+        public bool Verify(string ArchiveUrl) => !(ArchiveUrl == null || ArchiveUrl.TrimEnd('/') == "http://archive.is/submit" || ArchiveUrl.TrimEnd('/') == "http://archive.is" || ArchiveUrl.Contains("submit"));
         /// <summary>
         /// Checks if the ArchiveUrl is a successful URL
         /// </summary>

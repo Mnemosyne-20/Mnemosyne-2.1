@@ -10,7 +10,7 @@ namespace Mnemosyne2Reborn.UserData
 {
     public class RedditUserProfileSqlite
     {
-        static SQLiteCommand SQLiteSetUnarchived, SQLiteSetArchived, SQLiteSetExcluded, SQLiteSetImage, SQLiteGetImage, SQLiteAddUser, SQLiteGetArchived, SQLiteGetUnarchived, SQLiteGetExcluded, SQLiteGetOptOut, SQLiteSetOptOut, SQLiteGetUserExists;
+        static SQLiteCommand SQLiteSetUnarchived, SQLiteSetArchived, SQLiteSetExcluded, SQLiteSetImage, SQLiteGetImage, SQLiteAddUser, SQLiteGetArchived, SQLiteGetUnarchived, SQLiteGetExcluded, SQLiteGetOptOut, SQLiteSetOptOut, SQLiteGetUserExists, SQLiteAvgExcluded, SQLiteAvgImage, SQLiteAvgArchived, SQLiteAvgUnarchived;
         public static SQLiteConnection connection;
         static bool Initialized = false;
 #pragma warning disable CS0618 // Type or member is obsolete
@@ -59,6 +59,7 @@ namespace Mnemosyne2Reborn.UserData
                 SQLiteSetOptOut.ExecuteNonQuery();
             }
         }
+        public float AverageImage => Convert.ToSingle(SQLiteAvgImage.ExecuteScalar());
         public int Image
         {
             get
@@ -73,6 +74,7 @@ namespace Mnemosyne2Reborn.UserData
                 SQLiteSetImage.ExecuteNonQuery();
             }
         }
+        public float AverageUnarchived => Convert.ToSingle(SQLiteAvgUnarchived.ExecuteScalar());
         public int Unarchived
         {
             get
@@ -87,6 +89,7 @@ namespace Mnemosyne2Reborn.UserData
                 SQLiteSetUnarchived.ExecuteNonQuery();
             }
         }
+        public float AverageArchived => Convert.ToSingle(SQLiteAvgArchived.ExecuteScalar());
         public int Archived
         {
             get
@@ -102,6 +105,7 @@ namespace Mnemosyne2Reborn.UserData
                 SQLiteSetArchived.ExecuteNonQuery();
             }
         }
+        public float AverageExcluded => Convert.ToSingle(SQLiteAvgExcluded.ExecuteScalar());
         public int Excluded
         {
             get
@@ -191,6 +195,14 @@ namespace Mnemosyne2Reborn.UserData
 
             SQLiteGetImage = new SQLiteCommand("select ImageUrls from Users where Name = @Name", connection);
             SQLiteGetImage.Parameters.Add(UserNameParam);
+
+            SQLiteAvgArchived = new SQLiteCommand("select avg(ArchivedUrls) from Users");
+
+            SQLiteAvgExcluded = new SQLiteCommand("select avg(ExcludedUrls) from Users");
+
+            SQLiteAvgImage = new SQLiteCommand("select avg(ImageUrls) from Users");
+
+            SQLiteAvgUnarchived = new SQLiteCommand("select avg(UnarchivedUrls) from Users");
         }
         public RedditUserProfileSqlite(string filename = "redditusers.sqlite")
         {

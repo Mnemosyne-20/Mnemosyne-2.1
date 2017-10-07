@@ -8,8 +8,8 @@ namespace ArchiveApi
 {
     public class TimeMap
     {
-        public DateTime From;
-        public DateTime Until;
+        public DateTime From { get; private set; }
+        public DateTime Until { get; private set; }
         public Uri TimeMapUri { get; private set; }
         #region Constructors
         public TimeMap(Uri TimeMapUri) => this.TimeMapUri = TimeMapUri;
@@ -24,7 +24,7 @@ namespace ArchiveApi
             this.Until = Until;
         }
         public TimeMap(string TimeMapUri, DateTime From, DateTime Until) : this(new Uri(TimeMapUri), From, Until) { }
-        internal TimeMap(WebLink web)
+        public TimeMap(WebLink web)
         {
             if (web.Attributes.GetValues("rel").Contains("self"))
             {
@@ -54,5 +54,6 @@ namespace ArchiveApi
             }
             return mementos;
         }
+        public static Mementos GetMementos(IArchiveService service, Uri url) => GetMementosAsync(service, url).Result;
     }
 }

@@ -2,6 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ArchiveApi;
 using CoAP;
+using System.Linq;
 namespace ArchiveApiTest
 {
     [TestClass]
@@ -27,17 +28,42 @@ namespace ArchiveApiTest
 <http://archive.is/20161021231009/https://kernel.org/>; rel=""memento""; datetime=""Fri, 21 Oct 2016 23:10:09 GMT"",
 <http://archive.is/20170308191942/https://kernel.org/>; rel=""last memento""; datetime=""Wed, 08 Mar 2017 19:19:42 GMT"",
 <http://archive.is/timemap/http://kernel.org/>; rel=""self""; type=""application/link-format""; from=""Wed, 23 May 2012 21:04:12 GMT""; until=""Wed, 08 Mar 2017 19:19:42 GMT""";
+        [TestCategory("Mementos")]
         [TestMethod]
         public void MementoFirstTest()
         {
             Mementos mementos = new Mementos(LinkFormat.Parse(Test));
             Assert.IsTrue(mementos.FirstMemento == "http://archive.is/20120523210412/http://kernel.org/");
         }
+        [TestCategory("Mementos")]
         [TestMethod]
         public void MementoLastTest()
         {
             Mementos mementos = new Mementos(LinkFormat.Parse(Test));
             Assert.IsTrue(mementos.LastMemento == "http://archive.is/20170308191942/https://kernel.org/");
+        }
+        [TestCategory("Mementos")]
+        [TestMethod]
+        public void MementoOriginalTest()
+        {
+            Mementos mementos = new Mementos(LinkFormat.Parse(Test));
+            Assert.IsTrue(mementos.Original == "http://kernel.org/");
+        }
+        [TestCategory("TimeMap")]
+        [TestMethod]
+        public void TimeMapFromTest()
+        {
+            WebLink link = LinkFormat.Parse(Test).Where(a => a.Attributes.GetValues("rel").Contains("self")).First();
+            TimeMap timeMap = new TimeMap(link);
+            Assert.IsTrue(timeMap.From == DateTime.Parse("Wed, 23 May 2012 21:04:12 GMT"));
+        }
+        [TestCategory("TimeMap")]
+        [TestMethod]
+        public void TimeMapUntilTest()
+        {
+            WebLink link = LinkFormat.Parse(Test).Where(a => a.Attributes.GetValues("rel").Contains("self")).First();
+            TimeMap timeMap = new TimeMap(link);
+            Assert.IsTrue(timeMap.Until == DateTime.Parse("Wed, 08 Mar 2017 19:19:42 GMT"));
         }
     }
 }

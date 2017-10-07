@@ -3,8 +3,9 @@ using System.Threading.Tasks;
 
 namespace ArchiveApi.Interfaces
 {
-    public interface IArchiveService
+    public interface IArchiveService : IDisposable
     {
+        Uri BaseUri { get; }
         bool Verify(string Url);
         bool Verify(Uri Url);
         string Save(string Url);

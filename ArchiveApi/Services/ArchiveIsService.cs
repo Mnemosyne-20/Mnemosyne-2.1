@@ -11,9 +11,10 @@ namespace ArchiveApi.Services
     /// </summary>
     public class ArchiveIsService : IArchiveService
     {
-        string submitEndpoint = "/submit/";
-        string timeMapEndpoint = "/timemap/";
+        public Uri SubmitEndpoint => new Uri(Url, "/submit/");
         public Uri Url => new Uri("http://www.archive.is");
+        public Uri BaseUri { get => Url; }
+        HttpClient client = new HttpClient(new ClearanceHandler() { InnerHandler = new HttpClientHandler() { AllowAutoRedirect = true }, MaxRetries = 5 });
         /// <summary>
         /// Checks if the ArchiveUrl is a successful URL
         /// </summary>
@@ -34,56 +35,52 @@ namespace ArchiveApi.Services
         /// <returns>Archive link</returns>
         public string Save(string Url)
         {
-            string ReturnUrl = "";
-            using (var client = new HttpClient(new ClearanceHandler() { InnerHandler = new HttpClientHandler() { AllowAutoRedirect = true }, MaxRetries = 5 }))
-            {
-                /// <summary>
-                /// This puts a request to the archive site, so yhea...
-                /// </summary>
-                var response = client.PostAsync("http://archive.is/submit/", new FormUrlEncodedContent(new Dictionary<string, string>
+            /// <summary>
+            /// This puts a request to the archive site, so yhea...
+            /// </summary>
+            var response = client.PostAsync(SubmitEndpoint, new FormUrlEncodedContent(new Dictionary<string, string>
                 {
                     {"url", Url.ToString() }
                 })).Result;
-                ReturnUrl = response.RequestMessage.RequestUri.ToString();
-                if (!Verify(ReturnUrl) && response.Headers.TryGetValues("Refresh", out var headers))
+            string ReturnUrl = response.RequestMessage.RequestUri.ToString();
+            if (!Verify(ReturnUrl) && response.Headers.TryGetValues("Refresh", out var headers))
+            {
+                foreach (var header in headers)
                 {
-                    foreach (var header in headers)
+                    if (header.Contains("http://archive.is"))
                     {
-                        if (header.Contains("http://archive.is"))
-                        {
-                            ReturnUrl = header.Split('=')[1];
-                        }
+                        ReturnUrl = header.Split('=')[1];
                     }
                 }
+            }
 
-                /// <remarks>
-                /// Fixes the bug where archive.is returns a json file that has a url tag
-                /// </remarks>
-                if (!Verify(ReturnUrl) && !response.IsSuccessStatusCode)
+            /// <remarks>
+            /// Fixes the bug where archive.is returns a json file that has a url tag
+            /// </remarks>
+            if (!Verify(ReturnUrl) && !response.IsSuccessStatusCode)
+            {
+                #region fixing issues with return because this works somehow!?!?
+                using (StringReader reader = new StringReader(response.ToString()))
                 {
-                    #region fixing issues with return because this works somehow!?!?
-                    using (StringReader reader = new StringReader(response.ToString()))
+                    for (int i = 0; i < 3; i++)
                     {
-                        for (int i = 0; i < 3; i++)
-                        {
-                            reader.ReadLine();
-                        }
-                        string[] sides = reader.ReadLine().Split('=');
-                        try
-                        {
-                            ReturnUrl = sides[1];
-                        }
-                        catch (Exception e)
-                        {
-                            Console.WriteLine("Error from archive.is: \n" + e.Message);
-                        }
+                        reader.ReadLine();
                     }
-                    #endregion
+                    string[] sides = reader.ReadLine().Split('=');
+                    try
+                    {
+                        ReturnUrl = sides[1];
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine("Error from archive.is: \n" + e.Message);
+                    }
                 }
-                if (!Verify(ReturnUrl))
-                {
-                    throw new ArchiveException($"Archive failed with original link {Url.ToString()} at {DateTime.Now}");
-                }
+                #endregion
+            }
+            if (!Verify(ReturnUrl))
+            {
+                throw new ArchiveException($"Archive failed with original link {Url.ToString()} at {DateTime.Now}");
             }
             return ReturnUrl;
         }
@@ -94,56 +91,52 @@ namespace ArchiveApi.Services
         /// <returns>Archive link</returns>
         public string Save(Uri Url)
         {
-            string ReturnUrl = "";
-            using (var client = new HttpClient(new ClearanceHandler() { InnerHandler = new HttpClientHandler() { AllowAutoRedirect = true }, MaxRetries = 5 }))
-            {
-                /// <summary>
-                /// This puts a request to the archive site, so yhea...
-                /// </summary>
-                var response = client.PostAsync("http://archive.is/submit/", new FormUrlEncodedContent(new Dictionary<string, string>
+            /// <summary>
+            /// This puts a request to the archive site, so yhea...
+            /// </summary>
+            var response = client.PostAsync(SubmitEndpoint, new FormUrlEncodedContent(new Dictionary<string, string>
                 {
                     {"url", Url.ToString() }
                 })).Result;
-                ReturnUrl = response.RequestMessage.RequestUri.ToString();
-                if (!Verify(ReturnUrl) && response.Headers.TryGetValues("Refresh", out var headers))
+            string ReturnUrl = response.RequestMessage.RequestUri.ToString();
+            if (!Verify(ReturnUrl) && response.Headers.TryGetValues("Refresh", out var headers))
+            {
+                foreach (var header in headers)
                 {
-                    foreach (var header in headers)
+                    if (header.Contains("http://archive.is"))
                     {
-                        if (header.Contains("http://archive.is"))
-                        {
-                            ReturnUrl = header.Split('=')[1];
-                        }
+                        ReturnUrl = header.Split('=')[1];
                     }
                 }
+            }
 
-                /// <remarks>
-                /// Fixes the bug where archive.is returns a json file that has a url tag
-                /// </remarks>
-                if (!Verify(ReturnUrl) && !response.IsSuccessStatusCode)
+            /// <remarks>
+            /// Fixes the bug where archive.is returns a json file that has a url tag
+            /// </remarks>
+            if (!Verify(ReturnUrl) && !response.IsSuccessStatusCode)
+            {
+                #region fixing issues with return because this works somehow!?!?
+                using (StringReader reader = new StringReader(response.ToString()))
                 {
-                    #region fixing issues with return because this works somehow!?!?
-                    using (StringReader reader = new StringReader(response.ToString()))
+                    for (int i = 0; i < 3; i++)
                     {
-                        for (int i = 0; i < 3; i++)
-                        {
-                            reader.ReadLine();
-                        }
-                        string[] sides = reader.ReadLine().Split('=');
-                        try
-                        {
-                            ReturnUrl = sides[1];
-                        }
-                        catch (Exception e)
-                        {
-                            Console.WriteLine("Error from archive.is: \n" + e.Message);
-                        }
+                        reader.ReadLine();
                     }
-                    #endregion
+                    string[] sides = reader.ReadLine().Split('=');
+                    try
+                    {
+                        ReturnUrl = sides[1];
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine("Error from archive.is: \n" + e.Message);
+                    }
                 }
-                if (!Verify(ReturnUrl))
-                {
-                    throw new ArchiveException($"Archive failed with original link {Url.ToString()} at {DateTime.Now}");
-                }
+                #endregion
+            }
+            if (!Verify(ReturnUrl))
+            {
+                throw new ArchiveException($"Archive failed with original link {Url.ToString()} at {DateTime.Now}");
             }
             return ReturnUrl;
         }
@@ -154,55 +147,51 @@ namespace ArchiveApi.Services
         /// <returns>Archive link</returns>
         public async Task<string> SaveAsync(string Url)
         {
-            string ReturnUrl = "";
-            using (var client = new HttpClient(new ClearanceHandler() { InnerHandler = new HttpClientHandler() { AllowAutoRedirect = true }, MaxRetries = 5 }))
-            {
-                /// <summary>
-                /// This puts a request to the archive site, so yhea...
-                /// </summary>
-                var response = await client.PostAsync("http://archive.is/submit/", new FormUrlEncodedContent(new Dictionary<string, string>
+            /// <summary>
+            /// This puts a request to the archive site, so yhea...
+            /// </summary>
+            var response = await client.PostAsync(SubmitEndpoint, new FormUrlEncodedContent(new Dictionary<string, string>
                 {
                     {"url", Url.ToString() }
                 }));
-                ReturnUrl = response.RequestMessage.RequestUri.ToString();
-                if (!Verify(ReturnUrl) && response.Headers.TryGetValues("Refresh", out var headers))
+            string ReturnUrl = response.RequestMessage.RequestUri.ToString();
+            if (!Verify(ReturnUrl) && response.Headers.TryGetValues("Refresh", out var headers))
+            {
+                foreach (var header in headers)
                 {
-                    foreach (var header in headers)
+                    if (header.Contains("http://archive.is"))
                     {
-                        if (header.Contains("http://archive.is"))
-                        {
-                            ReturnUrl = header.Split('=')[1];
-                        }
+                        ReturnUrl = header.Split('=')[1];
                     }
                 }
-                /// <remarks>
-                /// Fixes the bug where archive.is returns a json file that has a url tag
-                /// </remarks>
-                if (!Verify(ReturnUrl) && !response.IsSuccessStatusCode)
+            }
+            /// <remarks>
+            /// Fixes the bug where archive.is returns a json file that has a url tag
+            /// </remarks>
+            if (!Verify(ReturnUrl) && !response.IsSuccessStatusCode)
+            {
+                #region fixing issues with return because this works somehow!?!?
+                using (StringReader reader = new StringReader(response.ToString()))
                 {
-                    #region fixing issues with return because this works somehow!?!?
-                    using (StringReader reader = new StringReader(response.ToString()))
+                    for (int i = 0; i < 3; i++)
                     {
-                        for (int i = 0; i < 3; i++)
-                        {
-                            reader.ReadLine();
-                        }
-                        string[] sides = reader.ReadLine().Split('=');
-                        try
-                        {
-                            ReturnUrl = sides[1];
-                        }
-                        catch (Exception e)
-                        {
-                            Console.WriteLine("Error from archive.is: \n" + e.Message);
-                        }
+                        reader.ReadLine();
                     }
-                    #endregion
+                    string[] sides = reader.ReadLine().Split('=');
+                    try
+                    {
+                        ReturnUrl = sides[1];
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine("Error from archive.is: \n" + e.Message);
+                    }
                 }
-                if (!Verify(ReturnUrl))
-                {
-                    throw new ArchiveException($"Archive failed with original link {Url.ToString()} at {DateTime.Now}");
-                }
+                #endregion
+            }
+            if (!Verify(ReturnUrl))
+            {
+                throw new ArchiveException($"Archive failed with original link {Url.ToString()} at {DateTime.Now}");
             }
             return ReturnUrl;
         }
@@ -213,56 +202,52 @@ namespace ArchiveApi.Services
         /// <returns>Archive link</returns>
         public async Task<string> SaveAsync(Uri Url)
         {
-            string ReturnUrl = "";
-            using (var client = new HttpClient(new ClearanceHandler() { InnerHandler = new HttpClientHandler() { AllowAutoRedirect = true }, MaxRetries = 5 }))
-            {
-                /// <summary>
-                /// This puts a request to the archive site, so yhea...
-                /// </summary>
-                var response = await client.PostAsync("http://archive.is/submit/", new FormUrlEncodedContent(new Dictionary<string, string>
+            /// <summary>
+            /// This puts a request to the archive site, so yhea...
+            /// </summary>
+            var response = await client.PostAsync(SubmitEndpoint, new FormUrlEncodedContent(new Dictionary<string, string>
                 {
                     {"url", Url.ToString() }
                 }));
-                ReturnUrl = response.RequestMessage.RequestUri.ToString();
-                if (!Verify(ReturnUrl) && response.Headers.TryGetValues("Refresh", out var headers))
+            string ReturnUrl = response.RequestMessage.RequestUri.ToString();
+            if (!Verify(ReturnUrl) && response.Headers.TryGetValues("Refresh", out var headers))
+            {
+                foreach (var header in headers)
                 {
-                    foreach (var header in headers)
+                    if (header.Contains("http://archive.is"))
                     {
-                        if (header.Contains("http://archive.is"))
-                        {
-                            ReturnUrl = header.Split('=')[1];
-                        }
+                        ReturnUrl = header.Split('=')[1];
                     }
                 }
+            }
 
-                /// <remarks>
-                /// Fixes the bug where archive.is returns a json file that has a url tag
-                /// </remarks>
-                if (!Verify(ReturnUrl) && !response.IsSuccessStatusCode)
+            /// <remarks>
+            /// Fixes the bug where archive.is returns a json file that has a url tag
+            /// </remarks>
+            if (!Verify(ReturnUrl) && !response.IsSuccessStatusCode)
+            {
+                #region fixing issues with return because this works somehow!?!?
+                using (StringReader reader = new StringReader(response.ToString()))
                 {
-                    #region fixing issues with return because this works somehow!?!?
-                    using (StringReader reader = new StringReader(response.ToString()))
+                    for (int i = 0; i < 3; i++)
                     {
-                        for (int i = 0; i < 3; i++)
-                        {
-                            reader.ReadLine();
-                        }
-                        string[] sides = reader.ReadLine().Split('=');
-                        try
-                        {
-                            ReturnUrl = sides[1];
-                        }
-                        catch (Exception e)
-                        {
-                            Console.WriteLine("Error from archive.is: \n" + e.Message);
-                        }
+                        reader.ReadLine();
                     }
-                    #endregion
+                    string[] sides = reader.ReadLine().Split('=');
+                    try
+                    {
+                        ReturnUrl = sides[1];
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine("Error from archive.is: \n" + e.Message);
+                    }
                 }
-                if (!Verify(ReturnUrl))
-                {
-                    throw new ArchiveException($"Archive failed with original link {Url.ToString()} at {DateTime.Now}");
-                }
+                #endregion
+            }
+            if (!Verify(ReturnUrl))
+            {
+                throw new ArchiveException($"Archive failed with original link {Url.ToString()} at {DateTime.Now}");
             }
             return ReturnUrl;
         }
@@ -270,6 +255,42 @@ namespace ArchiveApi.Services
         Uri IArchiveService.Save(Uri Url) => new Uri(Save(Url));
 
         Task<Uri> IArchiveService.SaveAsync(Uri Url) => throw new NotImplementedException();
+
+        #region IDisposable Support
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    client.Dispose();
+                    // TODO: dispose managed state (managed objects).
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // TODO: set large fields to null.
+
+                disposedValue = true;
+            }
+        }
+
+        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
+        // ~ArchiveIsService() {
+        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+        //   Dispose(false);
+        // }
+
+        // This code added to correctly implement the disposable pattern.
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+            // TODO: uncomment the following line if the finalizer is overridden above.
+            GC.SuppressFinalize(this);
+        }
+        #endregion
     }
     public class ArchiveIsFactory : IArchiveServiceFactory
     {

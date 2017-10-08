@@ -1,20 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ArchiveApi.Interfaces;
+﻿using ArchiveApi.Interfaces;
 using ArchiveApi.Services;
 namespace ArchiveApi
 {
-    public enum ArchiveServiceTypes
+    public enum DefaultServices
     {
-        ArchiveToday,
-        ArchiveOrg,
-        Unknown
+        ArchiveIs,
+        ArchiveFo
     }
     public static class ArchiveService
     {
-
+        public static IArchiveService CreateService(DefaultServices service)
+        {
+            switch (service)
+            {
+                case DefaultServices.ArchiveIs:
+                    return new ArchiveIsService();
+                case DefaultServices.ArchiveFo:
+                default:
+                    return new ArchiveFoService();
+            }
+        }
     }
 }

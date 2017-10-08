@@ -11,9 +11,9 @@ namespace ArchiveApi.Services
     /// </summary>
     public class ArchiveIsService : IArchiveService
     {
-        public Uri SubmitEndpoint => new Uri(Url, "/submit/");
-        public Uri Url => new Uri("http://www.archive.is");
-        public Uri BaseUri { get => Url; }
+        public Uri TimeMapEndpoint => new Uri(BaseUri, "/timemap/");
+        public Uri SubmitEndpoint => new Uri(BaseUri, "/submit/");
+        public Uri BaseUri => new Uri("http://www.archive.is");
         HttpClient client = new HttpClient(new ClearanceHandler() { InnerHandler = new HttpClientHandler() { AllowAutoRedirect = true }, MaxRetries = 5 });
         /// <summary>
         /// Checks if the ArchiveUrl is a successful URL

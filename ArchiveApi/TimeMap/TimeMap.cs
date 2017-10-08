@@ -14,15 +14,9 @@ namespace ArchiveApi
         #region Constructors
         public TimeMap(Uri TimeMapUri) => this.TimeMapUri = TimeMapUri;
         public TimeMap(string TimeMapUri) : this(new Uri(TimeMapUri)) { }
-        public TimeMap(Uri TimeMapUri, DateTime From) : this(TimeMapUri)
-        {
-            this.From = From;
-        }
+        public TimeMap(Uri TimeMapUri, DateTime From) : this(TimeMapUri) => this.From = From;
         public TimeMap(string TimeMapUri, DateTime From) : this(new Uri(TimeMapUri), From) { }
-        public TimeMap(Uri TimeMapUri, DateTime From, DateTime Until) : this(TimeMapUri, From)
-        {
-            this.Until = Until;
-        }
+        public TimeMap(Uri TimeMapUri, DateTime From, DateTime Until) : this(TimeMapUri, From) => this.Until = Until;
         public TimeMap(string TimeMapUri, DateTime From, DateTime Until) : this(new Uri(TimeMapUri), From, Until) { }
         public TimeMap(WebLink web)
         {
@@ -48,9 +42,8 @@ namespace ArchiveApi
             Mementos mementos = null;
             using (HttpClient client = new HttpClient())
             {
-                var response = await client.GetAsync(new Uri(service.BaseUri, $"/timemap/{url.ToString()}"));
-                var message = await response.Content.ReadAsStringAsync();
-                mementos = new Mementos(LinkFormat.Parse(message));
+                var response = await client.GetAsync(new Uri(service.TimeMapEndpoint, url.ToString()));
+                mementos = new Mementos(LinkFormat.Parse(await response.Content.ReadAsStringAsync()));
             }
             return mementos;
         }

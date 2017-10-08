@@ -13,21 +13,19 @@ namespace ArchiveApi
         public bool IsActuallyMemento => webLink.Attributes.GetValues("rel").Contains("memento");
         public Uri Url => new Uri(webLink.Uri);
         WebLink webLink;
-        public Memento(WebLink memento)
-        {
-            webLink = memento;
-        }
-        public override bool Equals(object other)
-        {
-            return (other is WebLink) && ((other as WebLink) == webLink);
-        }
-        public static bool operator ==(Memento mem1, Memento mem2) { return mem1.Equals(mem2); }
-        public static bool operator !=(Memento mem1, Memento mem2) { return !mem1.Equals(mem2); }
-        public static bool operator ==(Memento mem1, string mem2) { return mem1.Equals(mem2); }
-        public static bool operator !=(Memento mem1, string mem2) { return !mem1.Equals(mem2); }
-        public bool Equals(Uri other) { return Url == other; }
-        public bool Equals(string other) { return Url.ToString() == other; }
+        public Memento(WebLink memento) => webLink = memento;
+        #region Equality operators
+        public override bool Equals(object other) => (other is WebLink) && ((other as WebLink) == webLink);
+        public static bool operator ==(Memento mem1, Memento mem2) => mem1.Equals(mem2);
+        public static bool operator !=(Memento mem1, Memento mem2) => !mem1.Equals(mem2);
+        public static bool operator ==(Memento mem1, string mem2) => mem1.Equals(mem2);
+        public static bool operator !=(Memento mem1, string mem2) => !mem1.Equals(mem2);
+        public static bool operator ==(Memento mem1, Uri mem2) => mem1.Equals(mem2);
+        public static bool operator !=(Memento mem1, Uri mem2) => !mem1.Equals(mem2);
+        public bool Equals(Uri other) => Url == other;
+        public bool Equals(string other) => Url.ToString() == other;
         public override int GetHashCode() => base.GetHashCode();
+        #endregion
     }
     public class Mementos : IEnumerable
     {
@@ -46,9 +44,8 @@ namespace ArchiveApi
         }
         public Mementos(IEnumerable<WebLink> mementoList)
         {
-            int mementoCount = (mementoList.Where(a => a.Attributes.GetValues("rel").Contains("memento"))).Count();
-            _mementos = new Memento[mementoCount];
-            for(int i = 0, i2 = 0; i < mementoList.Count(); i++)
+            _mementos = new Memento[((mementoList.Where(a => a.Attributes.GetValues("rel").Contains("memento"))).Count())];
+            for (int i = 0, i2 = 0; i < mementoList.Count(); i++)
             {
                 var link = mementoList.ElementAt(i);
                 if (link.Attributes.GetValues("rel").Contains("timegate"))
@@ -64,24 +61,15 @@ namespace ArchiveApi
                 }
             }
         }
-        public IEnumerator GetEnumerator()
-        {
-            return new MementoEnumerator(_mementos);
-        }
+        public IEnumerator GetEnumerator() => new MementoEnumerator(_mementos);
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return this.GetEnumerator();
-        }
+        IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
     }
     public class MementoEnumerator : IEnumerator
     {
         public Memento[] mementos;
         int position = -1;
-        public MementoEnumerator(Memento[] mementos)
-        {
-            this.mementos = mementos;
-        }
+        public MementoEnumerator(Memento[] mementos) => this.mementos = mementos;
         public Memento Current
         {
             get
@@ -105,9 +93,6 @@ namespace ArchiveApi
             return (position < mementos.Length);
         }
 
-        public void Reset()
-        {
-            position = -1;
-        }
+        public void Reset() => position = -1;
     }
 }

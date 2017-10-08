@@ -11,9 +11,9 @@ namespace ArchiveApi.Services
     /// </summary>
     public class ArchiveFoService : IArchiveService
     {
-        public Uri SubmitEndpoint => new Uri(Url, "/submit/");
-        public Uri Url => new Uri("http://www.archive.fo");
-        public Uri BaseUri { get => Url; }
+        public Uri TimeMapEndpoint => new Uri(BaseUri, "/timemap/");
+        public Uri SubmitEndpoint => new Uri(BaseUri, "/submit/");
+        public Uri BaseUri => new Uri("http://www.archive.fo");
         HttpClient client = new HttpClient(new ClearanceHandler() { InnerHandler = new HttpClientHandler() { AllowAutoRedirect = true }, MaxRetries = 5 });
         /// <summary>
         /// Checks if the ArchiveUrl is a successful URL
@@ -38,7 +38,7 @@ namespace ArchiveApi.Services
             /// <summary>
             /// This puts a request to the archive site, so yhea...
             /// </summary>
-            var response = client.PostAsync("http://archive.fo/submit/", new FormUrlEncodedContent(new Dictionary<string, string>
+            var response = client.PostAsync(SubmitEndpoint, new FormUrlEncodedContent(new Dictionary<string, string>
                 {
                     {"url", Url.ToString() }
                 })).Result;
@@ -95,7 +95,7 @@ namespace ArchiveApi.Services
             /// <summary>
             /// This puts a request to the archive site, so yhea...
             /// </summary>
-            var response = client.PostAsync("http://archive.fo/submit/", new FormUrlEncodedContent(new Dictionary<string, string>
+            var response = client.PostAsync(SubmitEndpoint, new FormUrlEncodedContent(new Dictionary<string, string>
                 {
                     {"url", Url.ToString() }
                 })).Result;
@@ -152,7 +152,7 @@ namespace ArchiveApi.Services
             /// <summary>
             /// This puts a request to the archive site, so yhea...
             /// </summary>
-            var response = await client.PostAsync("http://archive.fo/submit/", new FormUrlEncodedContent(new Dictionary<string, string>
+            var response = await client.PostAsync(SubmitEndpoint, new FormUrlEncodedContent(new Dictionary<string, string>
                 {
                     {"url", Url.ToString() }
                 }));
@@ -207,7 +207,7 @@ namespace ArchiveApi.Services
             /// <summary>
             /// This puts a request to the archive site, so yhea...
             /// </summary>
-            var response = await client.PostAsync("http://archive.fo/submit/", new FormUrlEncodedContent(new Dictionary<string, string>
+            var response = await client.PostAsync(SubmitEndpoint, new FormUrlEncodedContent(new Dictionary<string, string>
                 {
                     {"url", Url.ToString() }
                 }));

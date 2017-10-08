@@ -5,6 +5,7 @@ namespace ArchiveApi.Interfaces
 {
     public interface IArchiveService : IDisposable
     {
+        Uri TimeMapEndpoint { get; }
         Uri BaseUri { get; }
         bool Verify(string Url);
         bool Verify(Uri Url);

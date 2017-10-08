@@ -2,7 +2,6 @@
 
 namespace ArchiveApi
 {
-    [Serializable]
     public class ArchiveException : Exception
     {
         public ArchiveException()

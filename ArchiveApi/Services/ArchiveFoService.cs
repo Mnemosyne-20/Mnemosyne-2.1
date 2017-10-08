@@ -13,7 +13,7 @@ namespace ArchiveApi.Services
     {
         public Uri TimeMapEndpoint => new Uri(BaseUri, "/timemap/");
         public Uri SubmitEndpoint => new Uri(BaseUri, "/submit/");
-        public Uri BaseUri => new Uri("http://www.archive.fo");
+        public Uri BaseUri => new Uri("http://archive.fo");
         HttpClient client = new HttpClient(new ClearanceHandler() { InnerHandler = new HttpClientHandler() { AllowAutoRedirect = true }, MaxRetries = 5 });
         /// <summary>
         /// Checks if the ArchiveUrl is a successful URL

@@ -10,10 +10,8 @@ namespace Mnemosyne2Reborn
     public static class ArchiveLinks
     {
         static IArchiveService service;
-        public static void SetArchiveService(IArchiveServiceFactory factory)
-        {
-            service = factory.GetArchiveService();
-        }
+        public static void SetArchiveService(IArchiveServiceFactory factory) => service = factory.GetArchiveService();
+        public static void SetArchiveService(IArchiveService service) => ArchiveLinks.service = service;
         /// <summary>
         /// Returns two lists, one contains the links that have been archived, the other the links found that aren't excluded
         /// </summary>

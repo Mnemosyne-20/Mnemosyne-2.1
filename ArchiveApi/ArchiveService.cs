@@ -9,7 +9,7 @@ namespace ArchiveApi
     }
     public static class ArchiveService
     {
-        public static IArchiveService CreateService(DefaultServices service)
+        public static IArchiveService CreateService(DefaultServices service = DefaultServices.ArchiveFo)
         {
             switch (service)
             {

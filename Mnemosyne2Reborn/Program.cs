@@ -1,5 +1,5 @@
-﻿using ArchiveApi.Interfaces;
-using ArchiveApi.Services;
+﻿using ArchiveApi;
+using ArchiveApi.Interfaces;
 using Mnemosyne2Reborn.BotState;
 using Mnemosyne2Reborn.Commenting;
 using Mnemosyne2Reborn.Configuration;
@@ -89,9 +89,9 @@ namespace Mnemosyne2Reborn
                 File.Delete("./Data/Users.json");
             }
 #pragma warning restore CS0618 // Type or member is obsolete
-            IArchiveServiceFactory archiveServiceFactory = new ArchiveFoFactory();
-            ArchiveLinks.SetArchiveService(archiveServiceFactory);
-            PostArchives.SetArchiveService(archiveServiceFactory);
+            IArchiveService service = ArchiveService.CreateService(DefaultServices.ArchiveFo);
+            ArchiveLinks.SetArchiveService(service);
+            PostArchives.SetArchiveService(service);
             while (true) // main loop, calls delegates that move thrugh every subreddit allowed iteratively
             {
                 try

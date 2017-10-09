@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace ArchiveApi.Services
 {
     /// <summary>
-    /// Is a class that creates an Archive Service Provider, e.g. archive.is, currently can only use archive.is because URI is weird in C# for some reason
+    /// This class is used for archive.is services, it is essentially a non-russian-accessible reskin of archive.fo / archive.li / archive.today / ...., like, no, seriously this website has like 6 TLDs availible for it.
     /// </summary>
     public class ArchiveIsService : IArchiveService
     {

@@ -6,8 +6,9 @@ using System.Net.Http;
 using System.Threading.Tasks;
 namespace ArchiveApi.Services
 {
+
     /// <summary>
-    /// Is a class that creates an Archive Service Provider, e.g. archive.fo, currently can only use archive.fo because URI is weird in C# for some reason
+    /// This class is used for archive.fo services, it is essentially a russia-accessible reskin of archive.is / archive.li / archive.today / ...., like, no, seriously this website has like 6 TLDs availible for it.
     /// </summary>
     public class ArchiveFoService : IArchiveService
     {

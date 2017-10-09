@@ -7,8 +7,9 @@ namespace MnemosyneTest
     [TestClass]
     public class RedditUserProfileSQLiteUnitTest
     {
+        [TestCategory("RedditUserProfileSQLite")]
         [TestMethod]
-        public void AddArchived()
+        public void AddArchivedTest()
         {
             new RedditUserProfileSqlite("1\\redditusers.sqlite");
             var red = new Reddit();
@@ -18,6 +19,7 @@ namespace MnemosyneTest
             var next = redditUserProfileSqlite.Archived;
             Assert.IsFalse(next == current);
         }
+        [TestCategory("RedditUserProfileSQLite")]
         [TestMethod]
         public void TestOptOut()
         {
@@ -29,6 +31,7 @@ namespace MnemosyneTest
             };
             Assert.IsTrue(redditUserProfileSqlite.OptedOut);
         }
+        [TestCategory("RedditUserProfileSQLite")]
         [TestMethod]
         public void TestAddUnarchived()
         {
@@ -40,6 +43,7 @@ namespace MnemosyneTest
             var next = redditUserProfileSqlite.Unarchived;
             Assert.IsFalse(next == current);
         }
+        [TestCategory("RedditUserProfileSQLite")]
         [TestMethod]
         public void TestExcluded()
         {
@@ -51,6 +55,7 @@ namespace MnemosyneTest
             var next = redditUserProfileSqlite.Excluded;
             Assert.IsFalse(next == current);
         }
+        [TestCategory("RedditUserProfileSQLite")]
         [TestMethod]
         public void TestImage()
         {

@@ -292,11 +292,4 @@ namespace ArchiveApi.Services
         }
         #endregion
     }
-    public class ArchiveIsFactory : IArchiveServiceFactory
-    {
-        public override IArchiveService GetArchiveService()
-        {
-            return new ArchiveIsService();
-        }
-    }
 }

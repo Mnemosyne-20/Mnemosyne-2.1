@@ -24,8 +24,7 @@ namespace Mnemosyne2Reborn.BotState
         public bool DoesCommentExist(string postID)
         {
             SQLCmd_DoesBotCommentExist.Parameters["@postID"].Value = postID;
-            long count = SQLCmd_DoesBotCommentExist.ExecuteScalar() as long? ?? 0;
-            return count != 0;
+            return Convert.ToBoolean(SQLCmd_DoesBotCommentExist.ExecuteScalar());
         }
         public void AddCheckedComment(string commentID)
         {
@@ -42,8 +41,7 @@ namespace Mnemosyne2Reborn.BotState
         public bool HasCommentBeenChecked(string commentID)
         {
             SQLCmd_HasCommentBeenChecked.Parameters["@commentID"].Value = commentID;
-            long count = SQLCmd_HasCommentBeenChecked.ExecuteScalar() as long? ?? 0;
-            return count != 0;
+            return Convert.ToBoolean(SQLCmd_HasCommentBeenChecked.ExecuteScalar());
         }
         void InitializeDatabase()
         {
@@ -146,8 +144,7 @@ namespace Mnemosyne2Reborn.BotState
         public bool HasPostBeenChecked(string postId)
         {
             SQLCmd_HasPostBeenChecked.Parameters["@postID"].Value = postId;
-            long count = SQLCmd_HasPostBeenChecked.ExecuteScalar() as long? ?? 0;
-            return count != 0;
+            return Convert.ToBoolean(SQLCmd_HasPostBeenChecked.ExecuteScalar());
         }
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls

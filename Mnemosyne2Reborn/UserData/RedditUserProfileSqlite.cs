@@ -11,7 +11,7 @@ namespace Mnemosyne2Reborn.UserData
     public class RedditUserProfileSqlite
     {
         static SQLiteCommand SQLiteSetUnarchived, SQLiteSetArchived, SQLiteSetExcluded, SQLiteSetImage, SQLiteGetImage, SQLiteAddUser, SQLiteGetArchived, SQLiteGetUnarchived, SQLiteGetExcluded, SQLiteGetOptOut, SQLiteSetOptOut, SQLiteGetUserExists, SQLiteAvgExcluded, SQLiteAvgImage, SQLiteAvgArchived, SQLiteAvgUnarchived;
-        public static SQLiteConnection connection;
+        public static SQLiteConnection Connection { get; private set; }
         static bool Initialized = false;
 #pragma warning disable CS0618 // Type or member is obsolete
         public static void TransferProfilesToSqlite(Dictionary<string, RedditUserProfile> dict)
@@ -19,7 +19,7 @@ namespace Mnemosyne2Reborn.UserData
         {
             if (!Initialized)
                 throw new InvalidOperationException("You must initialize using the string based constructor first, then you may use the class later on");
-            var optedOut = from a in dict where a.Value.OptedOut == true select a;
+            var optedOut = from a in dict.AsParallel() where a.Value.OptedOut == true select a; // parallel because the dictionary can be absolutely enormous depending on length of runtime
             foreach (var user in optedOut)
             {
                 try
@@ -145,52 +145,52 @@ namespace Mnemosyne2Reborn.UserData
         void InitDbTable()
         {
             string query = "create table if not exists Users (Name text unique, UnarchivedUrls integer, ImageUrls integer, ArchivedUrls integer, ExcludedUrls integer, OptedOut integer)";
-            using (SQLiteCommand cmd = new SQLiteCommand(query, connection))
+            using (SQLiteCommand cmd = new SQLiteCommand(query, Connection))
                 cmd.ExecuteNonQuery();
         }
         void InitDbCommands()
         {
             SQLiteParameter UserNameParam = new SQLiteParameter("@Name", DbType.String);
 
-            SQLiteGetUserExists = new SQLiteCommand("select count(*) from Users where Name = @Name", connection);
+            SQLiteGetUserExists = new SQLiteCommand("select count(*) from Users where Name = @Name", Connection);
             SQLiteGetUserExists.Parameters.Add(UserNameParam);
 
-            SQLiteAddUser = new SQLiteCommand("insert or abort into Users(Name, UnarchivedUrls, ImageUrls, ArchivedUrls, ExcludedUrls, OptedOut) values(@Name, 0, 0, 0, 0, 0)", connection);
+            SQLiteAddUser = new SQLiteCommand("insert or abort into Users(Name, UnarchivedUrls, ImageUrls, ArchivedUrls, ExcludedUrls, OptedOut) values(@Name, 0, 0, 0, 0, 0)", Connection);
             SQLiteAddUser.Parameters.Add(UserNameParam);
 
-            SQLiteGetUnarchived = new SQLiteCommand("select UnarchivedUrls from Users where Name = @Name", connection);
+            SQLiteGetUnarchived = new SQLiteCommand("select UnarchivedUrls from Users where Name = @Name", Connection);
             SQLiteGetUnarchived.Parameters.Add(UserNameParam);
 
-            SQLiteGetArchived = new SQLiteCommand("select ArchivedUrls from Users where Name = @Name", connection);
+            SQLiteGetArchived = new SQLiteCommand("select ArchivedUrls from Users where Name = @Name", Connection);
             SQLiteGetArchived.Parameters.Add(UserNameParam);
 
-            SQLiteGetOptOut = new SQLiteCommand("select OptedOut from Users where Name = @Name", connection);
+            SQLiteGetOptOut = new SQLiteCommand("select OptedOut from Users where Name = @Name", Connection);
             SQLiteGetOptOut.Parameters.Add(UserNameParam);
 
-            SQLiteGetExcluded = new SQLiteCommand("select ExcludedUrls from Users where Name = @Name", connection);
+            SQLiteGetExcluded = new SQLiteCommand("select ExcludedUrls from Users where Name = @Name", Connection);
             SQLiteGetExcluded.Parameters.Add(UserNameParam);
 
-            SQLiteSetArchived = new SQLiteCommand("update Users set ArchivedUrls = @ArchivedUrls where Name = @Name", connection);
+            SQLiteSetArchived = new SQLiteCommand("update Users set ArchivedUrls = @ArchivedUrls where Name = @Name", Connection);
             SQLiteSetArchived.Parameters.Add(new SQLiteParameter("@ArchivedUrls", DbType.Int32));
             SQLiteSetArchived.Parameters.Add(UserNameParam);
 
-            SQLiteSetExcluded = new SQLiteCommand("update Users set ExcludedUrls = @ExcludedUrls where Name = @Name", connection);
+            SQLiteSetExcluded = new SQLiteCommand("update Users set ExcludedUrls = @ExcludedUrls where Name = @Name", Connection);
             SQLiteSetExcluded.Parameters.Add(new SQLiteParameter("@ExcludedUrls", DbType.Int32));
             SQLiteSetExcluded.Parameters.Add(UserNameParam);
 
-            SQLiteSetUnarchived = new SQLiteCommand("update Users set UnarchivedUrls = @UnarchivedUrls where Name = @Name", connection);
+            SQLiteSetUnarchived = new SQLiteCommand("update Users set UnarchivedUrls = @UnarchivedUrls where Name = @Name", Connection);
             SQLiteSetUnarchived.Parameters.Add(new SQLiteParameter("@UnarchivedUrls", DbType.Int32));
             SQLiteSetUnarchived.Parameters.Add(UserNameParam);
 
-            SQLiteSetOptOut = new SQLiteCommand("update Users set OptedOut = @OptedOut where Name = @Name", connection);
+            SQLiteSetOptOut = new SQLiteCommand("update Users set OptedOut = @OptedOut where Name = @Name", Connection);
             SQLiteSetOptOut.Parameters.Add(new SQLiteParameter("@OptedOut", DbType.Int32));
             SQLiteSetOptOut.Parameters.Add(UserNameParam);
 
-            SQLiteSetImage = new SQLiteCommand("update Users set ImageUrls = @ImageUrls where Name = @Name", connection);
+            SQLiteSetImage = new SQLiteCommand("update Users set ImageUrls = @ImageUrls where Name = @Name", Connection);
             SQLiteSetImage.Parameters.Add(new SQLiteParameter("@ImageUrls", DbType.Int32));
             SQLiteSetImage.Parameters.Add(UserNameParam);
 
-            SQLiteGetImage = new SQLiteCommand("select ImageUrls from Users where Name = @Name", connection);
+            SQLiteGetImage = new SQLiteCommand("select ImageUrls from Users where Name = @Name", Connection);
             SQLiteGetImage.Parameters.Add(UserNameParam);
 
             SQLiteAvgArchived = new SQLiteCommand("select avg(ArchivedUrls) from Users");
@@ -208,8 +208,8 @@ namespace Mnemosyne2Reborn.UserData
                 SQLiteConnection.CreateFile($"{AppDomain.CurrentDomain.BaseDirectory.TrimEnd('/')}/Data/{filename}");
             }
             AppDomain.CurrentDomain.SetData("DataDirectory", $"{AppDomain.CurrentDomain.BaseDirectory.TrimEnd('/')}/Data/");
-            connection = new SQLiteConnection($"Data Source=|DataDirectory|{filename};Version=3;");
-            connection.Open();
+            Connection = new SQLiteConnection($"Data Source=|DataDirectory|{filename};Version=3;");
+            Connection.Open();
             InitDbTable();
             InitDbCommands();
             Initialized = true;

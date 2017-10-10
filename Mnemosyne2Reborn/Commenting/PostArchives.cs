@@ -159,7 +159,10 @@ namespace Mnemosyne2Reborn.Commenting
                     botCommentThingID = "t1_" + botCommentThingID;
                 }
                 Console.WriteLine($"Already have post in {postID}, getting comment {botCommentThingID.Substring(3)}");
-                EditArchiveComment((Comment)reddit.GetThingByFullname(botCommentThingID), Links);
+                if (!EditArchiveComment((Comment)reddit.GetThingByFullname(botCommentThingID), Links))
+                {
+                    PostArchiveLinksToComment(conf, state, Program.Headers[2], comment, comment.GetCommentPost(reddit), Links);
+                }
             }
             else
             {
@@ -196,32 +199,19 @@ namespace Mnemosyne2Reborn.Commenting
                 }
                 return Links;
             });
-            bool HasPostITT = state.DoesCommentExist(postID);
-            if (HasPostITT)
+            if (state.DoesCommentExist(postID))
             {
                 string botCommentThingID = state.GetCommentForPost(postID);
+                if (!botCommentThingID.Contains("t1_"))
+                {
+                    botCommentThingID = "t1_" + botCommentThingID;
+                }
                 Console.WriteLine($"Already have post in {postID}, getting comment {botCommentThingID.Substring(3)}");
-                #region Fixes 10k character limit
-                Comment commentToEdit = (Comment)reddit.GetThingByFullname(botCommentThingID);
-                List<string> ArchivesToInsert = await t;
-                string newCommentText = "";
-                string[] oldCommentLines = commentToEdit.Body.Split("\n".ToArray());
-                string[] head = oldCommentLines.Take(oldCommentLines.Length - 3).ToArray();
-                string[] tail = oldCommentLines.Skip(oldCommentLines.Length - 3).ToArray();
-                newCommentText += string.Join("\n", head);
-                foreach (string str in ArchivesToInsert)
+                List<string> Links = await t;
+                if (!EditArchiveComment((Comment)reddit.GetThingByFullname(botCommentThingID), Links))
                 {
-                    newCommentText += "\n" + str;
+                    PostArchiveLinksToComment(conf, state, Program.Headers[2], comment, comment.GetCommentPost(reddit), Links);
                 }
-                if (newCommentText.Length > 10000)
-                {
-                    Console.WriteLine($"Too many lines for comment {botCommentThingID} making new comment for post {postID}");
-                    PostArchiveLinksToComment(conf, state, Program.Headers[2], commentToEdit, await t);
-                    state.AddCheckedComment(commentID);
-                    return;
-                }
-                #endregion
-                EditArchiveComment((Comment)reddit.GetThingByFullname(botCommentThingID), ArchivesToInsert);
             }
             else
             {
@@ -238,7 +228,7 @@ namespace Mnemosyne2Reborn.Commenting
         /// <param name="head"></param>
         /// <param name="post"></param>
         /// <param name="ArchiveList"></param>
-        public static void PostArchiveLinksToComment(Config conf, IBotState state, string head, Comment comment, List<string> ArchiveList)
+        public static void PostArchiveLinksToComment(Config conf, IBotState state, string head, Comment comment, Post post, List<string> ArchiveList)
         {
             if (conf == null || state == null || head == null || comment == null || ArchiveList == null)
             {
@@ -254,7 +244,7 @@ namespace Mnemosyne2Reborn.Commenting
             Comment botComment = comment.Reply(c);
             try
             {
-                state.AddBotComment(comment.Id, botComment.Id);
+                state.UpdateBotComment(comment.LinkId.Substring(3), botComment.Id);
                 Console.WriteLine(c);
             }
             catch (InvalidOperationException e)
@@ -301,12 +291,12 @@ namespace Mnemosyne2Reborn.Commenting
         /// </summary>
         /// <param name="targetComment">Comment to edit, checks what is current and updates it with new archives</param>
         /// <param name="ArchivedToInsert">The list of items to insert, not the archives themselves, this is usually used internally</param>
-        public static void EditArchiveComment(Comment targetComment, List<string> ArchivesToInsert)
+        public static bool EditArchiveComment(Comment targetComment, List<string> ArchivesToInsert)
         {
+            bool bEditGood = false;
             if (ArchivesToInsert.Count > 0)
             {
                 Console.Title = $"Editing comment {targetComment.Id}";
-                bool bEditGood = false;
                 string newCommentText = "";
                 string[] oldCommentLines = targetComment.Body.Split("\n".ToArray());
                 if (oldCommentLines.Length >= 1)
@@ -348,12 +338,15 @@ namespace Mnemosyne2Reborn.Commenting
                         }
                         newCommentText += string.Join("\n", tail);
                     }
+                    if (newCommentText.Length > 10000)
+                        bEditGood = false;
                 }
                 if (bEditGood)
                 {
                     targetComment.EditText(newCommentText);
                 }
             }
+            return bEditGood;
         }
     }
 }

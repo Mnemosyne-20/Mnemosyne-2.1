@@ -59,8 +59,24 @@ namespace Mnemosyne2Reborn
         public static Regex ImageRegex = new Regex(@"(\.gif|\.jpg|\.png|\.pdf|\.webm|\.mp4)$");
         public static Config Config = !File.Exists("./Data/Settings.json") ? CreateNewConfig() : Config.GetConfig();
         #endregion
-        static void Main()
+        static void Main(string[] args)
         {
+            foreach (string s in args)
+            {
+                switch (s)
+                {
+                    case "--server":
+                    case "-s":
+                        break;
+                    case "--help":
+                        Console.WriteLine("Mnemosyne - 2.1 by chugga_fan");
+                        Console.WriteLine("Currently no supported command line options, but future options will be:");
+                        Console.WriteLine("\t--server | -s\tWill be used to start a web hosted version, with an ASP.NET host");
+                        return;
+                    default:
+                        break;
+                }
+            }
             Console.Title = "Mnemosyne-2.1 by chugga_fan";
             Console.Clear();
             IBotState botstate = Config.SQLite ? (IBotState)new SQLiteBotState() : new FlatBotState();
@@ -89,7 +105,7 @@ namespace Mnemosyne2Reborn
                 File.Delete("./Data/Users.json");
             }
 #pragma warning restore CS0618 // Type or member is obsolete
-            IArchiveService service = ArchiveService.CreateService(DefaultServices.ArchiveFo);
+            IArchiveService service = new ArchiveService().CreateNewService();
             ArchiveLinks.SetArchiveService(service);
             PostArchives.SetArchiveService(service);
             while (true) // main loop, calls delegates that move thrugh every subreddit allowed iteratively

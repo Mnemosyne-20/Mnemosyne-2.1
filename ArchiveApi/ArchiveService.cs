@@ -7,9 +7,14 @@ namespace ArchiveApi
         ArchiveIs,
         ArchiveFo
     }
-    public static class ArchiveService
+    public class ArchiveService : IArchiveServiceFactory
     {
-        public static IArchiveService CreateService(DefaultServices service = DefaultServices.ArchiveFo)
+        DefaultServices service;
+        public ArchiveService(DefaultServices service = DefaultServices.ArchiveFo)
+        {
+            this.service = service;
+        }
+        public override IArchiveService CreateNewService()
         {
             switch (service)
             {

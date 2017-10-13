@@ -15,7 +15,7 @@ namespace ArchiveApi
     /// The exception that is thrown if CloudFlare clearance failed after the declared number of attempts.
     /// </summary>
     [Serializable]
-    public class CloudFlareClearanceException : HttpRequestException
+    internal class CloudFlareClearanceException : HttpRequestException
     {
         public CloudFlareClearanceException(int attempts) : this(attempts, $"Clearance failed after {attempts} attempt(s).") { }
 
@@ -254,7 +254,7 @@ namespace ArchiveApi
     /// <summary>
     /// Provides methods to solve the JavaScript challenge, which is part of CloudFlares clearance process.
     /// </summary>
-    public static class ChallengeSolver
+    internal static class ChallengeSolver
     {
         private const string ScriptTagPattern = @"<script\b[^>]*>(?<Content>.*?)<\/script>";
         private const string ObfuscatedNumberPattern = @"(?<Number>[\(\)\+\!\[\]]+)";
@@ -340,7 +340,7 @@ namespace ArchiveApi
     /// <summary>
     /// Holds the information, which is required to pass the CloudFlare clearance.
     /// </summary>
-    public struct ChallengeSolution : IEquatable<ChallengeSolution>
+    internal struct ChallengeSolution : IEquatable<ChallengeSolution>
     {
         public ChallengeSolution(string clearancePage, string verificationCode, string pass, int answer)
         {

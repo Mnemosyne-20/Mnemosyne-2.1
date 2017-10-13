@@ -14,7 +14,7 @@ namespace Mnemosyne2Reborn.Commenting
     {
         #region Static values and setters
         static IArchiveService service;
-        public static void SetArchiveService(IArchiveServiceFactory factory) => service = factory.GetArchiveService();
+        public static void SetArchiveService(IArchiveServiceFactory factory) => service = factory.CreateNewService();
         public static void SetArchiveService(IArchiveService service) => PostArchives.service = service;
         static Random rand = new Random();
         #endregion

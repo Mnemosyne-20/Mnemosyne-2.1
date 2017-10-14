@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.Linq;
 namespace Mnemosyne2Reborn
 {
     public static class RegularExpressions
@@ -10,22 +11,7 @@ namespace Mnemosyne2Reborn
         /// </summary>
         /// <param name="PostBody">This is the post body</param>
         /// <returns>the list of URLS we're archiving</returns>
-        public static List<string> FindLinks(string PostBody)
-        {
-            List<string> LinksList = new List<string>();
-            Match match = Regex.Match(PostBody, @"""(http|ftp|https)://([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?"""); // Same voodoo black demon magic from last repo
-            while (match.Success)
-            {
-                string foundlink = match.Value.TrimStart('"').TrimEnd('"');
-                if (!LinksList.Contains(foundlink))
-                {
-                    LinksList.Add(foundlink);
-                }
-                // iterates the match so that it actually works
-                match = match.NextMatch();
-            }
-            return LinksList;
-        }
+        public static List<string> FindLinks(string PostBody) => FindLinksE(PostBody).ToList();
         public static IEnumerable<string> FindLinksE(string PostBody)
         {
             Match match = Regex.Match(PostBody, @"""(http|ftp|https)://([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?"""); // Same voodoo black demon magic from last repo

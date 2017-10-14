@@ -14,11 +14,10 @@ namespace Mnemosyne2Reborn
         public static List<string> FindLinks(string PostBody) => FindLinksE(PostBody).ToList();
         public static IEnumerable<string> FindLinksE(string PostBody)
         {
-            Match match = Regex.Match(PostBody, @"""(http|ftp|https)://([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?"""); // Same voodoo black demon magic from last repo
-            while (match.Success)
+            MatchCollection matches = Regex.Matches(PostBody, @"""(http|ftp|https)://([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?"""); // Same voodoo black demon magic from last repo
+            foreach(Match match in matches)
             {
                 yield return match.Value.TrimStart('"').TrimEnd('"');
-                match = match.NextMatch(); // iterates it so it yeilds a new result each time
             }
         }
     }

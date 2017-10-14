@@ -94,8 +94,7 @@ namespace Mnemosyne2Reborn
         public static Dictionary<string, int> ArchivePostLinks(ref List<string> FoundLinks, Regex[] exclusions, RedditSharp.Things.RedditUser user, bool removeCollisions)
         {
             Dictionary<string, int> ArchiveLinks = new Dictionary<string, int>();
-            int counter = 1;
-            for (int i = 0; i < FoundLinks.Count; i++)
+            for (int i = 0, counter = 1; i < FoundLinks.Count; i++)
             {
                 string link = FoundLinks[i];
                 new RedditUserProfileSqlite(user).AddUrlUsed(link);

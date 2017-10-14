@@ -37,7 +37,7 @@ namespace ArchiveApi
         Memento[] _mementos;
         public Mementos(IEnumerable<Memento> mementoList)
         {
-            _mementos = (Memento[])mementoList;
+            _mementos = mementoList.ToArray();
             TimeGate = null;
             TimeMap = null;
             Original = null;
@@ -48,13 +48,14 @@ namespace ArchiveApi
             for (int i = 0, i2 = 0; i < mementoList.Count(); i++)
             {
                 var link = mementoList.ElementAt(i);
-                if (link.Attributes.GetValues("rel").Contains("timegate"))
-                    TimeGate = link.Attributes.GetValues("rel").First();
-                else if (link.Attributes.GetValues("rel").Contains("timemap"))
+                var linkAttributes = link.Attributes.GetValues("rel");
+                if (linkAttributes.Contains("timegate"))
+                    TimeGate = link.Uri;
+                else if (linkAttributes.Contains("timemap"))
                     TimeMap = new TimeMap(link);
-                else if (link.Attributes.GetValues("rel").Contains("original"))
+                else if (linkAttributes.Contains("original"))
                     Original = link.Uri;
-                else if (link.Attributes.GetValues("rel").Contains("memento"))
+                else if (linkAttributes.Contains("memento"))
                 {
                     _mementos[i2] = new Memento(link);
                     i2++;

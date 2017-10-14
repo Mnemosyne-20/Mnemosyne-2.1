@@ -34,114 +34,13 @@ namespace ArchiveApi.Services
         /// </summary>
         /// <param name="Url">Url to archive</param>
         /// <returns>Archive link</returns>
-        public string Save(string Url)
-        {
-            /// <summary>
-            /// This puts a request to the archive site, so yhea...
-            /// </summary>
-            var response = client.PostAsync(SubmitEndpoint, new FormUrlEncodedContent(new Dictionary<string, string>
-                {
-                    {"url", Url.ToString() }
-                })).Result;
-            string ReturnUrl = response.RequestMessage.RequestUri.ToString();
-            if (!Verify(ReturnUrl) && response.Headers.TryGetValues("Refresh", out var headers))
-            {
-                foreach (var header in headers)
-                {
-                    if (header.Contains("http://archive.fo"))
-                    {
-                        ReturnUrl = header.Split('=')[1];
-                    }
-                }
-            }
-
-            /// <remarks>
-            /// Fixes the bug where archive.fo returns a json file that has a url tag
-            /// </remarks>
-            if (!Verify(ReturnUrl) && !response.IsSuccessStatusCode)
-            {
-                #region fixing issues with return because this works somehow!?!?
-                using (StringReader reader = new StringReader(response.ToString()))
-                {
-                    for (int i = 0; i < 3; i++)
-                    {
-                        reader.ReadLine();
-                    }
-                    string[] sides = reader.ReadLine().Split('=');
-                    try
-                    {
-                        ReturnUrl = sides[1];
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine("Error from archive.fo: \n" + e.Message);
-                    }
-                }
-                #endregion
-            }
-            if (!Verify(ReturnUrl))
-            {
-                throw new ArchiveException($"Archive failed with original link {Url.ToString()} at {DateTime.Now}");
-            }
-
-            return ReturnUrl;
-        }
+        public string Save(string Url) => SaveAsync(Url).Result;
         /// <summary>
         /// Saves a webpage
         /// </summary>
         /// <param name="Url">Url to archive</param>
         /// <returns>Archive link</returns>
-        public string Save(Uri Url)
-        {
-            /// <summary>
-            /// This puts a request to the archive site, so yhea...
-            /// </summary>
-            var response = client.PostAsync(SubmitEndpoint, new FormUrlEncodedContent(new Dictionary<string, string>
-                {
-                    {"url", Url.ToString() }
-                })).Result;
-            string ReturnUrl = response.RequestMessage.RequestUri.ToString();
-            if (!Verify(ReturnUrl) && response.Headers.TryGetValues("Refresh", out var headers))
-            {
-                foreach (var header in headers)
-                {
-                    if (header.Contains("http://archive.fo"))
-                    {
-                        ReturnUrl = header.Split('=')[1];
-                    }
-                }
-            }
-
-            /// <remarks>
-            /// Fixes the bug where archive.fo returns a json file that has a url tag
-            /// </remarks>
-            if (!Verify(ReturnUrl) && !response.IsSuccessStatusCode)
-            {
-                #region fixing issues with return because this works somehow!?!?
-                using (StringReader reader = new StringReader(response.ToString()))
-                {
-                    for (int i = 0; i < 3; i++)
-                    {
-                        reader.ReadLine();
-                    }
-                    string[] sides = reader.ReadLine().Split('=');
-                    try
-                    {
-                        ReturnUrl = sides[1];
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine("Error from archive.fo: \n" + e.Message);
-                    }
-                }
-                #endregion
-            }
-            if (!Verify(ReturnUrl))
-            {
-                throw new ArchiveException($"Archive failed with original link {Url.ToString()} at {DateTime.Now}");
-            }
-            return ReturnUrl;
-        }
+        public string Save(Uri Url) => SaveAsync(Url).Result;
         /// <summary>
         /// Saves a webpage
         /// </summary>
@@ -149,7 +48,6 @@ namespace ArchiveApi.Services
         /// <returns>Archive link</returns>
         public async Task<string> SaveAsync(string Url)
         {
-
             /// <summary>
             /// This puts a request to the archive site, so yhea...
             /// </summary>
@@ -162,7 +60,7 @@ namespace ArchiveApi.Services
             {
                 foreach (var header in headers)
                 {
-                    if (header.Contains("http://archive.fo"))
+                    if (header.Contains(BaseUri.OriginalString))
                     {
                         ReturnUrl = header.Split('=')[1];
                     }
@@ -217,7 +115,7 @@ namespace ArchiveApi.Services
             {
                 foreach (var header in headers)
                 {
-                    if (header.Contains("http://archive.fo"))
+                    if (header.Contains(BaseUri.OriginalString))
                     {
                         ReturnUrl = header.Split('=')[1];
                     }

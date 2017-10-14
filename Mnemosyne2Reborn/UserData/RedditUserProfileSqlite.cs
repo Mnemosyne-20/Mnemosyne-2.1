@@ -37,11 +37,7 @@ namespace Mnemosyne2Reborn.UserData
             SQLiteGetUserExists.Parameters["@Name"].Value = User;
             return Convert.ToBoolean(SQLiteGetUserExists.ExecuteScalar());
         }
-        public bool UserExists(RedditUser user)
-        {
-            SQLiteGetUserExists.Parameters["@Name"].Value = user.Name;
-            return Convert.ToBoolean(SQLiteGetUserExists.ExecuteScalar());
-        }
+        public bool UserExists(RedditUser User) => UserExists(User.Name);
         public bool OptedOut
         {
             get
@@ -91,7 +87,6 @@ namespace Mnemosyne2Reborn.UserData
         {
             get
             {
-
                 SQLiteGetArchived.Parameters["@Name"].Value = User;
                 return Convert.ToInt32(SQLiteGetArchived.ExecuteScalar());
             }

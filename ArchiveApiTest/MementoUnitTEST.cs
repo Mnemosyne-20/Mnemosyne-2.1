@@ -30,6 +30,13 @@ namespace ArchiveApiTest
 <http://archive.is/20170308191942/https://kernel.org/>; rel=""last memento""; datetime=""Wed, 08 Mar 2017 19:19:42 GMT"",
 <http://archive.is/timemap/http://kernel.org/>; rel=""self""; type=""application/link-format""; from=""Wed, 23 May 2012 21:04:12 GMT""; until=""Wed, 08 Mar 2017 19:19:42 GMT""";
         #endregion
+        [TestCategory("TimeGate")]
+        [TestMethod]
+        public void TimeGateTest()
+        {
+            Mementos mementos = new Mementos(LinkFormat.Parse(Test));
+            Assert.IsTrue(mementos.TimeGate == "http://archive.is/timegate/http://kernel.org/");
+        }
         [TestCategory("Mementos")]
         [TestMethod]
         public void MementoFirstTest()

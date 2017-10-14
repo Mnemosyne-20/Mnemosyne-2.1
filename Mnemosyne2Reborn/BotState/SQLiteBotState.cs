@@ -113,7 +113,7 @@ namespace Mnemosyne2Reborn.BotState
         public string GetCommentForPost(string postID)
         {
             SQLCmd_GetBotComment.Parameters["@postID"].Value = postID;
-            string botReplyID = (string)SQLCmd_GetBotComment.ExecuteScalar();
+            string botReplyID = Convert.ToString(SQLCmd_GetBotComment.ExecuteScalar());
             if (string.IsNullOrWhiteSpace(botReplyID))
             {
                 throw new InvalidOperationException($"Comment ID for post {postID} is null or empty");

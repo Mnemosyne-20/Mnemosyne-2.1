@@ -57,7 +57,7 @@ namespace Mnemosyne2Reborn.Commenting
             List<string> LinksToPost = new List<string>();
             if (sub.ArchivePost)
             {
-                LinksToPost.Add($"* **Post:** {service.Save(post.Url)}\n"); // saves post if you want to archive something
+                LinksToPost.Add($"* **Post:** {sub.SubredditArchiveService.Save(post.Url)}\n"); // saves post if you want to archive something
             }
             for (int i = 0; i < OriginalLinks.Count; i++)
             {
@@ -83,7 +83,7 @@ namespace Mnemosyne2Reborn.Commenting
             List<string> LinksToPost = new List<string>();
             if (sub.ArchivePost)
             {
-                LinksToPost.Add($"* **Post:** {service.Save(post.Url)}\n"); // saves post if you want to archive something
+                LinksToPost.Add($"* **Post:** {sub.SubredditArchiveService.Save(post.Url)}\n"); // saves post if you want to archive something
             }
             int i = 0;
             foreach (var val in ArchivedLinks)

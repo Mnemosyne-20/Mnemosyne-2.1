@@ -219,13 +219,15 @@ namespace ArchiveApi
 
             await Task.Delay(5000, cancellationToken);
 
-            var clearanceRequest = new HttpRequestMessage(HttpMethod.Get, clearanceUri);
+            using (var clearanceRequest = new HttpRequestMessage(HttpMethod.Get, clearanceUri))
+            {
+                if (response.RequestMessage.Headers.TryGetValues(HttpHeader.UserAgent, out IEnumerable<string> userAgent))
+                    clearanceRequest.Headers.Add(HttpHeader.UserAgent, userAgent);
 
-            if (response.RequestMessage.Headers.TryGetValues(HttpHeader.UserAgent, out IEnumerable<string> userAgent))
-                clearanceRequest.Headers.Add(HttpHeader.UserAgent, userAgent);
+                var passResponse = await _client.SendAsync(clearanceRequest, cancellationToken);
 
-            var passResponse = await _client.SendAsync(clearanceRequest, cancellationToken);
-            SaveIdCookie(passResponse); // new ID might be set as a response to the challenge in some cases
+                SaveIdCookie(passResponse); // new ID might be set as a response to the challenge in some cases
+            }
         }
 
         private void SaveIdCookie(HttpResponseMessage response)

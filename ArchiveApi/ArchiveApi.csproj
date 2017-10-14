@@ -47,6 +47,7 @@
   <ItemGroup>
     <Compile Include="ArchiveException.cs" />
     <Compile Include="ArchiveService.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Services\ArchiveFoService.cs" />
     <Compile Include="Services\ArchiveIsService.cs" />
     <Compile Include="Interfaces\ArchiveServiceFactory.cs" />

@@ -10,9 +10,17 @@ namespace ArchiveApi
     public class ArchiveService : IArchiveServiceFactory
     {
         DefaultServices service;
-        public ArchiveService(DefaultServices service = DefaultServices.ArchiveFo)
+        public ArchiveService(DefaultServices service = DefaultServices.ArchiveFo) => this.service = service;
+        public ArchiveService(string service)
         {
-            this.service = service;
+            if (service.Contains("archive.is"))
+            {
+                this.service = DefaultServices.ArchiveIs;
+            }
+            else if (service.Contains("archive.fo"))
+            {
+                this.service = DefaultServices.ArchiveFo;
+            }
         }
         public override IArchiveService CreateNewService()
         {

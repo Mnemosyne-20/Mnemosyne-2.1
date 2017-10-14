@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using ArchiveApi;
+using ArchiveApi.Interfaces;
+using Newtonsoft.Json;
 using RedditSharp;
 using RedditSharp.Things;
 namespace Mnemosyne2Reborn.Configuration
@@ -16,7 +18,8 @@ namespace Mnemosyne2Reborn.Configuration
             ArchiveSubreddit sub = new ArchiveSubreddit(reddit.GetSubreddit(json.Name))
             {
                 ArchivePost = json.ArchivePost,
-                ArchiveCommentLinks = json.ArchiveCommentLinks
+                ArchiveCommentLinks = json.ArchiveCommentLinks,
+                SubredditArchiveService = new ArchiveService(json.ArchiveWebsite).CreateNewService()
             };
             return sub;
         }
@@ -35,6 +38,9 @@ namespace Mnemosyne2Reborn.Configuration
         [JsonRequired]
         [JsonProperty("SubredditName")]
         public string Name { get; set; }
+        [JsonRequired]
+        [JsonProperty("ArchiveWebsite")]
+        public string ArchiveWebsite { get; set; }
     }
     /// <summary>
     /// This class creates a wrapper for a subreddit so that it has two properties to be pass around readily
@@ -42,15 +48,13 @@ namespace Mnemosyne2Reborn.Configuration
     public class ArchiveSubreddit
     {
         public readonly Subreddit sub;
-        public ArchiveSubreddit(Subreddit sub)
-        {
-            this.sub = sub;
-        }
+        public ArchiveSubreddit(Subreddit sub) => this.sub = sub;
         public Listing<Post> New => sub.New;
         public Listing<Post> Posts => sub.Posts;
         public Listing<Comment> Comments => sub.Comments;
         public string Name => sub.Name;
         public bool ArchiveCommentLinks { get; set; }
         public bool ArchivePost { get; set; }
+        public IArchiveService SubredditArchiveService { get; set; }
     }
 }

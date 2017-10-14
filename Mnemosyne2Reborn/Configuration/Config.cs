@@ -3,6 +3,15 @@ using System;
 using System.IO;
 namespace Mnemosyne2Reborn.Configuration
 {
+    public class ConfigEventArgs : EventArgs
+    {
+        private Config conf;
+        public ConfigEventArgs(Config c)
+        {
+            conf = c;
+        }
+        public Config Config => conf;
+    }
     [Serializable]
     public class Config
     {
@@ -43,10 +52,8 @@ namespace Mnemosyne2Reborn.Configuration
         /// EXISTS ONLY FOR JSONCONVERT
         /// DO NOT USE
         /// </summary>
-        [Obsolete("Don't use this unless you're doing jsonconvert")]
         public Config()
         {
-
         }
         public Config(bool SQLite, string UserName, ArchiveSubredditJson[] Subreddits, string Password, bool UseOAuth = false, string OAuthSecret = null, string OAuthClientId = null, bool ArchiveLinks = false, string ArchiveService = "http://www.archive.is", string RedirectURI = "https://github.com/Mnemosyne-20/Mnemosyne-2.1")
         {

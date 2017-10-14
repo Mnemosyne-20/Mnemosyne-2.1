@@ -37,6 +37,7 @@ namespace Mnemosyne2Reborn
             "PORTMANTEAU-BOT",
             "GoodBot_BadBot_Karma"
         };
+        public event EventHandler<ConfigEventArgs> UpdateConfig;
         /// <summary>
         /// Iterates each "thing" you make, subreddit is required for a few of them
         /// </summary>
@@ -59,6 +60,17 @@ namespace Mnemosyne2Reborn
         public static Regex ImageRegex = new Regex(@"(\.gif|\.jpg|\.png|\.pdf|\.webm|\.mp4)$");
         public static Config Config = !File.Exists("./Data/Settings.json") ? CreateNewConfig() : Config.GetConfig();
         #endregion
+        static ArchiveSubreddit[] ArchiveSubreddits;
+        public Program()
+        {
+            UpdateConfig += (sender, e) => { Config = e.Config; };
+        }
+        public static void GetHelp()
+        {
+            Console.WriteLine("Mnemosyne - 2.1 by chugga_fan");
+            Console.WriteLine("Currently no supported command line options, but future options will be:");
+            Console.WriteLine("\t--server | -s\tWill be used to start a web hosted version, with an ASP.NET host");
+        }
         static void Main(string[] args)
         {
             foreach (string s in args)
@@ -69,9 +81,7 @@ namespace Mnemosyne2Reborn
                     case "-s":
                         break;
                     case "--help":
-                        Console.WriteLine("Mnemosyne - 2.1 by chugga_fan");
-                        Console.WriteLine("Currently no supported command line options, but future options will be:");
-                        Console.WriteLine("\t--server | -s\tWill be used to start a web hosted version, with an ASP.NET host");
+                        GetHelp();
                         return;
                     default:
                         break;
@@ -89,10 +99,10 @@ namespace Mnemosyne2Reborn
             Reddit reddit = Config.UseOAuth ? new Reddit(agent) : new Reddit(Config.UserName, Config.Password);
 #pragma warning restore CS0618 // Type or member is obsolete
             reddit.InitOrUpdateUser();
-            ArchiveSubreddit[] subs = new ArchiveSubreddit[Config.Subreddits.Length];
+            ArchiveSubreddits = new ArchiveSubreddit[Config.Subreddits.Length];
             for (int i = 0; i < Config.Subreddits.Length; i++)
             {
-                subs[i] = reddit.GetArchiveSubreddit(Config.Subreddits[i]);
+                ArchiveSubreddits[i] = reddit.GetArchiveSubreddit(Config.Subreddits[i]);
             }
             IteratePost = IteratePosts;
             IterateComment = IterateComments;
@@ -112,7 +122,7 @@ namespace Mnemosyne2Reborn
             {
                 try
                 {
-                    foreach (ArchiveSubreddit sub in subs) // Iterates allowed subreddits
+                    foreach (ArchiveSubreddit sub in ArchiveSubreddits) // Iterates allowed subreddits
                     {
                         IteratePost(reddit, botstate, sub);
                         IterateComment(reddit, botstate, sub);
@@ -175,7 +185,8 @@ namespace Mnemosyne2Reborn
                 {
                     ArchiveCommentLinks = ArcComments,
                     ArchivePost = ArcPost,
-                    Name = name
+                    Name = name,
+                    ArchiveWebsite = "archive.fo"
                 };
                 Subs[i] = arcSubJson;
             }

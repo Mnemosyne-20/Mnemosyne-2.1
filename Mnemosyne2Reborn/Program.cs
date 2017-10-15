@@ -37,7 +37,6 @@ namespace Mnemosyne2Reborn
             "PORTMANTEAU-BOT",
             "GoodBot_BadBot_Karma"
         };
-        public event EventHandler<ConfigEventArgs> UpdateConfig;
         /// <summary>
         /// Iterates each "thing" you make, subreddit is required for a few of them
         /// </summary>
@@ -45,8 +44,9 @@ namespace Mnemosyne2Reborn
         /// <param name="state"></param>
         /// <param name="subbreddit"></param>
         public delegate void IterateThing(Reddit reddit, IBotState state, ArchiveSubreddit subbreddit);
-        public static IterateThing IteratePost;
-        public static IterateThing IterateComment;
+        public delegate void IterateConfiguratedThing(Reddit reddit, IBotState state, ArchiveSubreddit subreddit, Config config);
+        public static IterateConfiguratedThing IteratePost;
+        public static IterateConfiguratedThing IterateComment;
         public static IterateThing IterateMessage;
         /// <summary>
         /// This is intentional to be this way, it's so that the editor can get the headers easily
@@ -58,19 +58,32 @@ namespace Mnemosyne2Reborn
         public static Regex exclusions = new Regex(@"(facebook\.com|giphy\.com|youtube\.com|streamable\.com|www\.gobrickindustry\.us|gyazo\.com|sli\.mg|imgur\.com|reddit\.com/message|youtube\.com|youtu\.be|wiki/rules|politics_feedback_results_and_where_it_goes_from|urbandictionary\.com)");
         public static Regex providers = new Regex(@"(web-beta.archive.org|archive\.is|archive\.fo|web\.archive\.org|archive\.today|megalodon\.jp|web\.archive\.org|webcache\.googleusercontent\.com|archive\.li)");
         public static Regex ImageRegex = new Regex(@"(\.gif|\.jpg|\.png|\.pdf|\.webm|\.mp4)$");
-        public static Config Config = !File.Exists("./Data/Settings.json") ? CreateNewConfig() : Config.GetConfig();
-        #endregion
+
         static ArchiveSubreddit[] ArchiveSubreddits;
-        public Program()
+        #region Locks
+        static object LockConfigObject = new object();
+        #endregion
+        #endregion
+        #region Local Values
+        public event EventHandler<ConfigEventArgs> UpdatedConfig;
+        Config _config;
+        public Config Config
         {
-            UpdateConfig += (sender, e) => { Config = e.Config; };
+            get
+            {
+                return _config;
+            }
+            set
+            {
+                lock (LockConfigObject)
+                {
+                    _config = value;
+                }
+                UpdatedConfig?.Invoke(this, new ConfigEventArgs(_config));
+            }
         }
-        public static void GetHelp()
-        {
-            Console.WriteLine("Mnemosyne - 2.1 by chugga_fan");
-            Console.WriteLine("Currently no supported command line options, but future options will be:");
-            Console.WriteLine("\t--server | -s\tWill be used to start a web hosted version, with an ASP.NET host");
-        }
+        #endregion
+
         static void Main(string[] args)
         {
             foreach (string s in args)
@@ -87,8 +100,19 @@ namespace Mnemosyne2Reborn
                         break;
                 }
             }
+            Program p = new Program();
+        }
+        public static void GetHelp()
+        {
+            Console.WriteLine("Mnemosyne - 2.1 by chugga_fan");
+            Console.WriteLine("Currently no supported command line options, but future options will be:");
+            Console.WriteLine("\t--server | -s\tWill be used to start a web hosted version, with an ASP.NET host");
+        }
+        public Program()
+        {
             Console.Title = "Mnemosyne-2.1 by chugga_fan";
             Console.Clear();
+            Config = !File.Exists("./Data/Settings.json") ? CreateNewConfig() : Config.GetConfig();
             IBotState botstate = Config.SQLite ? (IBotState)new SQLiteBotState() : new FlatBotState();
             WebAgent agent = null;
             if (Config.UseOAuth)
@@ -97,18 +121,12 @@ namespace Mnemosyne2Reborn
             }
 #pragma warning disable CS0618 // Type or member is obsolete
             Reddit reddit = Config.UseOAuth ? new Reddit(agent) : new Reddit(Config.UserName, Config.Password);
-#pragma warning restore CS0618 // Type or member is obsolete
             reddit.InitOrUpdateUser();
-            ArchiveSubreddits = new ArchiveSubreddit[Config.Subreddits.Length];
-            for (int i = 0; i < Config.Subreddits.Length; i++)
-            {
-                ArchiveSubreddits[i] = reddit.GetArchiveSubreddit(Config.Subreddits[i]);
-            }
+            ArchiveSubreddits = InitializeArchiveSubreddits(reddit, Config);
             IteratePost = IteratePosts;
             IterateComment = IterateComments;
             IterateMessage = IterateMessages;
             new RedditUserProfileSqlite();
-#pragma warning disable CS0618 // Type or member is obsolete
             if (File.Exists("./Data/Users.json"))
             {
                 RedditUserProfileSqlite.TransferProfilesToSqlite(RedditUserProfile.Users);
@@ -118,37 +136,52 @@ namespace Mnemosyne2Reborn
             IArchiveService service = new ArchiveService().CreateNewService();
             ArchiveLinks.SetArchiveService(service);
             PostArchives.SetArchiveService(service);
+            MainLoop(reddit, botstate);
+        }
+        public static ArchiveSubreddit[] InitializeArchiveSubreddits(Reddit reddit, Config config)
+        {
+            ArchiveSubreddit[] ArchiveSubreddits = new ArchiveSubreddit[config.Subreddits.Length];
+            for (int i = 0; i < config.Subreddits.Length; i++)
+            {
+                ArchiveSubreddits[i] = reddit.GetArchiveSubreddit(config.Subreddits[i]);
+            }
+            return ArchiveSubreddits;
+        }
+        public void MainLoop(Reddit reddit, IBotState botstate)
+        {
             while (true) // main loop, calls delegates that move thrugh every subreddit allowed iteratively
             {
                 try
                 {
                     foreach (ArchiveSubreddit sub in ArchiveSubreddits) // Iterates allowed subreddits
                     {
-                        IteratePost(reddit, botstate, sub);
-                        IterateComment(reddit, botstate, sub);
+                        IteratePost(reddit, botstate, sub, Config);
+                        IterateComment(reddit, botstate, sub, Config);
                         IterateMessage(reddit, botstate, sub);
                     }
                     Console.Title = $"Sleeping, New messages: {reddit.User.UnreadMessages.Count() >= 1}";
                 }
-                catch (WebException e) when (e.Message.Contains("(404)") || !e.Message.Contains("Cannot resolve hostname") && (int)((HttpWebResponse)e.Response).StatusCode <= 500 && (int)((HttpWebResponse)e.Response).StatusCode >= 600)
+                catch (WebException e) when (e.Message.Contains("(404)") || e.Message.Contains("Cannot resolve hostname") && (int)((HttpWebResponse)e.Response).StatusCode <= 500 && (int)((HttpWebResponse)e.Response).StatusCode >= 600)
                 {
                     Console.WriteLine("Connect to the internet, Error: " + e.Message);
                 }
                 catch (Exception e)
                 {
-                    if (e.Message.Contains("Cannot resolve hostname") || e.Message.Contains("(502)") || e.Message.Contains("(503)") || e.Message.Contains("The remote name could not be resolved")) continue;
+                    if (e.Message.Contains("(502)") || e.Message.Contains("(503)") || e.Message.Contains("The remote name could not be resolved"))
+                    {
+                        continue;
+                    }
                     // Catches errors and documents them, I should switch to a System.Diagnostics logger but I have no experience with it
                     if (!Directory.Exists("./Errors"))
                     {
                         Directory.CreateDirectory("./Errors");
                     }
-                    File.AppendAllText("./Errors/Failures.txt", $"{e.ToString()}\n");
+                    File.AppendAllText("./Errors/Failures.txt", $"{e.ToString()}{Environment.NewLine}");
                     Console.WriteLine($"Caught an exception of type {e.GetType()} output is in ./Errors/Failures.txt");
                 }
                 Thread.Sleep(1000); // sleeps for one second to help with the reddit calls
             }
         }
-
         public static Config CreateNewConfig()
         {
             Console.WriteLine("Would you like to store data using SQLite instead of JSON files? (Yes/No)");
@@ -236,7 +269,7 @@ namespace Mnemosyne2Reborn
                 }
             }
         }
-        public static void IteratePosts(Reddit reddit, IBotState state, ArchiveSubreddit subreddit)
+        public static void IteratePosts(Reddit reddit, IBotState state, ArchiveSubreddit subreddit, Config config)
         {
             if (reddit == null || state == null || subreddit == null)
             {
@@ -257,22 +290,23 @@ namespace Mnemosyne2Reborn
                     {
                         continue;
                     }
-                    else if (Links.Count == 0 && subreddit.ArchivePost)
+                    if (Links.Count >= 0)
                     {
-                        goto ArchivePost;
-                    }
-                    foreach (string s in Links)
-                    {
-                        Console.WriteLine($"Found {s} in post {post.Id}");
+                        foreach (string s in Links)
+                        {
+                            Console.WriteLine($"Found {s} in post {post.Id}");
+                        }
                     }
                     ArchivedLinks = ArchiveLinks.ArchivePostLinks(ref Links, new Regex[] { exclusions, providers, ImageRegex }, reddit.GetUser(post.AuthorName), false);
-                    ArchivePost:;
-                    PostArchives.ArchivePostLinks(subreddit, Config, state, post, Links, ArchivedLinks);
+                    lock (LockConfigObject)
+                    {
+                        PostArchives.ArchivePostLinks(subreddit, config, state, post, Links, ArchivedLinks);
+                    }
                     state.AddCheckedPost(post.Id);
                 }
             }
         }
-        public static void IterateComments(Reddit reddit, IBotState state, ArchiveSubreddit subreddit)
+        public static void IterateComments(Reddit reddit, IBotState state, ArchiveSubreddit subreddit, Config config)
         {
             if (!subreddit.ArchiveCommentLinks)
             {
@@ -295,7 +329,10 @@ namespace Mnemosyne2Reborn
                     Console.WriteLine($"Found {s} in comment {comment.Id}");
                 }
                 List<string> ArchivedLinks = ArchiveLinks.ArchivePostLinks(ref Links, new Regex[] { exclusions, providers, ImageRegex }, reddit.GetUser(comment.AuthorName));
-                PostArchives.ArchiveCommentLinks(Config, state, reddit, comment, ArchivedLinks, Links);
+                lock (LockConfigObject)
+                {
+                    PostArchives.ArchiveCommentLinks(config, state, reddit, comment, ArchivedLinks, Links);
+                }
                 state.AddCheckedComment(comment.Id);
             }
         }

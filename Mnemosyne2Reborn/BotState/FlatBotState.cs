@@ -14,8 +14,7 @@ namespace Mnemosyne2Reborn.BotState
         static Dictionary<string, string> ReadReplyTrackingFile(string file)
         {
             Dictionary<string, string> replyDict = new Dictionary<string, string>();
-            string fileIn = File.ReadAllText(file);
-            string[] elements = fileIn.Split(new char[] { ':', ',' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] elements = File.ReadAllText(file).Split(new char[] { ':', ',' }, StringSplitOptions.RemoveEmptyEntries);
             for (int i = 0; i < elements.Length; i += 2)
             {
                 string postID = elements[i];

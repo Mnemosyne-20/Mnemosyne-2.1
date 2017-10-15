@@ -85,12 +85,15 @@ namespace Mnemosyne2Reborn.Commenting
             {
                 LinksToPost.Add($"* **Post:** {sub.SubredditArchiveService.Save(post.Url)}\n"); // saves post if you want to archive something
             }
-            int i = 0;
-            foreach (var val in ArchivedLinks)
+            if (ArchivedLinks != null)
             {
-                string hostname = new Uri(OriginalLinks[i]).Host.Replace("www.", "");
-                LinksToPost.Add($"* **Link: {val.Value.ToString()}** ([{hostname}]({OriginalLinks[i]})): {val.Key}\n");
-                i++;
+                int i = 0;
+                foreach (var val in ArchivedLinks)
+                {
+                    string hostname = new Uri(OriginalLinks[i]).Host.Replace("www.", "");
+                    LinksToPost.Add($"* **Link: {val.Value.ToString()}** ([{hostname}]({OriginalLinks[i]})): {val.Key}\n");
+                    i++;
+                }
             }
             if (LinksToPost.Count == 0)
             {
@@ -113,12 +116,15 @@ namespace Mnemosyne2Reborn.Commenting
             {
                 LinksToPost.Add($"* **Post:** {service.Save(post.Url)}\n"); // saves post if you want to archive something
             }
-            int i = 0;
-            foreach (var val in ArchivedLinks)
+            if (ArchivedLinks != null)
             {
-                string hostname = new Uri(OriginalLinks[i]).Host.Replace("www.", "");
-                LinksToPost.Add($"* **Link: {val.Value.ToString()}** ([{hostname}]({OriginalLinks[i]})): {val.Key}\n");
-                i++;
+                int i = 0;
+                foreach (var val in ArchivedLinks)
+                {
+                    string hostname = new Uri(OriginalLinks[i]).Host.Replace("www.", "");
+                    LinksToPost.Add($"* **Link: {val.Value.ToString()}** ([{hostname}]({OriginalLinks[i]})): {val.Key}\n");
+                    i++;
+                }
             }
             if (LinksToPost.Count == 0)
             {

@@ -298,7 +298,7 @@ namespace Mnemosyne2Reborn
             Console.Title = $"Finding posts in {subreddit.Name} New messages: {reddit.User.UnreadMessages.Count() >= 1}";
             foreach (var post in subreddit.New.Take(25))
             {
-                if (!state.DoesCommentExist(post.Id) && !state.HasCommentBeenChecked(post.Id))
+                if (!state.DoesCommentExist(post.Id) && !state.HasPostBeenChecked(post.Id))
                 {
                     Dictionary<string, int> ArchivedLinks = new Dictionary<string, int>();
                     List<string> Links = new List<string>();

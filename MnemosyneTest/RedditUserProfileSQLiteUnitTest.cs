@@ -13,6 +13,7 @@ namespace MnemosyneTest
         {
             red = new Reddit();
             System.IO.Directory.CreateDirectory(".\\Data\\5");
+            System.IO.Directory.CreateDirectory(".\\Data\\6");
         }
         [TestCategory("RedditUserProfileSQLite")]
         [TestMethod]
@@ -64,6 +65,27 @@ namespace MnemosyneTest
             var current = redditUserProfileSqlite.Image;
             var next = ++redditUserProfileSqlite.Image;
             Assert.IsFalse(next == current);
+        }
+        [TestCategory("RedditUserProfileSQLite")]
+        [TestMethod]
+        public void TestAddUrlUsed()
+        {
+            new RedditUserProfileSqlite("6\\redditusers.sqlite");
+            RedditUserProfileSqlite redditUserProfileSqlite = new RedditUserProfileSqlite(red.GetUser("chugga_fan"));
+            redditUserProfileSqlite.AddUrlUsed("http://archive.fo");
+            Assert.IsTrue(redditUserProfileSqlite.Archived == 1);
+            redditUserProfileSqlite.AddUrlUsed("http://youtu.be");
+            Assert.IsTrue(redditUserProfileSqlite.Excluded == 1);
+            redditUserProfileSqlite.AddUrlUsed("help.gif");
+            Assert.IsTrue(redditUserProfileSqlite.Image == 1);
+            redditUserProfileSqlite.OptedOut = true;
+            // TEST OPT OUT WORKS
+            redditUserProfileSqlite.AddUrlUsed("http://archive.fo");
+            Assert.IsTrue(redditUserProfileSqlite.Archived == 1);
+            redditUserProfileSqlite.AddUrlUsed("http://youtu.be");
+            Assert.IsTrue(redditUserProfileSqlite.Excluded == 1);
+            redditUserProfileSqlite.AddUrlUsed("help.gif");
+            Assert.IsTrue(redditUserProfileSqlite.Image == 1);
         }
     }
 }

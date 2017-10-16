@@ -94,28 +94,28 @@ namespace Mnemosyne2Reborn
         public static Dictionary<string, int> ArchivePostLinks(ref List<string> FoundLinks, Regex[] exclusions, RedditSharp.Things.RedditUser user, bool removeCollisions)
         {
             Dictionary<string, int> ArchiveLinks = null;
-            for (int i = 0, counter = 1; i < FoundLinks.Count; i++)
+            for (int i = 0; i < FoundLinks.Count; i++)
             {
-                ArchiveLinks = new Dictionary<string, int>();
                 string link = FoundLinks[i];
                 new RedditUserProfileSqlite(user).AddUrlUsed(link);
-                if (exclusions.Sum(b => b.IsMatch(link) ? 1 : 0) == 0)
-                {
-                    string check = service.Save(link);
-                    int retries = 0;
-                    while (!service.Verify(check) && retries < 10)
-                    {
-                        retries++;
-                        System.Threading.Thread.Sleep(5000);
-                        check = service.Save(link);
-                    }
-                    ArchiveLinks.Add(check, counter);
-                }
-                else
+                if (exclusions.Sum(a => a.IsMatch(link) ? 1 : 0) != 0)
                 {
                     FoundLinks.Remove(link);
                 }
-                counter++;
+            }
+            for (int i = 0; i < FoundLinks.Count; i++)
+            {
+                ArchiveLinks = new Dictionary<string, int>();
+                string link = FoundLinks[i];
+                string check = service.Save(link);
+                int retries = 0;
+                while (!service.Verify(check) && retries < 10)
+                {
+                    retries++;
+                    System.Threading.Thread.Sleep(5000);
+                    check = service.Save(link);
+                }
+                ArchiveLinks.Add(check, i + 1);
             }
             return ArchiveLinks;
         }

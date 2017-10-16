@@ -59,12 +59,28 @@ namespace Mnemosyne2Reborn
         public static Regex providers = new Regex(@"(web-beta.archive.org|archive\.is|archive\.fo|web\.archive\.org|archive\.today|megalodon\.jp|web\.archive\.org|webcache\.googleusercontent\.com|archive\.li)");
         public static Regex ImageRegex = new Regex(@"(\.gif|\.jpg|\.png|\.pdf|\.webm|\.mp4)$");
 
-        static ArchiveSubreddit[] ArchiveSubreddits;
+        ArchiveSubreddit[] _archiveSubreddits;
+        ArchiveSubreddit[] ArchiveSubreddits
+        {
+            get
+            {
+                return _archiveSubreddits;
+            }
+            set
+            {
+                lock (LockArchiveSubredditsObject)
+                {
+                    _archiveSubreddits = value;
+                }
+            }
+        }
         #region Locks
         static object LockConfigObject = new object();
+        static object LockArchiveSubredditsObject = new object();
         #endregion
         #endregion
         #region Local Values
+        Reddit reddit;
         public event EventHandler<ConfigEventArgs> UpdatedConfig;
         Config _config;
         public Config Config
@@ -120,8 +136,9 @@ namespace Mnemosyne2Reborn
                 agent = new BotWebAgent(Config.UserName, Config.Password, Config.OAuthClientId, Config.OAuthSecret, Config.RedirectURI);
             }
 #pragma warning disable CS0618 // Type or member is obsolete
-            Reddit reddit = Config.UseOAuth ? new Reddit(agent) : new Reddit(Config.UserName, Config.Password);
+            reddit = Config.UseOAuth ? new Reddit(agent) : new Reddit(Config.UserName, Config.Password);
             reddit.InitOrUpdateUser();
+            UpdatedConfig += (sender, e) => { ArchiveSubreddits = InitializeArchiveSubreddits(reddit, e.Config); };
             ArchiveSubreddits = InitializeArchiveSubreddits(reddit, Config);
             IteratePost = IteratePosts;
             IterateComment = IterateComments;
@@ -153,11 +170,14 @@ namespace Mnemosyne2Reborn
             {
                 try
                 {
-                    foreach (ArchiveSubreddit sub in ArchiveSubreddits) // Iterates allowed subreddits
+                    lock (LockArchiveSubredditsObject)
                     {
-                        IteratePost(reddit, botstate, sub, Config);
-                        IterateComment(reddit, botstate, sub, Config);
-                        IterateMessage(reddit, botstate, sub);
+                        foreach (ArchiveSubreddit sub in ArchiveSubreddits) // Iterates allowed subreddits
+                        {
+                            IteratePost(reddit, botstate, sub, Config);
+                            IterateComment(reddit, botstate, sub, Config);
+                            IterateMessage(reddit, botstate, sub);
+                        }
                     }
                     Console.Title = $"Sleeping, New messages: {reddit.User.UnreadMessages.Count() >= 1}";
                 }
@@ -278,11 +298,11 @@ namespace Mnemosyne2Reborn
             Console.Title = $"Finding posts in {subreddit.Name} New messages: {reddit.User.UnreadMessages.Count() >= 1}";
             foreach (var post in subreddit.New.Take(25))
             {
-                if (!state.DoesCommentExist(post.Id) && !state.HasCommentBeenChecked(post.Id) && !state.HasPostBeenChecked(post.Id))
+                if (!state.DoesCommentExist(post.Id) && !state.HasCommentBeenChecked(post.Id))
                 {
                     Dictionary<string, int> ArchivedLinks = new Dictionary<string, int>();
                     List<string> Links = new List<string>();
-                    if (post.IsSelfPost && post.SelfTextHtml != null && post.SelfTextHtml.Length != 0)
+                    if (post.IsSelfPost && !string.IsNullOrEmpty(post.SelfTextHtml))
                     {
                         Links = RegularExpressions.FindLinks(post.SelfTextHtml);
                     }

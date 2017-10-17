@@ -3,8 +3,18 @@ using ArchiveApi.Interfaces;
 using Newtonsoft.Json;
 using RedditSharp;
 using RedditSharp.Things;
+using System;
 namespace Mnemosyne2Reborn.Configuration
 {
+    public class ArchiveSubredditEventArgs : EventArgs
+    {
+        ArchiveSubreddit[] _archiveSubreddits;
+        public ArchiveSubredditEventArgs(ArchiveSubreddit[] archiveSubreddits)
+        {
+            _archiveSubreddits = archiveSubreddits;
+        }
+        public ArchiveSubreddit[] ArchiveSubreddits => _archiveSubreddits;
+    }
     public static class Extensions
     {
         /// <summary>

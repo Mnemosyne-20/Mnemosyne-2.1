@@ -17,8 +17,7 @@ namespace Mnemosyne2Reborn.UserData
         public static void TransferProfilesToSqlite(Dictionary<string, RedditUserProfile> dict)
 #pragma warning restore CS0618 // Type or member is obsolete
         {
-            if (!Initialized)
-                throw new InvalidOperationException("You must initialize using the string based constructor first, then you may use the class later on");
+            CheckInitialized();
             var optedOut = from a in dict.AsParallel() where a.Value.OptedOut == true select a; // parallel because the dictionary can be absolutely enormous depending on length of runtime
             foreach (var user in optedOut)
             {
@@ -32,12 +31,18 @@ namespace Mnemosyne2Reborn.UserData
                 }
             }
         }
-        public bool UserExists(string User)
+        static void CheckInitialized()
         {
+            if (!Initialized)
+                throw new InvalidOperationException("You must initialize using the string based constructor first, then you may use the class later on");
+        }
+        public static bool UserExists(string User)
+        {
+            CheckInitialized();
             SQLiteGetUserExists.Parameters["@Name"].Value = User;
             return Convert.ToBoolean(SQLiteGetUserExists.ExecuteScalar());
         }
-        public bool UserExists(RedditUser User) => UserExists(User.Name);
+        public static bool UserExists(RedditUser User) => UserExists(User.Name);
         public bool OptedOut
         {
             get
@@ -52,7 +57,7 @@ namespace Mnemosyne2Reborn.UserData
                 SQLiteSetOptOut.ExecuteNonQuery();
             }
         }
-        public float AverageImage => Convert.ToSingle(SQLiteAvgImage.ExecuteScalar());
+        public static float AverageImage => Convert.ToSingle(SQLiteAvgImage.ExecuteScalar());
         public int Image
         {
             get
@@ -82,7 +87,7 @@ namespace Mnemosyne2Reborn.UserData
                 SQLiteSetUnarchived.ExecuteNonQuery();
             }
         }
-        public float AverageArchived => Convert.ToSingle(SQLiteAvgArchived.ExecuteScalar());
+        public static float AverageArchived => Convert.ToSingle(SQLiteAvgArchived.ExecuteScalar());
         public int Archived
         {
             get
@@ -97,7 +102,7 @@ namespace Mnemosyne2Reborn.UserData
                 SQLiteSetArchived.ExecuteNonQuery();
             }
         }
-        public float AverageExcluded => Convert.ToSingle(SQLiteAvgExcluded.ExecuteScalar());
+        public static float AverageExcluded => Convert.ToSingle(SQLiteAvgExcluded.ExecuteScalar());
         public int Excluded
         {
             get
@@ -137,13 +142,13 @@ namespace Mnemosyne2Reborn.UserData
                 Image++;
             }
         }
-        void InitDbTable()
+        static void InitDbTable()
         {
             string query = "create table if not exists Users (Name text unique, UnarchivedUrls integer, ImageUrls integer, ArchivedUrls integer, ExcludedUrls integer, OptedOut integer)";
             using (SQLiteCommand cmd = new SQLiteCommand(query, Connection))
                 cmd.ExecuteNonQuery();
         }
-        void InitDbCommands()
+        static void InitDbCommands()
         {
             SQLiteParameter UserNameParam = new SQLiteParameter("@Name", DbType.String);
 
@@ -196,14 +201,14 @@ namespace Mnemosyne2Reborn.UserData
 
             SQLiteAvgUnarchived = new SQLiteCommand("select avg(UnarchivedUrls) from Users");
         }
-        public RedditUserProfileSqlite(string filename = "redditusers.sqlite")
+        public RedditUserProfileSqlite(string fileName = "redditusers.sqlite")
         {
-            if (!File.Exists($"{AppDomain.CurrentDomain.BaseDirectory.TrimEnd('/')}/Data/{filename}"))
+            if (!File.Exists($"{AppDomain.CurrentDomain.BaseDirectory.TrimEnd('/')}/Data/{fileName}"))
             {
-                SQLiteConnection.CreateFile($"{AppDomain.CurrentDomain.BaseDirectory.TrimEnd('/')}/Data/{filename}");
+                SQLiteConnection.CreateFile($"{AppDomain.CurrentDomain.BaseDirectory.TrimEnd('/')}/Data/{fileName}");
             }
             AppDomain.CurrentDomain.SetData("DataDirectory", $"{AppDomain.CurrentDomain.BaseDirectory.TrimEnd('/')}/Data/");
-            Connection = new SQLiteConnection($"Data Source=|DataDirectory|{filename};Version=3;");
+            Connection = new SQLiteConnection($"Data Source=|DataDirectory|{fileName};Version=3;");
             Connection.Open();
             InitDbTable();
             InitDbCommands();

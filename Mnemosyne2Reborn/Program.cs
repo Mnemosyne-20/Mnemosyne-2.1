@@ -58,22 +58,6 @@ namespace Mnemosyne2Reborn
         public static Regex exclusions = new Regex(@"(facebook\.com|giphy\.com|youtube\.com|streamable\.com|www\.gobrickindustry\.us|gyazo\.com|sli\.mg|imgur\.com|reddit\.com/message|youtube\.com|youtu\.be|wiki/rules|politics_feedback_results_and_where_it_goes_from|urbandictionary\.com)");
         public static Regex providers = new Regex(@"(web-beta.archive.org|archive\.is|archive\.fo|web\.archive\.org|archive\.today|megalodon\.jp|web\.archive\.org|webcache\.googleusercontent\.com|archive\.li)");
         public static Regex ImageRegex = new Regex(@"(\.gif|\.jpg|\.png|\.pdf|\.webm|\.mp4)$");
-
-        ArchiveSubreddit[] _archiveSubreddits;
-        ArchiveSubreddit[] ArchiveSubreddits
-        {
-            get
-            {
-                return _archiveSubreddits;
-            }
-            set
-            {
-                lock (LockArchiveSubredditsObject)
-                {
-                    _archiveSubreddits = value;
-                }
-            }
-        }
         #region Locks
         static object LockConfigObject = new object();
         static object LockArchiveSubredditsObject = new object();
@@ -82,6 +66,7 @@ namespace Mnemosyne2Reborn
         #region Local Values
         Reddit reddit;
         public event EventHandler<ConfigEventArgs> UpdatedConfig;
+        public event EventHandler<ArchiveSubredditEventArgs> UpdatedArchiveSubreddits;
         Config _config;
         public Config Config
         {
@@ -98,8 +83,20 @@ namespace Mnemosyne2Reborn
                 UpdatedConfig?.Invoke(this, new ConfigEventArgs(_config));
             }
         }
+        ArchiveSubreddit[] _archiveSubreddits;
+        public ArchiveSubreddit[] ArchiveSubreddits
+        {
+            get => _archiveSubreddits;
+            set
+            {
+                lock (LockArchiveSubredditsObject)
+                {
+                    _archiveSubreddits = value;
+                }
+                UpdatedArchiveSubreddits?.Invoke(this, new ArchiveSubredditEventArgs(_archiveSubreddits));
+            }
+        }
         #endregion
-
         static void Main(string[] args)
         {
             foreach (string s in args)
@@ -110,6 +107,8 @@ namespace Mnemosyne2Reborn
                     case "-s":
                         break;
                     case "--help":
+                    case "-h":
+                    case "-?":
                         GetHelp();
                         return;
                     default:
@@ -276,7 +275,7 @@ namespace Mnemosyne2Reborn
                 }
                 switch (message.Body.ToLower())
                 {
-                    case "out out":
+                    case "opt out":
                         Console.WriteLine($"User {message.Author} has opted out.");
                         new RedditUserProfileSqlite(reddit.GetUser(message.Author)).OptedOut = true;
                         message.SetAsRead();
@@ -328,13 +327,13 @@ namespace Mnemosyne2Reborn
         }
         public static void IterateComments(Reddit reddit, IBotState state, ArchiveSubreddit subreddit, Config config)
         {
-            if (!subreddit.ArchiveCommentLinks)
-            {
-                return;
-            }
             if (reddit == null || state == null || subreddit == null)
             {
                 throw new ArgumentNullException(reddit == null ? nameof(reddit) : state == null ? nameof(state) : nameof(subreddit));
+            }
+            if (!subreddit.ArchiveCommentLinks)
+            {
+                return;
             }
             Console.Title = $"Finding comments in {subreddit.Name} New messages: {reddit.User.UnreadMessages.Count() >= 1}";
             foreach (var comment in subreddit.Comments.Take(25))

@@ -21,27 +21,27 @@ namespace Mnemosyne2Reborn
         /// <returns>A list of archives in order, no tuple anymore!</returns>
         public static List<string> ArchivePostLinks(ref List<string> FoundLinks, Regex[] exclusions, RedditSharp.Things.RedditUser user)
         {
-            List<string> ArchiveLinks = new List<string>();
             for (int i = 0; i < FoundLinks.Count; i++)
             {
                 string link = FoundLinks[i];
                 new RedditUserProfileSqlite(user).AddUrlUsed(link);
-                if (exclusions.Sum(b => b.IsMatch(link) ? 1 : 0) == 0)
+                if (exclusions.Sum(a => a.IsMatch(link) ? 1 : 0) != 0)
                 {
-                    string check = service.Save(link);
-                    int retries = 0;
-                    while (!service.Verify(check) && retries < 10) // rechecks in case archive.is failed
-                    {
-                        retries++;
-                        System.Threading.Thread.Sleep(5000); // waits so we don't spam archive.is
-                        check = service.Save(link);
-                    }
-                    ArchiveLinks.Add(check);
+                    FoundLinks.Remove(link);
+                    i--;
                 }
-                else
+            }
+            List<string> ArchiveLinks = new List<string>();
+            foreach (var link in FoundLinks)
+            {
+                string check = service.Save(link);
+                int retries = 0;
+                for (int i = 0; i < 10 && !service.Verify(check); check = service.Save(check))
                 {
-                    FoundLinks.Remove(link); // removes links that are exlcuded
+                    retries++;
+                    System.Threading.Thread.Sleep(5000);
                 }
+                ArchiveLinks.Add(check);
             }
             return ArchiveLinks;
         }
@@ -104,19 +104,17 @@ namespace Mnemosyne2Reborn
                     i--;
                 }
             }
-            for (int i = 0; i < FoundLinks.Count; i++)
+            ArchiveLinks = new Dictionary<string, int>();
+            int i2 = 1;
+            foreach (var link in FoundLinks)
             {
-                ArchiveLinks = new Dictionary<string, int>();
-                string link = FoundLinks[i];
                 string check = service.Save(link);
-                int retries = 0;
-                while (!service.Verify(check) && retries < 10)
+                for (int i = 0; i < 10 && !service.Verify(check); check = service.Save(check), i++)
                 {
-                    retries++;
                     System.Threading.Thread.Sleep(5000);
-                    check = service.Save(link);
                 }
-                ArchiveLinks.Add(check, i + 1);
+                ArchiveLinks.Add(check, i2 + 1);
+                i2++;
             }
             return ArchiveLinks;
         }

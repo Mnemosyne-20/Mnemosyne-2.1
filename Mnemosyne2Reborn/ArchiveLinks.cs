@@ -101,6 +101,7 @@ namespace Mnemosyne2Reborn
                 if (exclusions.Sum(a => a.IsMatch(link) ? 1 : 0) != 0)
                 {
                     FoundLinks.Remove(link);
+                    i--;
                 }
             }
             for (int i = 0; i < FoundLinks.Count; i++)

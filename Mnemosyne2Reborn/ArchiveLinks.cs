@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 namespace Mnemosyne2Reborn
 {
-    public struct ArchiveLink
+    public struct ArchiveLink : IComparable<ArchiveLink>
     {
         public string OriginalLink;
         public string ArchivedLink;
@@ -24,6 +24,9 @@ namespace Mnemosyne2Reborn
         {
             this.ArchivedLink = ArchivedLink;
         }
+
+        public int CompareTo(ArchiveLink other) => this.Position.CompareTo(other.Position);
+
         public void SetArchivedLink(string ArchivedLink)
         {
             this.ArchivedLink = ArchivedLink;
@@ -147,19 +150,24 @@ namespace Mnemosyne2Reborn
         public static List<ArchiveLink> ArchivePostLinks2(List<string> FoundLinks, Regex[] exclusions, RedditSharp.Things.RedditUser user)
         {
             List<ArchiveLink> ArchivedLinks = new List<ArchiveLink>();
-            for (int i = 0; i < FoundLinks.Count; i++)
+            for (int i = 0, i2 = 1; i < FoundLinks.Count && i2 <= FoundLinks.Count; i++, i2++)
             {
                 string link = FoundLinks[i];
-                ArchivedLinks.Add(new ArchiveLink(link, i));
+                ArchivedLinks.Add(new ArchiveLink(link, i2));
                 new RedditUserProfileSqlite(user).AddUrlUsed(link);
                 if (exclusions.Sum(a => a.IsMatch(link) ? 1 : 0) != 0)
                 {
-                    ArchivedLinks[ArchivedLinks.Count - 1].SetExcluded();
+                    ArchiveLink link2 = ArchivedLinks[ArchivedLinks.Count - 1];
+                    link2.SetExcluded();
+                    ArchivedLinks[ArchivedLinks.Count - 1] = link2;
                     i--;
                 }
             }
+            ArchivedLinks.Sort();
             for (int i = 0; i < ArchivedLinks.Count; i++)
             {
+                if (ArchivedLinks[i].IsExcluded)
+                    continue;
                 string link = ArchivedLinks[i].OriginalLink;
                 string check = service.Save(link);
                 for (int i2 = 0; i2 < 10 && !service.Verify(check); check = service.Save(check), i2++)

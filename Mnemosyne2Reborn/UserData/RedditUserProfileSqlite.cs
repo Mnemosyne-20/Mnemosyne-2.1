@@ -57,7 +57,14 @@ namespace Mnemosyne2Reborn.UserData
                 SQLiteSetOptOut.ExecuteNonQuery();
             }
         }
-        public static float AverageImage => Convert.ToSingle(SQLiteAvgImage.ExecuteScalar());
+        public static float AverageImage
+        {
+            get
+            {
+                CheckInitialized();
+                return Convert.ToSingle(SQLiteAvgImage.ExecuteScalar());
+            }
+        }
         public int Image
         {
             get
@@ -72,7 +79,14 @@ namespace Mnemosyne2Reborn.UserData
                 SQLiteSetImage.ExecuteNonQuery();
             }
         }
-        public float AverageUnarchived => Convert.ToSingle(SQLiteAvgUnarchived.ExecuteScalar());
+        public float AverageUnarchived
+        {
+            get
+            {
+                CheckInitialized();
+                return Convert.ToSingle(SQLiteAvgUnarchived.ExecuteScalar());
+            }
+        }
         public int Unarchived
         {
             get
@@ -87,7 +101,14 @@ namespace Mnemosyne2Reborn.UserData
                 SQLiteSetUnarchived.ExecuteNonQuery();
             }
         }
-        public static float AverageArchived => Convert.ToSingle(SQLiteAvgArchived.ExecuteScalar());
+        public static float AverageArchived
+        {
+            get
+            {
+                CheckInitialized();
+                return Convert.ToSingle(SQLiteAvgArchived.ExecuteScalar());
+            }
+        }
         public int Archived
         {
             get
@@ -102,7 +123,14 @@ namespace Mnemosyne2Reborn.UserData
                 SQLiteSetArchived.ExecuteNonQuery();
             }
         }
-        public static float AverageExcluded => Convert.ToSingle(SQLiteAvgExcluded.ExecuteScalar());
+        public static float AverageExcluded
+        {
+            get
+            {
+                CheckInitialized();
+                return Convert.ToSingle(SQLiteAvgExcluded.ExecuteScalar());
+            }
+        }
         public int Excluded
         {
             get

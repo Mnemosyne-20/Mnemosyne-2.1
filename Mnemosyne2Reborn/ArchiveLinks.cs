@@ -7,6 +7,32 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 namespace Mnemosyne2Reborn
 {
+    public struct ArchiveLink
+    {
+        public string OriginalLink;
+        public string ArchivedLink;
+        public int Position;
+        public bool IsExcluded;
+        public ArchiveLink(string OriginalLink, int Position)
+        {
+            this.OriginalLink = OriginalLink;
+            this.ArchivedLink = null;
+            this.Position = Position;
+            this.IsExcluded = false;
+        }
+        public ArchiveLink(string OriginalLink, string ArchivedLink, int Position) : this(OriginalLink, Position)
+        {
+            this.ArchivedLink = ArchivedLink;
+        }
+        public void SetArchivedLink(string ArchivedLink)
+        {
+            this.ArchivedLink = ArchivedLink;
+        }
+        public void SetExcluded()
+        {
+            IsExcluded = true;
+        }
+    }
     public static class ArchiveLinks
     {
         static IArchiveService service;
@@ -117,6 +143,32 @@ namespace Mnemosyne2Reborn
                 i2++;
             }
             return ArchiveLinks;
+        }
+        public static List<ArchiveLink> ArchivePostLinks2(List<string> FoundLinks, Regex[] exclusions, RedditSharp.Things.RedditUser user)
+        {
+            List<ArchiveLink> ArchivedLinks = new List<ArchiveLink>();
+            for (int i = 0; i < FoundLinks.Count; i++)
+            {
+                string link = FoundLinks[i];
+                ArchivedLinks.Add(new ArchiveLink(link, i));
+                new RedditUserProfileSqlite(user).AddUrlUsed(link);
+                if (exclusions.Sum(a => a.IsMatch(link) ? 1 : 0) != 0)
+                {
+                    ArchivedLinks[ArchivedLinks.Count - 1].SetExcluded();
+                    i--;
+                }
+            }
+            for (int i = 0; i < ArchivedLinks.Count; i++)
+            {
+                string link = ArchivedLinks[i].OriginalLink;
+                string check = service.Save(link);
+                for (int i2 = 0; i2 < 10 && !service.Verify(check); check = service.Save(check), i2++)
+                {
+                    System.Threading.Thread.Sleep(5000);
+                }
+                ArchivedLinks[i].SetArchivedLink(check);
+            }
+            return ArchivedLinks;
         }
     }
 }

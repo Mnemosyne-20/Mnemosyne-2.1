@@ -299,7 +299,7 @@ namespace Mnemosyne2Reborn
             {
                 if (!state.DoesCommentExist(post.Id) && !state.HasPostBeenChecked(post.Id))
                 {
-                    Dictionary<string, int> ArchivedLinks = new Dictionary<string, int>();
+                    List<ArchiveLink> ArchivedLinks = new List<ArchiveLink>();
                     List<string> Links = new List<string>();
                     if (post.IsSelfPost && !string.IsNullOrEmpty(post.SelfTextHtml))
                     {
@@ -316,10 +316,10 @@ namespace Mnemosyne2Reborn
                             Console.WriteLine($"Found {s} in post {post.Id}");
                         }
                     }
-                    ArchivedLinks = ArchiveLinks.ArchivePostLinks(ref Links, new Regex[] { exclusions, providers, ImageRegex }, reddit.GetUser(post.AuthorName), false);
+                    ArchivedLinks = ArchiveLinks.ArchivePostLinks2(Links, new Regex[] { exclusions, providers, ImageRegex }, reddit.GetUser(post.AuthorName));
                     lock (LockConfigObject)
                     {
-                        PostArchives.ArchivePostLinks(subreddit, config, state, post, Links, ArchivedLinks);
+                        PostArchives.ArchivePostLinks(subreddit, config, state, post, ArchivedLinks);
                     }
                     state.AddCheckedPost(post.Id);
                 }

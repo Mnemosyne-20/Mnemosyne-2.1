@@ -44,6 +44,28 @@ namespace Mnemosyne2Reborn.Commenting
             }
             PostArchiveLinks(conf, state, Program.Headers[0], post, LinksToPost);
         }
+        public static void ArchivePostLinks(Config conf, IBotState state, Post post, List<ArchiveLink> ArchivedLinks)
+        {
+            List<string> LinksToPost = new List<string>();
+            if (conf.ArchiveLinks)
+            {
+                LinksToPost.Add($"* **Post:** {service.Save(post.Url)}\n");
+            }
+            if (ArchivedLinks.Count != 0)
+            {
+                foreach (var link in ArchivedLinks)
+                {
+                    if (link.IsExcluded)
+                        continue;
+                    LinksToPost.Add($"* **Link: {link.Position}** ([{new Uri(link.OriginalLink).Host.Replace("www.", "")}]({link.OriginalLink})): {link.ArchivedLink}\n");
+                }
+            }
+            if (LinksToPost.Count == 0)
+            {
+                return;
+            }
+            PostArchiveLinks(conf, state, Program.Headers[0], post, LinksToPost);
+        }
         /// <summary>
         /// Archives post links
         /// </summary>
@@ -63,6 +85,28 @@ namespace Mnemosyne2Reborn.Commenting
             {
                 string hostname = new Uri(OriginalLinks[i]).Host.Replace("www.", "");
                 LinksToPost.Add($"* **Link: {(i + 1).ToString()}** ([{hostname}]({OriginalLinks[i]})): {ArchivedLinks[i]}\n");
+            }
+            if (LinksToPost.Count == 0)
+            {
+                return;
+            }
+            PostArchiveLinks(conf, state, Program.Headers[0], post, LinksToPost);
+        }
+        public static void ArchivePostLinks(ArchiveSubreddit sub, Config conf, IBotState state, Post post, List<ArchiveLink> ArchivedLinks)
+        {
+            List<string> LinksToPost = new List<string>();
+            if (sub.ArchivePost)
+            {
+                LinksToPost.Add($"* **Post:** {sub.SubredditArchiveService.Save(post.Url)}\n"); // saves post if you want to archive something
+            }
+            if (ArchivedLinks.Count != 0)
+            {
+                foreach (var link in ArchivedLinks)
+                {
+                    if (link.IsExcluded)
+                        continue;
+                    LinksToPost.Add($"* **Link: {link.Position}** ([{new Uri(link.OriginalLink).Host.Replace("www.", "")}]({link.OriginalLink})): {link.ArchivedLink}\n");
+                }
             }
             if (LinksToPost.Count == 0)
             {

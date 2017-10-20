@@ -13,28 +13,17 @@ namespace Mnemosyne2Reborn
         public string ArchivedLink;
         public int Position;
         public bool IsExcluded;
-        public ArchiveLink(string OriginalLink, int Position)
+        public ArchiveLink(string originalLink, int position)
         {
-            this.OriginalLink = OriginalLink;
-            this.ArchivedLink = null;
-            this.Position = Position;
-            this.IsExcluded = false;
+            OriginalLink = originalLink;
+            ArchivedLink = null;
+            Position = position;
+            IsExcluded = false;
         }
-        public ArchiveLink(string OriginalLink, string ArchivedLink, int Position) : this(OriginalLink, Position)
-        {
-            this.ArchivedLink = ArchivedLink;
-        }
-
+        public ArchiveLink(string OriginalLink, string ArchivedLink, int Position) : this(OriginalLink, Position) => this.ArchivedLink = ArchivedLink;
         public int CompareTo(ArchiveLink other) => this.Position.CompareTo(other.Position);
-
-        public void SetArchivedLink(string ArchivedLink)
-        {
-            this.ArchivedLink = ArchivedLink;
-        }
-        public void SetExcluded()
-        {
-            IsExcluded = true;
-        }
+        public void SetArchivedLink(string ArchivedLink) => this.ArchivedLink = ArchivedLink;
+        public void SetExcluded() => IsExcluded = true;
     }
     public static class ArchiveLinks
     {
@@ -174,7 +163,9 @@ namespace Mnemosyne2Reborn
                 {
                     System.Threading.Thread.Sleep(5000);
                 }
-                ArchivedLinks[i].SetArchivedLink(check);
+                ArchiveLink l = ArchivedLinks[i];
+                l.SetArchivedLink(check);
+                ArchivedLinks[i] = l;
             }
             return ArchivedLinks;
         }

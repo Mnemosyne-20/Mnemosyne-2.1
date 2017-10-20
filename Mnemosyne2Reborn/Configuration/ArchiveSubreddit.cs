@@ -23,16 +23,12 @@ namespace Mnemosyne2Reborn.Configuration
         /// <param name="reddit">Reddit used to get the subreddit instance used in ArchiveSubreddit</param>
         /// <param name="json">ArchiveSubredditJson used to pass data to the ArchiveSubreddit</param>
         /// <returns>An initialized instance of ArchiveSubreddit</returns>
-        public static ArchiveSubreddit GetArchiveSubreddit(this Reddit reddit, ArchiveSubredditJson json)
+        public static ArchiveSubreddit GetArchiveSubreddit(this Reddit reddit, ArchiveSubredditJson json) => new ArchiveSubreddit(reddit.GetSubreddit(json.Name))
         {
-            ArchiveSubreddit sub = new ArchiveSubreddit(reddit.GetSubreddit(json.Name))
-            {
-                ArchivePost = json.ArchivePost,
-                ArchiveCommentLinks = json.ArchiveCommentLinks,
-                SubredditArchiveService = new ArchiveService(json.ArchiveWebsite).CreateNewService()
-            };
-            return sub;
-        }
+            ArchivePost = json.ArchivePost,
+            ArchiveCommentLinks = json.ArchiveCommentLinks,
+            SubredditArchiveService = new ArchiveService(json.ArchiveWebsite).CreateNewService()
+        };
     }
     /// <summary>
     /// Exists to be used in <see cref="Extensions.GetArchiveSubreddit(Reddit, ArchiveSubredditJson)"/> with no other purpose, as it it how the json is taken to convert to an ArchiveSubreddit object

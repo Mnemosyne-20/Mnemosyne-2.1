@@ -1,5 +1,9 @@
 ﻿using ArchiveApi.Interfaces;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
+using System.Linq;
+using RedditSharp;
+using RedditSharp.Things;
 namespace Mnemosyne2Reborn.Commenting
 {
     /// <summary>
@@ -11,125 +15,45 @@ namespace Mnemosyne2Reborn.Commenting
         /// <summary>
         /// Username of the reddit user, used to build the archive listing comments later
         /// </summary>
-        public string Name { get; set; }
-        public List<string> UnarchivedLinks { get; set; }
-        public List<string> ArchivedLinks { get; set; }
-        public List<int> ArchivedFoundNumber { get; set; }
-        public Dictionary<string, int> ArchivedWithPlace
-        {
-            get
-            {
-                Dictionary<string, int> temp = new Dictionary<string, int>();
-                for (int i = 0; i < ArchivedLinks.Count; i++)
-                {
-                    temp.Add(ArchivedLinks[i], ArchivedFoundNumber[i]);
-                }
-                return temp;
-            }
-            set
-            {
-                ArchivedLinks = new List<string>();
-                ArchivedFoundNumber = new List<int>();
-                foreach (var keyval in value)
-                {
-                    ArchivedLinks.Add(keyval.Key);
-                    ArchivedFoundNumber.Add(keyval.Value);
-                }
-            }
-        }
+        public string Name { get; private set; }
+        public List<ArchiveLink> ArchiveLinks { get; private set; }
         private IArchiveService service;
         #endregion
         #region Constructors
-        public UserLinks(string Name, IArchiveService service)
+        public UserLinks(IArchiveService service) => this.service = service;
+        public UserLinks(string Name, IArchiveService service) : this(service) => this.Name = Name;
+        #endregion
+        #region LinkTransformation
+        #region AddLinks
+        public void AddArchiveLink(ArchiveLink link) => ArchiveLinks.Add(link);
+        public void AddArchiveLink(string Original, int Position) => ArchiveLinks.Add(new ArchiveLink(Original, Position));
+        #endregion
+        #region FilterLinks
+        public void FilterLinks(Regex r) => FilterLinks(new Regex[] { r });
+        public void FilterLinks(Regex[] r)
         {
-            this.Name = Name;
-            this.service = service;
-            UnarchivedLinks = UnarchivedLinks ?? new List<string>();
-            ArchivedLinks = ArchivedLinks ?? new List<string>();
-            ArchivedFoundNumber = ArchivedFoundNumber ?? new List<int>();
-        }
-        public UserLinks(string Name, List<string> UnarchivedLinks, IArchiveService service) : this(Name, service)
-        {
-            this.UnarchivedLinks = UnarchivedLinks;
-        }
-        public UserLinks(string Name, List<string> UnarchivedLinks, List<string> ArchivedLinks, IArchiveService service) : this(Name, UnarchivedLinks, service)
-        {
-            this.ArchivedLinks = ArchivedLinks;
+            List<ArchiveLink> newList = (from a in r from b in ArchiveLinks where !a.IsMatch(b.OriginalLink) select b).ToList();
+            newList.Sort();
+            ArchiveLinks = newList;
         }
         #endregion
-        #region Adds
-        #region UnArchivedAdds
-        public void AddUnarchived(string UnarchivedLink)
+        #region ArchvieLinks
+        public void ArchiveContainedLinks(IArchiveService service = null)
         {
-            UnarchivedLinks.Add(UnarchivedLink);
-        }
-        public void AddUnarchived(string[] UnarchivedLinks)
-        {
-            this.UnarchivedLinks.AddRange(UnarchivedLinks);
-        }
-        public void AddUnarchived(List<string> UnarchivedLinks)
-        {
-            this.UnarchivedLinks.AddRange(UnarchivedLinks);
-        }
-        #endregion
-        #region ArchivedAdds
-        public void AddArchived(string ArchivedLink)
-        {
-            ArchivedLinks.Add(ArchivedLink);
-            ArchivedFoundNumber.Add(ArchivedFoundNumber.Count);
-        }
-        public void AddArchived(string[] ArchivedLinks)
-        {
-            this.ArchivedLinks.AddRange(ArchivedLinks);
-            foreach (string s in ArchivedLinks)
+            service = service ?? this.service;
+            for (int i = 0; i < ArchiveLinks.Count; i++)
             {
-                ArchivedFoundNumber.Add(ArchivedFoundNumber.Count);
-            }
-        }
-        public void AddArchived(List<string> ArchivedLinks)
-        {
-            this.ArchivedLinks.AddRange(ArchivedLinks);
-            foreach (string s in ArchivedLinks)
-            {
-                ArchivedFoundNumber.Add(ArchivedFoundNumber.Count);
+                if(ArchiveLinks[i].ArchivedLink == null)
+                {
+                    continue;
+                }
+                ArchiveLinks[i].SetArchivedLink(service.Save(ArchiveLinks[i].OriginalLink));
             }
         }
         #endregion
-        #region DictAdds
-        public void AddArchived(Dictionary<string, int> ArchivedIntDict)
-        {
-            foreach (KeyValuePair<string, int> keyval in ArchivedIntDict)
-            {
-                ArchivedLinks.Add(keyval.Key);
-                ArchivedFoundNumber.Add(keyval.Value);
-            }
-        }
-        public void AddArchived(KeyValuePair<string, int> ArchivedIntKeyVal)
-        {
-            ArchivedLinks.Add(ArchivedIntKeyVal.Key);
-            ArchivedFoundNumber.Add(ArchivedIntKeyVal.Value);
-        }
-        public void AddArchived(string archive, int appearance)
-        {
-            ArchivedLinks.Add(archive);
-            ArchivedFoundNumber.Add(appearance);
-        }
         #endregion
+        #region GetUser
+        public RedditUser GetUser(Reddit reddit) => reddit.GetUser(Name);
         #endregion
-        #region InteractiveMethods
-        /// <summary>
-        /// Archives links and then makes the ArchivedLinks property be the archived links
-        /// </summary>
-        /// <returns>ArchivedLinks, just in case you want it</returns>
-        public List<string> ArchiveUnarchivedLinks()
-        {
-            for (int i = 0; i < UnarchivedLinks.Count; i++)
-            {
-                ArchivedLinks.Add(service.Save(UnarchivedLinks[i]));
-                ArchivedFoundNumber.Add(i);
-            }
-            return ArchivedLinks;
-        }
-        #endregion 
     }
 }

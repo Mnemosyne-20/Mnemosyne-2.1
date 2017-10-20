@@ -244,8 +244,7 @@ namespace Mnemosyne2Reborn.UserData
         }
         public RedditUserProfileSqlite(RedditUser user)
         {
-            if (!Initialized)
-                throw new InvalidOperationException("You must initialize using the string based constructor first, then you may use the class later on");
+            CheckInitialized();
             User = user.Name;
             if (!UserExists(user))
             {

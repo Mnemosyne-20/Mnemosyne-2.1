@@ -16,6 +16,9 @@ namespace Mnemosyne2Reborn.Commenting
         /// Username of the reddit user, used to build the archive listing comments later
         /// </summary>
         public string Name { get; private set; }
+        /// <summary>
+        /// This contains a list of original links, archived links, and their positions in the system
+        /// </summary>
         public List<ArchiveLink> ArchiveLinks { get; private set; }
         private IArchiveService service;
         #endregion
@@ -32,7 +35,7 @@ namespace Mnemosyne2Reborn.Commenting
         public void FilterLinks(Regex r) => FilterLinks(new Regex[] { r });
         public void FilterLinks(Regex[] r)
         {
-            List<ArchiveLink> newList = (from a in r from b in ArchiveLinks where !a.IsMatch(b.OriginalLink) select b).ToList();
+            List<ArchiveLink> newList = (from a in r.AsParallel() from b in ArchiveLinks where !a.IsMatch(b.OriginalLink) select b).ToList();
             newList.Sort();
             ArchiveLinks = newList;
         }
@@ -43,11 +46,13 @@ namespace Mnemosyne2Reborn.Commenting
             service = service ?? this.service;
             for (int i = 0; i < ArchiveLinks.Count; i++)
             {
-                if(ArchiveLinks[i].ArchivedLink == null)
+                if(ArchiveLinks[i].ArchivedLink != null)
                 {
                     continue;
                 }
-                ArchiveLinks[i].SetArchivedLink(service.Save(ArchiveLinks[i].OriginalLink));
+                ArchiveLink link = ArchiveLinks[i];
+                link.ArchivedLink = service.Save(link.OriginalLink);
+                ArchiveLinks[i] = link;
             }
         }
         #endregion

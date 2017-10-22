@@ -26,54 +26,6 @@ namespace Mnemosyne2Reborn.Commenting
         /// <param name="post">A reddit post to reply to <see cref="Post"/></param>
         /// <param name="OriginalLinks">A list of the original links</param>
         /// <param name="ArchivedLinks">A list of pre-archived links that gets formatted for posting</param>
-        public static void ArchivePostLinks(Config conf, IBotState state, Post post, int[] LinkNumber, List<string> OriginalLinks, List<string> ArchivedLinks)
-        {
-            List<string> LinksToPost = new List<string>();
-            if (conf.ArchiveLinks)
-            {
-                LinksToPost.Add($"* **Post:** {service.Save(post.Url)}\n"); // saves post if you want to archive something
-            }
-            for (int i = 0; i < OriginalLinks.Count; i++)
-            {
-                string hostname = new Uri(OriginalLinks[i]).Host.Replace("www.", "");
-                LinksToPost.Add($"* **Link: {(i + 1).ToString()}** ([{hostname}]({OriginalLinks[i]})): {ArchivedLinks[i]}\n");
-            }
-            if (LinksToPost.Count == 0)
-            {
-                return;
-            }
-            PostArchiveLinks(conf, state, Program.Headers[0], post, LinksToPost);
-        }
-        public static void ArchivePostLinks(Config conf, IBotState state, Post post, List<ArchiveLink> ArchivedLinks)
-        {
-            List<string> LinksToPost = new List<string>();
-            if (conf.ArchiveLinks)
-            {
-                LinksToPost.Add($"* **Post:** {service.Save(post.Url)}\n");
-            }
-            if (ArchivedLinks.Count != 0)
-            {
-                foreach (var link in ArchivedLinks)
-                {
-                    if (link.IsExcluded)
-                        continue;
-                    LinksToPost.Add($"* **Link: {link.Position}** ([{new Uri(link.OriginalLink).Host.Replace("www.", "")}]({link.OriginalLink})): {link.ArchivedLink}\n");
-                }
-            }
-            if (LinksToPost.Count == 0)
-            {
-                return;
-            }
-            PostArchiveLinks(conf, state, Program.Headers[0], post, LinksToPost);
-        }
-        /// <summary>
-        /// Archives post links
-        /// </summary>
-        /// <param name="conf">Any configuration file</param>
-        /// <param name="state">An IBotstate <see cref="IBotState"/></param>
-        /// <param name="post">A reddit post to reply to <see cref="Post"/></param>
-        /// <param name="OriginalLinks">A list of the original links</param>
-        /// <param name="ArchivedLinks">A list of pre-archived links that gets formatted for posting</param>
         public static void ArchivePostLinks(ArchiveSubreddit sub, Config conf, IBotState state, Post post, int[] LinkNumber, List<string> OriginalLinks, List<string> ArchivedLinks)
         {
             List<string> LinksToPost = new List<string>();
@@ -92,6 +44,14 @@ namespace Mnemosyne2Reborn.Commenting
             }
             PostArchiveLinks(conf, state, Program.Headers[0], post, LinksToPost);
         }
+        /// <summary>
+        /// Archives post links for a <see cref="ArchiveSubreddit"/>
+        /// </summary>
+        /// <param name="sub">An <see cref="ArchiveSubreddit"/> used for archiving the post with a specific <see cref="IArchiveService"/></param>
+        /// <param name="conf">A <see cref="Config"/> for flavortext</param>
+        /// <param name="state">An <see cref="IBotState"/> used to keep track of comments and other things</param>
+        /// <param name="post">A <see cref="Post"/> that you are replying to</param>
+        /// <param name="ArchivedLinks">A <see cref="List{T}"/> of <see cref="ArchiveLink"/> used for keeping track of original and archived links</param>
         public static void ArchivePostLinks(ArchiveSubreddit sub, Config conf, IBotState state, Post post, List<ArchiveLink> ArchivedLinks)
         {
             List<string> LinksToPost = new List<string>();
@@ -128,37 +88,6 @@ namespace Mnemosyne2Reborn.Commenting
             if (sub.ArchivePost)
             {
                 LinksToPost.Add($"* **Post:** {sub.SubredditArchiveService.Save(post.Url)}\n"); // saves post if you want to archive something
-            }
-            if (ArchivedLinks != null)
-            {
-                int i = 0;
-                foreach (var val in ArchivedLinks)
-                {
-                    string hostname = new Uri(OriginalLinks[i]).Host.Replace("www.", "");
-                    LinksToPost.Add($"* **Link: {val.Value.ToString()}** ([{hostname}]({OriginalLinks[i]})): {val.Key}\n");
-                    i++;
-                }
-            }
-            if (LinksToPost.Count == 0)
-            {
-                return;
-            }
-            PostArchiveLinks(conf, state, Program.Headers[0], post, LinksToPost);
-        }
-        /// <summary>
-        /// Posts links that were gotten from a post
-        /// </summary>
-        /// <param name="conf">Configuration <see cref="Config"/></param>
-        /// <param name="state">Used to track replies</param>
-        /// <param name="post">Post to reply to</param>
-        /// <param name="OriginalLinks">Original links so that we format this properly</param>
-        /// <param name="ArchivedLinks">Dictionary of links and the position found</param>
-        public static void ArchivePostLinks(Config conf, IBotState state, Post post, List<string> OriginalLinks, Dictionary<string, int> ArchivedLinks)
-        {
-            List<string> LinksToPost = new List<string>();
-            if (conf.ArchiveLinks)
-            {
-                LinksToPost.Add($"* **Post:** {service.Save(post.Url)}\n"); // saves post if you want to archive something
             }
             if (ArchivedLinks != null)
             {

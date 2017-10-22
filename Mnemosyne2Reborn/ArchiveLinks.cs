@@ -167,6 +167,7 @@ namespace Mnemosyne2Reborn
                 l.SetArchivedLink(check);
                 ArchivedLinks[i] = l;
             }
+            ArchivedLinks.Sort();
             return ArchivedLinks;
         }
     }

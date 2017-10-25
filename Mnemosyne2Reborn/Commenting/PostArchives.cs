@@ -65,7 +65,7 @@ namespace Mnemosyne2Reborn.Commenting
                 {
                     if (link.IsExcluded)
                         continue;
-                    LinksToPost.Add($"* **Link: {link.Position}** ([{new Uri(link.OriginalLink).Host.Replace("www.", "")}]({link.OriginalLink})): {link.ArchivedLink}\n");
+                    LinksToPost.Add($"* **Link: {link.Position}** ([{link.Hostname}]({link.OriginalLink})): {link.ArchivedLink}\n");
                 }
             }
             if (LinksToPost.Count == 0)

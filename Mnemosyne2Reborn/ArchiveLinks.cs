@@ -13,6 +13,7 @@ namespace Mnemosyne2Reborn
         public string ArchivedLink;
         public int Position;
         public bool IsExcluded;
+        public string Hostname => new Uri(OriginalLink).Host.Replace("www.", "");
         public ArchiveLink(string originalLink, int position)
         {
             OriginalLink = originalLink;

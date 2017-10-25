@@ -3,6 +3,9 @@ using System;
 using System.IO;
 namespace Mnemosyne2Reborn.Configuration
 {
+    /// <summary>
+    /// Made to be used to quickly giving away the fact that the configuration updated, and when it updated...
+    /// </summary>
     public class ConfigEventArgs : EventArgs
     {
         private Config conf;

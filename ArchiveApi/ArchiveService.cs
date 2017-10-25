@@ -5,7 +5,8 @@ namespace ArchiveApi
     public enum DefaultServices
     {
         ArchiveIs,
-        ArchiveFo
+        ArchiveFo,
+        ArchiveLi
     }
     public class ArchiveService : IArchiveServiceFactory
     {
@@ -21,6 +22,10 @@ namespace ArchiveApi
             {
                 this.service = DefaultServices.ArchiveFo;
             }
+            else if(service.Contains("archive.li"))
+            {
+                this.service = DefaultServices.ArchiveLi;
+            }
         }
         public override IArchiveService CreateNewService()
         {
@@ -29,6 +34,9 @@ namespace ArchiveApi
                 case DefaultServices.ArchiveIs:
                     return new ArchiveIsService();
                 case DefaultServices.ArchiveFo:
+                    return new ArchiveFoService();
+                case DefaultServices.ArchiveLi:
+                    return new ArchiveLiService();
                 default:
                     return new ArchiveFoService();
             }

@@ -1,8 +1,10 @@
 ﻿using ArchiveApi.Interfaces;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
-using System.Linq;
+using Mnemosyne2Reborn.UserData;
 using RedditSharp;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
 using RedditSharp.Things;
 namespace Mnemosyne2Reborn.Commenting
 {
@@ -11,54 +13,84 @@ namespace Mnemosyne2Reborn.Commenting
     /// </summary>
     public class UserLinks
     {
-        #region Properties
         /// <summary>
         /// Username of the reddit user, used to build the archive listing comments later
         /// </summary>
         public string Name { get; private set; }
         /// <summary>
+        /// Location url of the post/comment
+        /// </summary>
+        public string Location { get; set; }
+        /// <summary>
         /// This contains a list of original links, archived links, and their positions in the system
         /// </summary>
         public List<ArchiveLink> ArchiveLinks { get; private set; }
-        private IArchiveService service;
-        #endregion
-        #region Constructors
-        public UserLinks(IArchiveService service) => this.service = service;
-        public UserLinks(string Name, IArchiveService service) : this(service) => this.Name = Name;
-        #endregion
-        #region LinkTransformation
-        #region AddLinks
-        public void AddArchiveLink(ArchiveLink link) => ArchiveLinks.Add(link);
-        public void AddArchiveLink(string Original, int Position) => ArchiveLinks.Add(new ArchiveLink(Original, Position));
-        #endregion
-        #region FilterLinks
-        public void FilterLinks(Regex r) => FilterLinks(new Regex[] { r });
-        public void FilterLinks(Regex[] r)
+        public static IArchiveService service;
+        /// <summary>
+        /// Initalizes the UserLinks class
+        /// </summary>
+        /// <param name="Name">A name for the user</param>
+        /// <param name="Location">The location (Uri) of the post/comment</param>
+        public UserLinks(string Name, string Location)
         {
-            List<ArchiveLink> newList = (from a in r.AsParallel() from b in ArchiveLinks where !a.IsMatch(b.OriginalLink) select b).ToList();
-            newList.Sort();
-            ArchiveLinks = newList;
+            this.Name = Name;
+            this.Location = Location;
         }
-        #endregion
-        #region ArchvieLinks
-        public void ArchiveContainedLinks(IArchiveService service = null)
+        /// <summary>
+        /// Initalizes the UserLinks class
+        /// </summary>
+        /// <param name="Name">A name for the user</param>
+        /// <param name="Location">The location (Uri) of the post/comment</param>
+        public UserLinks(string Name, Uri Location) : this(Name, Location.ToString()) { }
+        public UserLinks(Comment comment)
         {
-            service = service ?? this.service;
-            for (int i = 0; i < ArchiveLinks.Count; i++)
+            Name = comment.AuthorName;
+            Location = comment.Shortlink;
+        }
+        public UserLinks(Post post)
+        {
+            Name = post.AuthorName;
+            Location = post.Permalink.ToString();
+        }
+        /// <summary>
+        /// Add an <seealso cref="ArchiveLink"/> to <see cref="ArchiveLinks"/>
+        /// </summary>
+        /// <param name="link">An <seealso cref="ArchiveLink"/> to add</param>
+        public void AddLinks(ArchiveLink link)
+        {
+            ArchiveLinks.Add(link);
+            ArchiveLinks.Sort();
+        }
+        /// <summary>
+        /// Removes all links that match the given <seealso cref="Regex"/>
+        /// </summary>
+        /// <param name="r">A <seealso cref="Regex"/> to filter by</param>
+        public void RemoveOnRegex(Regex r) => RemoveOnRegex(new[] { r });
+        /// <summary>
+        /// A list of <see cref="Regex"/> to filter with
+        /// </summary>
+        /// <param name="r">A list of <see cref="Regex"/> that you use to filter with</param>
+        public void RemoveOnRegex(Regex[] r)
+        {
+            var stuff = from a in r.AsParallel() from b in ArchiveLinks where !a.IsMatch(b.OriginalLink) select b;
+            ArchiveLinks = stuff.ToList();
+            ArchiveLinks.Sort();
+        }
+        /// <summary>
+        /// Adds all original links to a <see cref="RedditUserProfileSqlite"/>
+        /// </summary>
+        /// <param name="r">A <see cref="Reddit"/> used for getting user information, cheifly the name of a user</param>
+        public void AddToProfile(Reddit r)
+        {
+            var profile = new RedditUserProfileSqlite(r.GetUser(Name));
+            foreach (var a in ArchiveLinks)
             {
-                if(ArchiveLinks[i].ArchivedLink != null)
-                {
-                    continue;
-                }
-                ArchiveLink link = ArchiveLinks[i];
-                link.ArchivedLink = service.Save(link.OriginalLink);
-                ArchiveLinks[i] = link;
+                profile.AddUrlUsed(a.OriginalLink);
             }
         }
-        #endregion
-        #endregion
-        #region GetUser
-        public RedditUser GetUser(Reddit reddit) => reddit.GetUser(Name);
-        #endregion
+        public string[] GetFormatedLinks()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -56,7 +56,7 @@ namespace Mnemosyne2Reborn
         /// These three being separate is important because it is used for data tracking
         /// </summary>
         public static Regex exclusions = new Regex(@"(facebook\.com|giphy\.com|youtube\.com|streamable\.com|www\.gobrickindustry\.us|gyazo\.com|sli\.mg|imgur\.com|reddit\.com/message|youtube\.com|youtu\.be|wiki/rules|politics_feedback_results_and_where_it_goes_from|urbandictionary\.com)");
-        public static Regex providers = new Regex(@"(web-beta.archive.org|archive\.is|archive\.fo|web\.archive\.org|archive\.today|megalodon\.jp|web\.archive\.org|webcache\.googleusercontent\.com|archive\.li)");
+        public static Regex providers = new Regex(@"(web-beta.archive.org|archive\.is|archive\.fo|archive\.org|archive\.today|megalodon\.jp|web\.archive\.org|webcache\.googleusercontent\.com|archive\.li)");
         public static Regex ImageRegex = new Regex(@"(\.gif|\.jpg|\.png|\.pdf|\.webm|\.mp4)$");
         #region Locks
         static object LockConfigObject = new object();
@@ -149,7 +149,7 @@ namespace Mnemosyne2Reborn
                 File.Delete("./Data/Users.json");
             }
 #pragma warning restore CS0618 // Type or member is obsolete
-            IArchiveService service = new ArchiveService().CreateNewService();
+            IArchiveService service = new ArchiveService(DefaultServices.ArchiveFo).CreateNewService();
             ArchiveLinks.SetArchiveService(service);
             PostArchives.SetArchiveService(service);
             MainLoop(reddit, botstate);

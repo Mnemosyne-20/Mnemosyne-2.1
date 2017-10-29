@@ -140,7 +140,7 @@ namespace Mnemosyne2Reborn.Commenting
                 Console.WriteLine($"Already have post in {postID}, getting comment {botCommentThingID.Substring(3)}");
                 if (!EditArchiveComment((Comment)reddit.GetThingByFullname(botCommentThingID), Links))
                 {
-                    PostArchiveLinksToComment(conf, state, Program.Headers[2], comment, comment.GetCommentPost(reddit), Links);
+                    PostArchiveLinksToComment(conf, state, Program.Headers[2], comment, Links);
                 }
             }
             else
@@ -189,7 +189,7 @@ namespace Mnemosyne2Reborn.Commenting
                 List<string> Links = await t;
                 if (!EditArchiveComment((Comment)reddit.GetThingByFullname(botCommentThingID), Links))
                 {
-                    PostArchiveLinksToComment(conf, state, Program.Headers[2], comment, comment.GetCommentPost(reddit), Links);
+                    PostArchiveLinksToComment(conf, state, Program.Headers[2], comment, Links);
                 }
             }
             else
@@ -207,7 +207,7 @@ namespace Mnemosyne2Reborn.Commenting
         /// <param name="head"></param>
         /// <param name="post"></param>
         /// <param name="ArchiveList"></param>
-        public static void PostArchiveLinksToComment(Config conf, IBotState state, string head, Comment comment, Post post, List<string> ArchiveList)
+        public static void PostArchiveLinksToComment(Config conf, IBotState state, string head, Comment comment, List<string> ArchiveList)
         {
             if (conf == null || state == null || head == null || comment == null || ArchiveList == null)
             {
@@ -223,7 +223,7 @@ namespace Mnemosyne2Reborn.Commenting
             Comment botComment = comment.Reply(c);
             try
             {
-                state.UpdateBotComment(comment.LinkId.Substring(3), botComment.Id);
+                state.UpdateBotComment(comment.Id, botComment.Id);
                 Console.WriteLine(c);
             }
             catch (InvalidOperationException e)

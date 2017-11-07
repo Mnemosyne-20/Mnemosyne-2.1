@@ -34,62 +34,41 @@ namespace Mnemosyne2Reborn.Commenting
         /// </summary>
         public string Name { get; private set; }
         /// <summary>
-        /// Location url of the post/comment
-        /// </summary>
-        public Uri Location { get; set; }
-        /// <summary>
         /// This contains a list of original links, archived links, and their positions in the system
         /// </summary>
         public List<ArchiveLink> ArchiveLinks { get; private set; }
-        public static IArchiveService service;
-        public UserLinks(string Location, Reddit reddit) : this(new Uri(Location), reddit)
-        { }
-        public UserLinks(Uri Location, Reddit reddit)
-        {
-            Comment c = reddit.GetComment(Location);
-            this.Thing = reddit.GetThingByFullname(c.FullName);
-            this.UserLinksType = this.Thing.Kind.Contains("t1") ? UserLinkType.Post : UserLinkType.Comment;
-            this.Name = this.UserLinksType == UserLinkType.Post ? ((Post)Thing).AuthorName : ((Comment)Thing).AuthorName;
-            this.Location = Location;
-        }
-        public UserLinks(string Name, Uri Location, Reddit reddit) : this(Location, reddit) => this.Name = Name;
-        public UserLinks(string Name, string Location, Reddit reddit) : this(Name, new Uri(Location), reddit) { }
-        /// <summary>
-        /// Initalizes the UserLinks class
-        /// </summary>
-        /// <param name="Name">A name for the user</param>
-        /// <param name="Location">The location (Uri) of the post/comment</param>
-        public UserLinks(string Name, string Location, Reddit reddit, UserLinkType type) : this(Name, new Uri(Location), reddit, type)
-        {
-        }
-        /// <summary>
-        /// Initalizes the UserLinks class
-        /// </summary>
-        /// <param name="Name">A name for the user</param>
-        /// <param name="Location">The location (Uri) of the post/comment</param>
-        public UserLinks(string Name, Uri Location, Reddit reddit, UserLinkType type) => this.UserLinksType = type;
+        public static IArchiveService Service { get; private set; }
         /// <summary>
         /// Makes a Userlinks class from a comment, a list of regexes, and a Reddit
         /// </summary>
         /// <param name="comment">A <see cref="Comment"/> used to get the links and several other things</param>
         /// <param name="regexes">A list of <see cref="Regex"/> used for excluding links</param>
         /// <param name="reddit">A <see cref="Reddit"/> literally only used for getting a RedditUser</param>
-        public UserLinks(Comment comment, Regex[] regexes, Reddit reddit) : this(comment.AuthorName, comment.Shortlink, reddit, UserLinkType.Comment) => ArchiveLinks = Mnemosyne2Reborn.ArchiveLinks.ArchivePostLinks2(RegularExpressions.FindLinks(comment.BodyHtml), regexes, reddit.GetUser(comment.AuthorName));
+        public UserLinks(Comment comment, Regex[] regexes, Reddit reddit)
+        {
+            this.Thing = comment;
+            Name = comment.AuthorName;
+            UserLinksType = UserLinkType.Comment;
+            ArchiveLinks = Mnemosyne2Reborn.ArchiveLinks.ArchivePostLinks2(RegularExpressions.FindLinks(comment.BodyHtml), regexes, reddit.GetUser(comment.AuthorName));
+        }
         /// <summary>
         /// Initializes the UserLinks class with Post items determining nessecary things
         /// </summary>
         /// <param name="post">A <see cref="Post"/> of which you give in</param>
         /// <param name="regexes">A list of <see cref="Regex"/>es that you use for excluding links</param>
-        public UserLinks(Post post, Regex[] regexes, Reddit reddit) : this(post.AuthorName, post.Permalink, reddit, UserLinkType.Post) => ArchiveLinks = Mnemosyne2Reborn.ArchiveLinks.ArchivePostLinks2(RegularExpressions.FindLinks(post.SelfTextHtml), regexes, post.Author);
-        /// <summary>
-        /// Add an <seealso cref="ArchiveLink"/> to <see cref="ArchiveLinks"/>
-        /// </summary>
-        /// <param name="link">An <seealso cref="ArchiveLink"/> to add</param>
-        public void AddLinks(ArchiveLink link)
+        /// <param name="reddit">A <see cref="Reddit"/> used for parameter parity with <see cref="UserLinks(Comment, Regex[], Reddit)"/></param>
+        public UserLinks(Post post, Regex[] regexes, Reddit reddit)
         {
-            ArchiveLinks.Add(link);
-            ArchiveLinks.Sort();
+            this.Thing = post;
+            this.UserLinksType = UserLinkType.Post;
+            Name = post.AuthorName;
+            ArchiveLinks = Mnemosyne2Reborn.ArchiveLinks.ArchivePostLinks2(RegularExpressions.FindLinks(post.SelfTextHtml), regexes, post.Author);
         }
+        /// <summary>
+        /// Sets the internal <see cref="IArchiveService"/>
+        /// </summary>
+        /// <param name="service">An <see cref="IArchiveService"/> to use</param>
+        public static void SetArchiveService(IArchiveService service) => Service = service;
         /// <summary>
         /// Removes all links that match the given <seealso cref="Regex"/>
         /// </summary>
@@ -117,15 +96,42 @@ namespace Mnemosyne2Reborn.Commenting
                 profile.AddUrlUsed(a.OriginalLink);
             }
         }
-        public string[] GetFormatedLinks()
+        public string[] GetFormatedLinks(Configuration.ArchiveSubreddit sub)
         {
             throw new NotImplementedException();
 #pragma warning disable
-            string[] temp = new string[ArchiveLinks.Count];
+            string[] temp = new string[ArchiveLinks.Count + (sub.ArchivePost ? 1 : 0)];
             if (UserLinksType == UserLinkType.Post)
             {
-
+                if (sub.ArchivePost)
+                {
+                    temp[0] = $"* **Post:** {sub.SubredditArchiveService.Save(((Post)Thing).Url)}\n";
+                }
+                for (int i = (sub.ArchivePost ? 1 : 0); i < temp.Length; i++)
+                {
+                    ArchiveLink link = ArchiveLinks[i];
+                    if (ArchiveLinks.Count != 0)
+                    {
+                        if (link.IsExcluded)
+                            continue;
+                        temp[i] = $"* **Link: {link.Position}** ([{link.Hostname}]({link.OriginalLink})): {link.ArchivedLink}\n";
+                    }
+                }
             }
+            else
+            {
+                for(int i = 0; i < temp.Length; i++)
+                {
+                    ArchiveLink link = ArchiveLinks[i];
+                    if(ArchiveLinks.Count != 0)
+                    {
+                        if (link.IsExcluded)
+                            continue;
+                        
+                    }
+                }
+            }
+            return temp;
 #pragma warning restore
         }
     }

@@ -19,84 +19,29 @@ namespace Mnemosyne2Reborn.Commenting
         static Random rand = new Random();
         #endregion
         /// <summary>
-        /// Archives post links
-        /// </summary>
-        /// <param name="conf">Any configuration file</param>
-        /// <param name="state">An IBotstate <see cref="IBotState"/></param>
-        /// <param name="post">A reddit post to reply to <see cref="Post"/></param>
-        /// <param name="OriginalLinks">A list of the original links</param>
-        /// <param name="ArchivedLinks">A list of pre-archived links that gets formatted for posting</param>
-        public static void ArchivePostLinks(ArchiveSubreddit sub, Config conf, IBotState state, Post post, int[] LinkNumber, List<string> OriginalLinks, List<string> ArchivedLinks)
-        {
-            List<string> LinksToPost = new List<string>();
-            if (sub.ArchivePost)
-            {
-                LinksToPost.Add($"* **Post:** {sub.SubredditArchiveService.Save(post.Url)}\n"); // saves post if you want to archive something
-            }
-            for (int i = 0; i < OriginalLinks.Count; i++)
-            {
-                string hostname = new Uri(OriginalLinks[i]).Host.Replace("www.", "");
-                LinksToPost.Add($"* **Link: {(i + 1).ToString()}** ([{hostname}]({OriginalLinks[i]})): {ArchivedLinks[i]}\n");
-            }
-            if (LinksToPost.Count == 0)
-            {
-                return;
-            }
-            PostArchiveLinks(conf, state, Program.Headers[0], post, LinksToPost);
-        }
-        /// <summary>
         /// Archives post links for a <see cref="ArchiveSubreddit"/>
         /// </summary>
         /// <param name="sub">An <see cref="ArchiveSubreddit"/> used for archiving the post with a specific <see cref="IArchiveService"/></param>
         /// <param name="conf">A <see cref="Config"/> for flavortext</param>
         /// <param name="state">An <see cref="IBotState"/> used to keep track of comments and other things</param>
         /// <param name="post">A <see cref="Post"/> that you are replying to</param>
-        /// <param name="ArchivedLinks">A <see cref="List{T}"/> of <see cref="ArchiveLink"/> used for keeping track of original and archived links</param>
-        public static void ArchivePostLinks(ArchiveSubreddit sub, Config conf, IBotState state, Post post, List<ArchiveLink> ArchivedLinks)
+        /// <param name="archivedLinks">A <see cref="List{T}"/> of <see cref="ArchiveLink"/> used for keeping track of original and archived links</param>
+        public static void ArchivePostLinks(ArchiveSubreddit sub, Config conf, IBotState state, Post post, List<ArchiveLink> archivedLinks)
         {
             List<string> LinksToPost = new List<string>();
             if (sub.ArchivePost)
             {
                 LinksToPost.Add($"* **Post:** {sub.SubredditArchiveService.Save(post.Url)}\n"); // saves post if you want to archive something
             }
-            if (ArchivedLinks.Count != 0)
+            if (archivedLinks.Count != 0)
             {
-                foreach (var link in ArchivedLinks)
+                foreach (var link in archivedLinks)
                 {
                     if (link.IsExcluded)
+                    {
                         continue;
+                    }
                     LinksToPost.Add($"* **Link: {link.Position}** ([{link.Hostname}]({link.OriginalLink})): {link.ArchivedLink}\n");
-                }
-            }
-            if (LinksToPost.Count == 0)
-            {
-                return;
-            }
-            PostArchiveLinks(conf, state, Program.Headers[0], post, LinksToPost);
-        }
-        /// <summary>
-        /// Posts links that were gotten from a post
-        /// </summary>
-        /// <param name="conf">Configuration <see cref="Config"/></param>
-        /// <param name="state">Used to track replies</param>
-        /// <param name="post">Post to reply to</param>
-        /// <param name="OriginalLinks">Original links so that we format this properly</param>
-        /// <param name="ArchivedLinks">Dictionary of links and the position found</param>
-        public static void ArchivePostLinks(ArchiveSubreddit sub, Config conf, IBotState state, Post post, List<string> OriginalLinks, Dictionary<string, int> ArchivedLinks)
-        {
-            List<string> LinksToPost = new List<string>();
-            if (sub.ArchivePost)
-            {
-                LinksToPost.Add($"* **Post:** {sub.SubredditArchiveService.Save(post.Url)}\n"); // saves post if you want to archive something
-            }
-            if (ArchivedLinks != null)
-            {
-                int i = 0;
-                foreach (var val in ArchivedLinks)
-                {
-                    string hostname = new Uri(OriginalLinks[i]).Host.Replace("www.", "");
-                    LinksToPost.Add($"* **Link: {val.Value.ToString()}** ([{hostname}]({OriginalLinks[i]})): {val.Key}\n");
-                    i++;
                 }
             }
             if (LinksToPost.Count == 0)
@@ -126,8 +71,7 @@ namespace Mnemosyne2Reborn.Commenting
             for (int i = 0; i < ArchiveLinks.Count; i++)
             {
                 string hostname = new Uri(OriginalLinks[i]).Host.Replace("www.", "");
-                string commentLink = $"https://www.reddit.com/comments/{postID}/_/{comment.Id}";
-                Links.Add($"* **By [{comment.AuthorName.DeMarkup()}]({commentLink})** ([{hostname}]({OriginalLinks[i]})): {ArchiveLinks[i]}\n");
+                Links.Add($"* **By [{comment.AuthorName.DeMarkup()}]({comment.Shortlink.Replace("oauth", "www")})** ([{hostname}]({OriginalLinks[i]})): {ArchiveLinks[i]}\n");
             }
             bool HasPostITT = state.DoesCommentExist(postID);
             if (HasPostITT)
@@ -147,6 +91,57 @@ namespace Mnemosyne2Reborn.Commenting
             {
                 Console.WriteLine($"No comment in {postID} to edit, making new one");
                 PostArchiveLinks(conf, state, Program.Headers[2], comment.GetCommentPost(reddit), Links);
+            }
+            state.AddCheckedComment(commentID);
+        }
+        /// <summary>
+        /// An asyncronous version of <seealso cref="ArchiveCommentLinks(Config, IBotState, Reddit, Comment, List{string}, List{string})"/> with <see cref="List{ArchiveLink}"/> support instead
+        /// </summary>
+        /// <param name="config">A <see cref="Config"/> used for flavortext</param>
+        /// <param name="state">An <see cref="IBotState"/> used for keeping track of things</param>
+        /// <param name="reddit">A <see cref="Reddit"/> used for getting things</param>
+        /// <param name="comment">The <see cref="Comment"/> you are archiving</param>
+        /// <param name="archiveLinks">A <see cref="List{ArchiveLink}"/> used for archived links</param>
+        /// <returns>A <see cref="Task"/> for asyncronous using</returns>
+        public static async Task ArchiveCommentLinksAsync(Config config, IBotState state, Reddit reddit, Comment comment, List<ArchiveLink> archiveLinks)
+        {
+            if (archiveLinks.Count < 1)
+            {
+                return;
+            }
+            List<string> Links = new List<string>();
+            string commentID = comment.Id;
+            string postID = comment.LinkId.Substring(3);
+            Task<List<string>> linksTask = Task.Run(() =>
+            {
+                List<string> links = new List<string>();
+                foreach (ArchiveLink link in archiveLinks)
+                {
+                    if (link.IsExcluded)
+                        continue;
+                    links.Add($"* **By [{comment.AuthorName.DeMarkup()}]({comment.Shortlink.Replace("oauth", "www")})** ([{link.Hostname}]({link.OriginalLink})): {link.ArchivedLink}\n");
+                }
+                return links;
+            });
+            if (state.DoesCommentExist(postID))
+            {
+                string botCommentThingID = state.GetCommentForPost(postID);
+                if (!botCommentThingID.Contains("t1_"))
+                {
+                    botCommentThingID = "t1_" + botCommentThingID;
+                }
+                Console.WriteLine($"Already have post in {postID}, getting comment {botCommentThingID.Substring(3)}");
+                Links = await linksTask;
+                if (!EditArchiveComment((Comment)reddit.GetThingByFullname(botCommentThingID), Links))
+                {
+                    PostArchiveLinksToComment(config, state, Program.Headers[2], comment, Links);
+                }
+            }
+            else
+            {
+                Links = await linksTask;
+                Console.WriteLine($"No comment in {postID} to edit, making new one");
+                PostArchiveLinks(config, state, Program.Headers[2], comment.GetCommentPost(reddit), Links);
             }
             state.AddCheckedComment(commentID);
         }
@@ -172,9 +167,8 @@ namespace Mnemosyne2Reborn.Commenting
                 List<string> Links = new List<string>();
                 for (int i = 0; i < ArchiveLinks.Count; i++)
                 {
-                    string hostname = new Uri(OriginalLinks[i]).Host.Replace("www.", "");
-                    string commentLink = $"https://www.reddit.com/comments/{postID}/_/{comment.Id}";
-                    Links.Add($"* **By [{comment.AuthorName.DeMarkup()}]({commentLink})** ([{hostname}]({OriginalLinks[i]})): {ArchiveLinks[i]}\n");
+                    string hostname = new Uri(OriginalLinks[i]).Host.Replace("www.", ""); // comment shortlink is literally the thing I had here
+                    Links.Add($"* **By [{comment.AuthorName.DeMarkup()}]({comment.Shortlink.Replace("oauth", "www")})** ([{hostname}]({OriginalLinks[i]})): {ArchiveLinks[i]}\n");
                 }
                 return Links;
             });
@@ -202,11 +196,12 @@ namespace Mnemosyne2Reborn.Commenting
         /// <summary>
         /// Posts all links archived, throws <see cref="ArgumentNullException"/> if you attempt to call this with any null arguments
         /// </summary>
-        /// <param name="conf"></param>
-        /// <param name="state"></param>
-        /// <param name="head"></param>
-        /// <param name="post"></param>
-        /// <param name="ArchiveList"></param>
+        /// <param name="conf">A <see cref="Config"/> that is used for flavortext and nothing else</param>
+        /// <param name="state">An <see cref="IBotState"/> that will update the list with the replies</param>
+        /// <param name="head">A header used for a header for the comment</param>
+        /// <param name="comment">A <see cref="Comment"/> that you're replying to</param>
+        /// <param name="ArchiveList">A <see cref="List{string}"/> for a list of archives to post to a comment</param>
+        /// <exception cref="ArgumentNullException"></exception>
         public static void PostArchiveLinksToComment(Config conf, IBotState state, string head, Comment comment, List<string> ArchiveList)
         {
             if (conf == null || state == null || head == null || comment == null || ArchiveList == null)
@@ -266,10 +261,10 @@ namespace Mnemosyne2Reborn.Commenting
             }
         }
         /// <summary>
-        /// Edits a comment containing found archives
+        /// Edits a comment containing found archives to add more
         /// </summary>
-        /// <param name="targetComment">Comment to edit, checks what is current and updates it with new archives</param>
-        /// <param name="ArchivedToInsert">The list of items to insert, not the archives themselves, this is usually used internally</param>
+        /// <param name="targetComment">A <see cref="Comment"/> to edit</param>
+        /// <param name="ArchivedToInsert">The <see cref="List{string}"/> of items to insert, not the archives themselves, this is usually used internally</param>
         public static bool EditArchiveComment(Comment targetComment, List<string> ArchivesToInsert)
         {
             bool bEditGood = false;
@@ -293,16 +288,7 @@ namespace Mnemosyne2Reborn.Commenting
                             }
                             bEditGood = true;
                         }
-                        else if (head[head.Length - 1].StartsWith("* **Link")) // links in a post
-                        {
-                            newCommentText += "\n\n----\nArchives for links in comments: \n\n";
-                            foreach (string str in ArchivesToInsert)
-                            {
-                                newCommentText += str;
-                            }
-                            bEditGood = true;
-                        }
-                        else if (head[head.Length - 1].StartsWith("* **Post")) // POST
+                        else if (head[head.Length - 1].StartsWith("* **Link") || head[head.Length - 1].StartsWith("* **Post")) // links in a post
                         {
                             newCommentText += "\n\n----\nArchives for links in comments: \n\n";
                             foreach (string str in ArchivesToInsert)

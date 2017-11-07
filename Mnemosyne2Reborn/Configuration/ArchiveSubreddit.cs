@@ -33,6 +33,7 @@ namespace Mnemosyne2Reborn.Configuration
     /// <summary>
     /// Exists to be used in <see cref="Extensions.GetArchiveSubreddit(Reddit, ArchiveSubredditJson)"/> with no other purpose, as it it how the json is taken to convert to an ArchiveSubreddit object
     /// </summary>
+    [Serializable]
     public class ArchiveSubredditJson
     {
         [JsonRequired]

@@ -29,18 +29,15 @@ namespace ArchiveApi
     }
     public class Mementos : IEnumerable
     {
-        public string TimeGate { get; private set; }
-        public TimeMap TimeMap { get; private set; }
-        public string Original { get; private set; }
+        public string TimeGate { get; private set; } = null;
+        public TimeMap TimeMap { get; private set; } = null;
+        public string Original { get; private set; } = null;
         public Memento FirstMemento => _mementos[0];
         public Memento LastMemento => _mementos[_mementos.Length - 1];
         Memento[] _mementos;
         public Mementos(IEnumerable<Memento> mementoList)
         {
             _mementos = mementoList.ToArray();
-            TimeGate = null;
-            TimeMap = null;
-            Original = null;
         }
         public Mementos(IEnumerable<WebLink> mementoList)
         {

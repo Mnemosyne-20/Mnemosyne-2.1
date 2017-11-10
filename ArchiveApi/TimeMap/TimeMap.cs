@@ -8,8 +8,17 @@ namespace ArchiveApi
 {
     public class TimeMap
     {
+        /// <summary>
+        /// <see cref="DateTime"/> of the first saved memento
+        /// </summary>
         public DateTime From { get; private set; }
+        /// <summary>
+        /// <see cref="DateTime"/> of the last saved memento
+        /// </summary>
         public DateTime Until { get; private set; }
+        /// <summary>
+        /// <see cref="Uri"/> of the timemap
+        /// </summary>
         public Uri TimeMapUri { get; private set; }
         #region Constructors
         public TimeMap(Uri TimeMapUri) => this.TimeMapUri = TimeMapUri;
@@ -18,13 +27,12 @@ namespace ArchiveApi
         public TimeMap(string TimeMapUri, DateTime From) : this(new Uri(TimeMapUri), From) { }
         public TimeMap(Uri TimeMapUri, DateTime From, DateTime Until) : this(TimeMapUri, From) => this.Until = Until;
         public TimeMap(string TimeMapUri, DateTime From, DateTime Until) : this(new Uri(TimeMapUri), From, Until) { }
-        public TimeMap(WebLink web)
+        public TimeMap(WebLink web) : this(new Uri(web.Uri))
         {
             if (web.Attributes.GetValues("rel").Contains("self"))
             {
                 Until = DateTime.Parse(string.Join(" ", web.Attributes.GetValues("until")));
                 From = DateTime.Parse(string.Join(" ", web.Attributes.GetValues("from")));
-                TimeMapUri = new Uri(web.Uri);
             }
             else
             {
@@ -32,13 +40,18 @@ namespace ArchiveApi
             }
         }
         #endregion
+        /// <summary>
+        /// Gets <see cref="Mementos"/> that an <see cref="IArchiveService"/> has made
+        /// </summary>
+        /// <param name="service">A <see cref="IArchiveService"/> that is used for getting mementos from a service</param>
+        /// <param name="url">A <see cref="Uri"/> to get mementos for</param>
+        /// <returns>A <see cref="Mementos"/> list for a <see cref="Uri"/></returns>
         public static async Task<Mementos> GetMementosAsync(IArchiveService service, Uri url)
         {
             if (service == null || url == null)
             {
                 throw new ArgumentNullException(service == null ? nameof(service) : nameof(url));
             }
-
             Mementos mementos = null;
             using (HttpClient client = new HttpClient())
             {

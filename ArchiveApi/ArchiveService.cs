@@ -14,17 +14,20 @@ namespace ArchiveApi
         public ArchiveService(DefaultServices service = DefaultServices.ArchiveFo) => this.service = service;
         public ArchiveService(string service)
         {
-            if (service.Contains("archive.is"))
+            switch(service.ToLower())
             {
-                this.service = DefaultServices.ArchiveIs;
-            }
-            else if (service.Contains("archive.fo"))
-            {
-                this.service = DefaultServices.ArchiveFo;
-            }
-            else if(service.Contains("archive.li"))
-            {
-                this.service = DefaultServices.ArchiveLi;
+                case "archive.is":
+                    this.service = DefaultServices.ArchiveIs;
+                    break;
+                case "archive.fo":
+                    this.service = DefaultServices.ArchiveFo;
+                    break;
+                case "archive.li":
+                    this.service = DefaultServices.ArchiveLi;
+                    break;
+                default:
+                    this.service = DefaultServices.ArchiveFo;
+                    break;
             }
         }
         public override IArchiveService CreateNewService()

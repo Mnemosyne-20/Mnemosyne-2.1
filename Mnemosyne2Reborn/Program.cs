@@ -127,7 +127,10 @@ namespace Mnemosyne2Reborn
         {
             Console.Title = "Mnemosyne-2.1 by chugga_fan";
             Console.Clear();
-            Config = !File.Exists("./Data/Settings.json") ? CreateNewConfig() : Config.GetConfig();
+            lock (LockConfigObject)
+            {
+                Config = !File.Exists("./Data/Settings.json") ? CreateNewConfig() : Config.GetConfig();
+            }
             IBotState botstate = Config.SQLite ? (IBotState)new SQLiteBotState() : new FlatBotState();
             WebAgent agent = null;
             if (Config.UseOAuth)
@@ -135,10 +138,16 @@ namespace Mnemosyne2Reborn
                 agent = new BotWebAgent(Config.UserName, Config.Password, Config.OAuthClientId, Config.OAuthSecret, Config.RedirectURI);
             }
 #pragma warning disable CS0618 // Type or member is obsolete
-            reddit = Config.UseOAuth ? new Reddit(agent) : new Reddit(Config.UserName, Config.Password);
+            lock (LockConfigObject)
+            {
+                reddit = Config.UseOAuth ? new Reddit(agent) : new Reddit(Config.UserName, Config.Password);
+            }
             reddit.InitOrUpdateUser();
             UpdatedConfig += (sender, e) => { ArchiveSubreddits = InitializeArchiveSubreddits(reddit, e.Config); };
-            ArchiveSubreddits = InitializeArchiveSubreddits(reddit, Config);
+            lock (LockConfigObject)
+            {
+                ArchiveSubreddits = InitializeArchiveSubreddits(reddit, Config);
+            }
             IteratePost = IteratePosts;
             IterateComment = IterateComments;
             IterateMessage = IterateMessages;
@@ -290,9 +299,9 @@ namespace Mnemosyne2Reborn
         }
         public static void IteratePosts(Reddit reddit, IBotState state, ArchiveSubreddit subreddit, Config config)
         {
-            if (reddit == null || state == null || subreddit == null)
+            if (reddit == null || state == null || subreddit == null || config == null)
             {
-                throw new ArgumentNullException(reddit == null ? nameof(reddit) : state == null ? nameof(state) : nameof(subreddit));
+                throw new ArgumentNullException(reddit == null ? nameof(reddit) : state == null ? nameof(state) : config == null ? nameof(config) : nameof(subreddit));
             }
             Console.Title = $"Finding posts in {subreddit.Name} New messages: {reddit.User.UnreadMessages.Count() >= 1}";
             foreach (var post in subreddit.New.Take(25))
@@ -316,7 +325,7 @@ namespace Mnemosyne2Reborn
                             Console.WriteLine($"Found {s} in post {post.Id}");
                         }
                     }
-                    ArchivedLinks = ArchiveLinks.ArchivePostLinks2(Links, new Regex[] { exclusions, providers, ImageRegex }, reddit.GetUser(post.AuthorName));
+                    ArchivedLinks = ArchiveLinks.ArchivePostLinks(Links, new Regex[] { exclusions, providers, ImageRegex }, reddit.GetUser(post.AuthorName));
                     lock (LockConfigObject)
                     {
                         PostArchives.ArchivePostLinks(subreddit, config, state, post, ArchivedLinks);
@@ -327,9 +336,9 @@ namespace Mnemosyne2Reborn
         }
         public static void IterateComments(Reddit reddit, IBotState state, ArchiveSubreddit subreddit, Config config)
         {
-            if (reddit == null || state == null || subreddit == null)
+            if (reddit == null || state == null || subreddit == null || config == null)
             {
-                throw new ArgumentNullException(reddit == null ? nameof(reddit) : state == null ? nameof(state) : nameof(subreddit));
+                throw new ArgumentNullException(reddit == null ? nameof(reddit) : state == null ? nameof(state) : config == null ? nameof(config) : nameof(subreddit));
             }
             if (!subreddit.ArchiveCommentLinks)
             {
@@ -347,10 +356,10 @@ namespace Mnemosyne2Reborn
                 {
                     Console.WriteLine($"Found {s} in comment {comment.Id}");
                 }
-                List<string> ArchivedLinks = ArchiveLinks.ArchivePostLinks(ref Links, new Regex[] { exclusions, providers, ImageRegex }, reddit.GetUser(comment.AuthorName));
+                List<ArchiveLink> ArchivedLinks = ArchiveLinks.ArchivePostLinks(Links, new[] { exclusions, providers, ImageRegex }, reddit.GetUser(comment.AuthorName));
                 lock (LockConfigObject)
                 {
-                    PostArchives.ArchiveCommentLinks(config, state, reddit, comment, ArchivedLinks, Links);
+                    PostArchives.ArchiveCommentLinks(config, state, reddit, comment, ArchivedLinks);
                 }
                 state.AddCheckedComment(comment.Id);
             }

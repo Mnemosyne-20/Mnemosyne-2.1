@@ -102,7 +102,7 @@ namespace MnemosyneTest
                 "wat",
                 "k"
             };
-            ArchiveLinks.ArchivePostLinks(ref test, new Regex[] { new Regex("") }, red.GetUser("chugga_fan"), false);
+            ArchiveLinks.ArchivePostLinks(test, new Regex[] { new Regex("") }, red.GetUser("chugga_fan"));
             Mnemosyne2Reborn.UserData.RedditUserProfileSqlite redditUserProfileSqlite = new Mnemosyne2Reborn.UserData.RedditUserProfileSqlite(red.GetUser("chugga_fan"));
             Assert.IsTrue(redditUserProfileSqlite.Unarchived == 3);
         }

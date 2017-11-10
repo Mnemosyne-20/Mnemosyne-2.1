@@ -70,12 +70,14 @@ namespace Mnemosyne2Reborn.BotState
         void InitializeCommands()
         {
             var PostParam = new SQLiteParameter("@postID", DbType.String);
+            var BotReplyParam = new SQLiteParameter("@botReplyID", DbType.String);
+            var CommentIdParam = new SQLiteParameter("@commentID", DbType.String);
             SQLCmd_AddBotComment = new SQLiteCommand("insert or abort into replies(postID, botReplyID) values(@postID, @botReplyID)", dbConnection);
             SQLCmd_AddBotComment.Parameters.Add(PostParam);
-            SQLCmd_AddBotComment.Parameters.Add(new SQLiteParameter("@botReplyID", DbType.String));
+            SQLCmd_AddBotComment.Parameters.Add(BotReplyParam);
 
             SQLCmd_AddCheckedComment = new SQLiteCommand("insert or abort into comments (commentID) values (@commentID)", dbConnection);
-            SQLCmd_AddCheckedComment.Parameters.Add(new SQLiteParameter("@commentID", DbType.String));
+            SQLCmd_AddCheckedComment.Parameters.Add(CommentIdParam);
 
             SQLCmd_AddCheckedPost = new SQLiteCommand("insert or abort into posts (postID) values (@postID)", dbConnection);
             SQLCmd_AddCheckedPost.Parameters.Add(PostParam);
@@ -84,16 +86,16 @@ namespace Mnemosyne2Reborn.BotState
             SQLCmd_DoesBotCommentExist.Parameters.Add(PostParam);
 
             SQLCmd_GetBotComment = new SQLiteCommand("select botReplyID from replies where postID = @postID", dbConnection);
-            SQLCmd_GetBotComment.Parameters.Add(new SQLiteParameter("@postID", DbType.String));
+            SQLCmd_GetBotComment.Parameters.Add(PostParam);
 
             SQLCmd_HasCommentBeenChecked = new SQLiteCommand("select count(commentID) from comments where commentID = @commentID", dbConnection);
-            SQLCmd_HasCommentBeenChecked.Parameters.Add(new SQLiteParameter("@commentID", DbType.String));
+            SQLCmd_HasCommentBeenChecked.Parameters.Add(CommentIdParam);
 
             SQLCmd_HasPostBeenChecked = new SQLiteCommand("select count(postID) from posts where postID = @postID", dbConnection);
             SQLCmd_HasPostBeenChecked.Parameters.Add(PostParam);
 
             SQLCmd_UpdateBotComment = new SQLiteCommand("update replies set botReplyID = @botReplyID where postID = @postID", dbConnection);
-            SQLCmd_UpdateBotComment.Parameters.Add(new SQLiteParameter("@botReplyID", DbType.String));
+            SQLCmd_UpdateBotComment.Parameters.Add(BotReplyParam);
             SQLCmd_UpdateBotComment.Parameters.Add(PostParam);
         }
         public void AddBotComment(string postID, string commentID)

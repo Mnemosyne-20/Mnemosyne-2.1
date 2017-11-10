@@ -172,8 +172,7 @@ namespace Mnemosyne2Reborn.UserData
         }
         static void InitDbTable()
         {
-            string query = "create table if not exists Users (Name text unique, UnarchivedUrls integer, ImageUrls integer, ArchivedUrls integer, ExcludedUrls integer, OptedOut integer)";
-            using (SQLiteCommand cmd = new SQLiteCommand(query, Connection))
+            using (SQLiteCommand cmd = new SQLiteCommand("create table if not exists Users (Name text unique, UnarchivedUrls integer, ImageUrls integer, ArchivedUrls integer, ExcludedUrls integer, OptedOut integer)", Connection))
                 cmd.ExecuteNonQuery();
         }
         static void InitDbCommands()

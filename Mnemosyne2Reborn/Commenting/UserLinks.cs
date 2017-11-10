@@ -49,7 +49,7 @@ namespace Mnemosyne2Reborn.Commenting
             this.Thing = comment;
             Name = comment.AuthorName;
             UserLinksType = UserLinkType.Comment;
-            ArchiveLinks = Mnemosyne2Reborn.ArchiveLinks.ArchivePostLinks2(RegularExpressions.FindLinks(comment.BodyHtml), regexes, reddit.GetUser(comment.AuthorName));
+            ArchiveLinks = Mnemosyne2Reborn.ArchiveLinks.ArchivePostLinks(RegularExpressions.FindLinks(comment.BodyHtml), regexes, reddit.GetUser(comment.AuthorName));
         }
         /// <summary>
         /// Initializes the UserLinks class with Post items determining nessecary things
@@ -62,7 +62,7 @@ namespace Mnemosyne2Reborn.Commenting
             this.Thing = post;
             this.UserLinksType = UserLinkType.Post;
             Name = post.AuthorName;
-            ArchiveLinks = Mnemosyne2Reborn.ArchiveLinks.ArchivePostLinks2(RegularExpressions.FindLinks(post.SelfTextHtml), regexes, post.Author);
+            ArchiveLinks = Mnemosyne2Reborn.ArchiveLinks.ArchivePostLinks(RegularExpressions.FindLinks(post.SelfTextHtml), regexes, post.Author);
         }
         /// <summary>
         /// Sets the internal <see cref="IArchiveService"/>
@@ -120,14 +120,14 @@ namespace Mnemosyne2Reborn.Commenting
             }
             else
             {
-                for(int i = 0; i < temp.Length; i++)
+                for (int i = 0; i < temp.Length; i++)
                 {
                     ArchiveLink link = ArchiveLinks[i];
-                    if(ArchiveLinks.Count != 0)
+                    if (ArchiveLinks.Count != 0)
                     {
                         if (link.IsExcluded)
                             continue;
-                        
+
                     }
                 }
             }

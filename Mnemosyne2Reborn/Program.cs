@@ -99,6 +99,7 @@ namespace Mnemosyne2Reborn
         #endregion
         static void Main(string[] args)
         {
+            Console.Title = "Mnemosyne-2.1 by chugga_fan";
             foreach (string s in args)
             {
                 switch (s)
@@ -125,7 +126,6 @@ namespace Mnemosyne2Reborn
         }
         public Program()
         {
-            Console.Title = "Mnemosyne-2.1 by chugga_fan";
             Console.Clear();
             lock (LockConfigObject)
             {
@@ -318,7 +318,7 @@ namespace Mnemosyne2Reborn
                     {
                         continue;
                     }
-                    if (Links.Count >= 0)
+                    if (Links.Count > 0)
                     {
                         foreach (string s in Links)
                         {

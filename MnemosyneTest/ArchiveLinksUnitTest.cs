@@ -14,14 +14,16 @@ namespace MnemosyneTest
 
         public Uri BaseUri => new Uri("http://what.com");
 
+        public Uri SubmitEndpoint => new Uri(BaseUri, "/test");
+
         public string Save(string Url)
         {
-            return new Uri(BaseUri, "/test").ToString();
+            return SubmitEndpoint.ToString();
         }
 
         public Uri Save(Uri Url)
         {
-            return new Uri(BaseUri, "/test");
+            return SubmitEndpoint;
         }
 
         public Task<string> SaveAsync(string Url)
@@ -36,12 +38,12 @@ namespace MnemosyneTest
 
         public bool Verify(string Url)
         {
-            return Url == new Uri(BaseUri, "/test").ToString();
+            return Url == SubmitEndpoint.ToString();
         }
 
         public bool Verify(Uri Url)
         {
-            return Url == new Uri(BaseUri, "/test");
+            return Url == SubmitEndpoint;
         }
 
         #region IDisposable Support

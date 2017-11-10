@@ -58,27 +58,27 @@ namespace Mnemosyne2Reborn.Configuration
         public Config()
         {
         }
-        public Config(bool SQLite, string UserName, ArchiveSubredditJson[] Subreddits, string Password, bool UseOAuth = false, string OAuthSecret = null, string OAuthClientId = null, bool ArchiveLinks = false, string ArchiveService = "http://www.archive.is", string RedirectURI = "https://github.com/Mnemosyne-20/Mnemosyne-2.1")
+        public Config(bool SQLite, string UserName, ArchiveSubredditJson[] Subreddits, string Password, bool UseOAuth = false, string OAuthSecret = null, string OAuthClientId = null, bool ArchiveLinks = false, string ArchiveService = "http://www.archive.fo", string RedirectURI = "https://github.com/Mnemosyne-20/Mnemosyne-2.1")
         {
             if (!Directory.Exists("./Data/"))
             {
                 Directory.CreateDirectory("./Data/");
             }
             this.SQLite = SQLite;
-            this.UserName = UserName ?? throw new ArgumentNullException("Username");
+            this.UserName = UserName ?? throw new ArgumentNullException(nameof(UserName), "Username");
             this.UseOAuth = UseOAuth;
             if (UseOAuth)
             {
-                this.OAuthClientId = OAuthClientId ?? throw new ArgumentNullException("Neccessity to use OAuth");
-                this.OAuthSecret = OAuthSecret ?? throw new ArgumentNullException("Neccessity to use OAuth");
+                this.OAuthClientId = OAuthClientId ?? throw new ArgumentNullException(nameof(OAuthClientId), "Neccessity to use OAuth");
+                this.OAuthSecret = OAuthSecret ?? throw new ArgumentNullException(nameof(OAuthSecret), "Neccessity to use OAuth");
             }
             else
             {
                 this.OAuthClientId = OAuthClientId;
                 this.OAuthSecret = OAuthSecret;
             }
-            this.Password = Password ?? throw new ArgumentNullException("Password");
-            this.Subreddits = Subreddits ?? throw new ArgumentNullException("Subreddits");
+            this.Password = Password ?? throw new ArgumentNullException(nameof(Password), "Password is null");
+            this.Subreddits = Subreddits ?? throw new ArgumentNullException(nameof(Subreddits), "Subreddits is null");
             this.ArchiveLinks = ArchiveLinks;
             FlavorText = new string[] { };
             this.ArchiveService = ArchiveService;

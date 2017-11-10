@@ -114,7 +114,7 @@ namespace ArchiveApi.Services
 
         Uri IArchiveService.Save(Uri Url) => new Uri(Save(Url));
 
-        Task<Uri> IArchiveService.SaveAsync(Uri Url) => throw new NotImplementedException();
+        async Task<Uri> IArchiveService.SaveAsync(Uri Url) => new Uri(await SaveAsync(Url));
 
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls

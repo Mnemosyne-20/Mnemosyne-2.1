@@ -30,14 +30,14 @@ namespace ArchiveApi.Services
         /// </summary>
         /// <param name="ArchiveUrl"></param>
         /// <returns>true if it does not contain "submit" in the uri</returns>
-        public bool Verify(string ArchiveUrl) => !(ArchiveUrl == null || ArchiveUrl.TrimEnd('/') == "http://archive.fo/submit" || ArchiveUrl.TrimEnd('/') == "https://archive.fo/submit" || ArchiveUrl.TrimEnd('/') == "http://archive.fo" || ArchiveUrl.Contains("submit") || !ArchiveUrl.Contains(BaseUri.OriginalString));
+        public bool Verify(string ArchiveUrl) => !(ArchiveUrl == null || ArchiveUrl.TrimEnd('/') == "http://archive.fo/submit" || ArchiveUrl.TrimEnd('/').Contains("http://archive.is") || ArchiveUrl.TrimEnd('/').Contains("https://archive.is") || ArchiveUrl.TrimEnd('/') == "https://archive.fo/submit" || ArchiveUrl.TrimEnd('/') == "http://archive.fo" || ArchiveUrl.Contains("submit") || !ArchiveUrl.Contains(BaseUri.OriginalString)) && Verify(new Uri(ArchiveUrl));
         /// <summary>
         /// Checks if the ArchiveUrl is a successful URL
         /// </summary>
         /// <remarks>Yes I know the internals of this are actually stupid, but the unit test passed, that is what matters here</remarks>
         /// <param name="ArchiveUrl"></param>
         /// <returns>true if it does not contain "submit" in the uri</returns>
-        public bool Verify(Uri ArchiveUrl) => !ArchiveUrl.AbsolutePath.Contains("submit") && ArchiveUrl.Host == "archive.fo";
+        public bool Verify(Uri ArchiveUrl) => ArchiveUrl.DnsSafeHost != "archive.is" && !ArchiveUrl.AbsolutePath.Contains("submit") && ArchiveUrl.Host == "archive.fo";
         /// <summary>
         /// Saves a webpage
         /// </summary>

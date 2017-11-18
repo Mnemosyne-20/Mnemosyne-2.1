@@ -8,7 +8,7 @@ namespace Mnemosyne2Reborn.BotState
     public class SQLiteBotState : IBotState
     {
         SQLiteConnection dbConnection;
-        SQLiteCommand SQLCmd_AddBotComment, SQLCmd_AddCheckedComment, SQLCmd_DoesBotCommentExist, SQLCmd_GetBotComment, SQLCmd_HasCommentBeenChecked, SQLCmd_HasPostBeenChecked, SQLCmd_AddCheckedPost, SQLCmd_UpdateBotComment;
+        SQLiteCommand SQLCmd_AddBotComment, SQLCmd_AddCheckedComment, SQLCmd_DoesBotCommentExist, SQLCmd_GetBotComment, SQLCmd_HasCommentBeenChecked, SQLCmd_HasPostBeenChecked, SQLCmd_AddCheckedPost, SQLCmd_UpdateBotComment, SQLCmd_Update24HourArchive, SQLCmd_Is24HourArchived;
         public SQLiteBotState(string filename = "botstate.sqlite")
         {
             if (!File.Exists($"{AppDomain.CurrentDomain.BaseDirectory.TrimEnd('/')}/Data/{filename}"))
@@ -60,7 +60,7 @@ namespace Mnemosyne2Reborn.BotState
             {
                 cmd.ExecuteNonQuery();
             }
-            query = "create table if not exists posts (postID text unique)";
+            query = "create table if not exists posts (postID text unique, reArchived integer)";
             using (SQLiteCommand cmd = new SQLiteCommand(query, dbConnection))
             {
                 cmd.ExecuteNonQuery();
@@ -79,7 +79,7 @@ namespace Mnemosyne2Reborn.BotState
             SQLCmd_AddCheckedComment = new SQLiteCommand("insert or abort into comments (commentID) values (@commentID)", dbConnection);
             SQLCmd_AddCheckedComment.Parameters.Add(CommentIdParam);
 
-            SQLCmd_AddCheckedPost = new SQLiteCommand("insert or abort into posts (postID) values (@postID)", dbConnection);
+            SQLCmd_AddCheckedPost = new SQLiteCommand("insert or abort into posts (postID, reArchived) values (@postID, 0)", dbConnection);
             SQLCmd_AddCheckedPost.Parameters.Add(PostParam);
 
             SQLCmd_DoesBotCommentExist = new SQLiteCommand("select count(*) from replies where postID = @postID", dbConnection);
@@ -97,6 +97,12 @@ namespace Mnemosyne2Reborn.BotState
             SQLCmd_UpdateBotComment = new SQLiteCommand("update replies set botReplyID = @botReplyID where postID = @postID", dbConnection);
             SQLCmd_UpdateBotComment.Parameters.Add(BotReplyParam);
             SQLCmd_UpdateBotComment.Parameters.Add(PostParam);
+
+            SQLCmd_Update24HourArchive = new SQLiteCommand("update posts set reArchived = 1 where postID = @postID");
+            SQLCmd_Update24HourArchive.Parameters.Add(PostParam);
+
+            SQLCmd_Is24HourArchived = new SQLiteCommand("select reArchived from posts where postID = @postID");
+            SQLCmd_Is24HourArchived.Parameters.Add(PostParam);
         }
         public void AddBotComment(string postID, string commentID)
         {
@@ -147,6 +153,17 @@ namespace Mnemosyne2Reborn.BotState
         {
             SQLCmd_HasPostBeenChecked.Parameters["@postID"].Value = postId;
             return Convert.ToBoolean(SQLCmd_HasPostBeenChecked.ExecuteScalar());
+        }
+        public bool Is24HourArchived(string postId)
+        {
+            SQLCmd_Is24HourArchived.Parameters["@postID"].Value = postId;
+            return Convert.ToBoolean(SQLCmd_Is24HourArchived.ExecuteScalarAsync());
+        }
+
+        public void Archive24Hours(string postId)
+        {
+            SQLCmd_Update24HourArchive.Parameters["@postID"].Value = postId;
+            SQLCmd_Update24HourArchive.ExecuteNonQuery();
         }
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls

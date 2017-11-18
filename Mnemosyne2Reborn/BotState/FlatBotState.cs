@@ -158,6 +158,14 @@ namespace Mnemosyne2Reborn.BotState
         /// <param name="postId">Post ID to check</param>
         /// <returns>If the post has been checked</returns>
         public bool HasPostBeenChecked(string postId) => CheckedPosts.Contains(postId);
+        /// <summary>
+        /// Checks if it has been archived after 24 hours
+        /// </summary>
+        /// <param name="postID">A post ID to add to the thing</param>
+        /// <returns>A boolean stating whether it has been archived or not</returns>
+        /// <exception cref="NotImplementedException">Currently unimplemented</exception>
+        public bool Is24HourArchived(string postId) => throw new NotImplementedException();
+        public void Archive24Hours(string postId) => throw new NotImplementedException();
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls
         protected virtual void Dispose(bool disposing)

@@ -7,7 +7,7 @@ using System;
 using System.Collections.Generic;
 namespace Mnemosyne2Reborn.Configuration
 {
-    public class ArchiveSubredditNameEqualityCompararer : IEqualityComparer<ArchiveSubreddit>
+    public class ArchiveSubredditEqualityCompararer : IEqualityComparer<ArchiveSubreddit>
     {
         public bool Equals(ArchiveSubreddit x, ArchiveSubreddit y) => x.Name == y.Name;
 

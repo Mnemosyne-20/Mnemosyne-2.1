@@ -247,6 +247,12 @@ namespace Mnemosyne2Reborn
                 string name = Console.ReadLine();
                 Console.WriteLine("Would you like to archive posts? (Yes/No)");
                 bool ArcPost = Console.ReadLine().ToLower()[0] == 'y';
+                bool Arc24Hours = false;
+                if (ArcPost)
+                {
+                    Console.WriteLine("Would you like to archive posts again after 24 hours? (Yes/No)");
+                    Arc24Hours = Console.ReadLine().ToLower()[0] == 'y';
+                }
                 Console.WriteLine("Would you like to archive links in comments? (Yes/No)");
                 bool ArcComments = Console.ReadLine().ToLower()[0] == 'y';
                 ArchiveSubredditJson arcSubJson = new ArchiveSubredditJson()
@@ -254,7 +260,8 @@ namespace Mnemosyne2Reborn
                     ArchiveCommentLinks = ArcComments,
                     ArchivePost = ArcPost,
                     Name = name,
-                    ArchiveWebsite = "archive.fo"
+                    ArchiveWebsite = "archive.fo",
+                    ArchiveAfter24Hours = Arc24Hours
                 };
                 Subs[i] = arcSubJson;
             }
@@ -332,7 +339,7 @@ namespace Mnemosyne2Reborn
                             Console.WriteLine($"Found {s} in post {post.Id}");
                         }
                     }
-                    ArchivedLinks = ArchiveLinks.ArchivePostLinks(Links, new Regex[] { exclusions, providers, ImageRegex }, reddit.GetUser(post.AuthorName));
+                    ArchivedLinks = ArchiveLinks.ArchivePostLinks(Links, new Regex[] { exclusions, providers, ImageRegex }, post.Author);
                     lock (LockConfigObject)
                     {
                         PostArchives.ArchivePostLinks(subreddit, config, state, post, ArchivedLinks);
@@ -380,18 +387,16 @@ namespace Mnemosyne2Reborn
                 throw new ArgumentNullException(reddit == null ? nameof(reddit) : state == null ? nameof(state) : config == null ? nameof(config) : nameof(subreddits));
             }
             Console.Title = $"Archiving posts after 24 hours";
-            ArchiveSubredditNameEqualityCompararer compararer = new ArchiveSubredditNameEqualityCompararer();
+            // Shut the fuck up about the name, I know it's stupid long, but it exists for literally only this, so can it
+            var compararer = new ArchiveSubredditEqualityCompararer();
             foreach (var postId in state.GetNon24HourArchivedPosts())
             {
-                Post post = (Post)reddit.GetThingByFullname("t3_" + Regex.Replace(postId, "t[0-6]_", ""));
-                ArchiveSubreddit sub = null;
-                if (subreddits.Contains(new ArchiveSubreddit(post.Subreddit), compararer))
+                Post post = (Post)reddit.GetThingByFullname($"t3_{Regex.Replace(postId, "^(t[0-6]_)", "")}");
+                ArchiveSubreddit sub = subreddits.FirstOrDefault((a) => a.Name == post.SubredditName);
+                if (sub == default(ArchiveSubreddit))
                 {
-                    sub = subreddits.Where((a) => a.Name == post.SubredditName).First();
-                }
-                else
-                {
-                    throw new Exception("Cannot find subreddit to archive with after 24 hours");
+                    state.Archive24Hours(post.Id);
+                    throw new Exception($"Post {post.Id} is not in a listed subreddit");
                 }
                 if (!sub.ArchiveAfter24Hours)
                 {
@@ -409,18 +414,19 @@ namespace Mnemosyne2Reborn
                     state.Archive24Hours(post.Id);
                     continue;
                 }
-                if (Links.Count > 0)
+                else if (Links.Count > 0)
                 {
                     foreach (string s in Links)
                     {
                         Console.WriteLine($"Found {s} in post {post.Id}");
                     }
                 }
-                ArchivedLinks = ArchiveLinks.ArchivePostLinks(Links, new Regex[] { exclusions, providers, ImageRegex }, reddit.GetUser(post.AuthorName));
+                ArchivedLinks = ArchiveLinks.ArchivePostLinks(Links, new Regex[] { exclusions, providers, ImageRegex }, post.Author);
                 lock (LockConfigObject)
                 {
                     PostArchives.ArchivePostLinks(sub, config, state, post, ArchivedLinks);
                 }
+                state.Archive24Hours(post.Id);
             }
         }
         #endregion

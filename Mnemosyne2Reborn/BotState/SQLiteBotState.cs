@@ -165,6 +165,7 @@ namespace Mnemosyne2Reborn.BotState
             SQLCmd_Update24HourArchive.Parameters["@postID"].Value = postId;
             SQLCmd_Update24HourArchive.ExecuteNonQuery();
         }
+        public string[] GetNon24HourArchivedPosts() => throw new NotImplementedException();
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls
 

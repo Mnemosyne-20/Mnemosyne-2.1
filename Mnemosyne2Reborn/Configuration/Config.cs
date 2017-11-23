@@ -82,7 +82,7 @@ namespace Mnemosyne2Reborn.Configuration
             this.ArchiveLinks = ArchiveLinks;
             FlavorText = new string[] { };
             this.ArchiveService = ArchiveService;
-            Ver = 3;
+            Ver = 4;
             this.RedirectURI = RedirectURI;
             File.WriteAllText("./Data/Settings.json", JsonConvert.SerializeObject(this, Formatting.Indented));
         }

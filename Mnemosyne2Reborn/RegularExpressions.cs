@@ -20,7 +20,7 @@ namespace Mnemosyne2Reborn
         public static IEnumerable<string> FindLinksE(string PostBody)
         {
             MatchCollection matches = Regex.Matches(PostBody, @"""(http|ftp|https)://([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?"""); // Same voodoo black demon magic from last repo
-            foreach(Match match in matches)
+            foreach (Match match in matches)
             {
                 yield return match.Value.TrimStart('"').TrimEnd('"');
             }

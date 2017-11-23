@@ -4,8 +4,18 @@ using Newtonsoft.Json;
 using RedditSharp;
 using RedditSharp.Things;
 using System;
+using System.Collections.Generic;
 namespace Mnemosyne2Reborn.Configuration
 {
+    public class ArchiveSubredditNameEqualityCompararer : IEqualityComparer<ArchiveSubreddit>
+    {
+        public bool Equals(ArchiveSubreddit x, ArchiveSubreddit y) => x.Name == y.Name;
+
+        public int GetHashCode(ArchiveSubreddit obj)
+        {
+            throw new NotImplementedException();
+        }
+    }
     public class ArchiveSubredditEventArgs : EventArgs
     {
         ArchiveSubreddit[] _archiveSubreddits;
@@ -43,6 +53,9 @@ namespace Mnemosyne2Reborn.Configuration
         [JsonRequired]
         [JsonProperty("ArchiveWebsite")]
         public string ArchiveWebsite { get; set; }
+        [JsonRequired]
+        [JsonProperty("ArchiveAfter24Hours")]
+        public bool ArchiveAfter24Hours { get; set; }
     }
     /// <summary>
     /// This class creates a wrapper for a subreddit so that it has two properties to be pass around readily
@@ -50,12 +63,12 @@ namespace Mnemosyne2Reborn.Configuration
     public class ArchiveSubreddit
     {
         public readonly Subreddit sub;
-        public ArchiveSubreddit(Reddit reddit, ArchiveSubredditJson json)
+        public ArchiveSubreddit(Reddit reddit, ArchiveSubredditJson json) : this(reddit.GetSubreddit(json.Name))
         {
-            sub = reddit.GetSubreddit(json.Name);
             SubredditArchiveService = new ArchiveService(json.ArchiveWebsite).CreateNewService();
             ArchivePost = json.ArchivePost;
             ArchiveCommentLinks = json.ArchiveCommentLinks;
+            ArchiveAfter24Hours = json.ArchiveAfter24Hours;
         }
         public ArchiveSubreddit(Subreddit sub) => this.sub = sub;
         public Listing<Post> New { get => sub.New; }
@@ -64,6 +77,7 @@ namespace Mnemosyne2Reborn.Configuration
         public string Name => sub.Name;
         public bool ArchiveCommentLinks { get; set; }
         public bool ArchivePost { get; set; }
+        public bool ArchiveAfter24Hours { get; set; }
         public IArchiveService SubredditArchiveService { get; set; }
     }
 }

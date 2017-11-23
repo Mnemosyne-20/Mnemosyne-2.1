@@ -44,10 +44,12 @@ namespace Mnemosyne2Reborn
         /// <param name="state"></param>
         /// <param name="subbreddit"></param>
         public delegate void IterateThing(Reddit reddit, IBotState state, ArchiveSubreddit subbreddit);
+        public delegate void IterateCheckedThing(Reddit reddit, IBotState state, ArchiveSubreddit[] subreddits, Config config);
         public delegate void IterateConfiguratedThing(Reddit reddit, IBotState state, ArchiveSubreddit subreddit, Config config);
         public static IterateConfiguratedThing IteratePost;
         public static IterateConfiguratedThing IterateComment;
         public static IterateThing IterateMessage;
+        public static IterateCheckedThing Iterate24Hours;
         /// <summary>
         /// This is intentional to be this way, it's so that the editor can get the headers easily
         /// </summary>
@@ -151,6 +153,7 @@ namespace Mnemosyne2Reborn
             IteratePost = IteratePosts;
             IterateComment = IterateComments;
             IterateMessage = IterateMessages;
+            //Iterate24Hours = Iterate24HourArchive;
             new RedditUserProfileSqlite();
             if (File.Exists("./Data/Users.json"))
             {
@@ -178,13 +181,17 @@ namespace Mnemosyne2Reborn
             {
                 try
                 {
-                    lock (LockArchiveSubredditsObject)
+                    lock (LockConfigObject)
                     {
-                        foreach (ArchiveSubreddit sub in ArchiveSubreddits) // Iterates allowed subreddits
+                        lock (LockArchiveSubredditsObject)
                         {
-                            IteratePost(reddit, botstate, sub, Config);
-                            IterateComment(reddit, botstate, sub, Config);
-                            IterateMessage(reddit, botstate, sub);
+                            foreach (ArchiveSubreddit sub in ArchiveSubreddits) // Iterates allowed subreddits
+                            {
+                                IteratePost?.Invoke(reddit, botstate, sub, Config);
+                                IterateComment?.Invoke(reddit, botstate, sub, Config);
+                                IterateMessage?.Invoke(reddit, botstate, sub);
+                            }
+                            Iterate24Hours?.Invoke(reddit, botstate, ArchiveSubreddits, Config);
                         }
                     }
                     Console.Title = $"Sleeping, New messages: {reddit.User.UnreadMessages.Count() >= 1}";
@@ -331,6 +338,8 @@ namespace Mnemosyne2Reborn
                         PostArchives.ArchivePostLinks(subreddit, config, state, post, ArchivedLinks);
                     }
                     state.AddCheckedPost(post.Id);
+                    if (!subreddit.ArchiveAfter24Hours)
+                        state.Archive24Hours(post.Id);
                 }
             }
         }
@@ -362,6 +371,56 @@ namespace Mnemosyne2Reborn
                     PostArchives.ArchiveCommentLinks(config, state, reddit, comment, ArchivedLinks);
                 }
                 state.AddCheckedComment(comment.Id);
+            }
+        }
+        public static void Iterate24HourArchive(Reddit reddit, IBotState state, ArchiveSubreddit[] subreddits, Config config)
+        {
+            if (reddit == null || state == null || subreddits == null || config == null)
+            {
+                throw new ArgumentNullException(reddit == null ? nameof(reddit) : state == null ? nameof(state) : config == null ? nameof(config) : nameof(subreddits));
+            }
+            Console.Title = $"Archiving posts after 24 hours";
+            ArchiveSubredditNameEqualityCompararer compararer = new ArchiveSubredditNameEqualityCompararer();
+            foreach (var postId in state.GetNon24HourArchivedPosts())
+            {
+                Post post = (Post)reddit.GetThingByFullname("t3_" + Regex.Replace(postId, "t[0-6]_", ""));
+                ArchiveSubreddit sub = null;
+                if (subreddits.Contains(new ArchiveSubreddit(post.Subreddit), compararer))
+                {
+                    sub = subreddits.Where((a) => a.Name == post.SubredditName).First();
+                }
+                else
+                {
+                    throw new Exception("Cannot find subreddit to archive with after 24 hours");
+                }
+                if (!sub.ArchiveAfter24Hours)
+                {
+                    state.Archive24Hours(post.Id);
+                    continue;
+                }
+                List<ArchiveLink> ArchivedLinks = new List<ArchiveLink>();
+                List<string> Links = new List<string>();
+                if (post.IsSelfPost && !string.IsNullOrEmpty(post.SelfTextHtml))
+                {
+                    Links = RegularExpressions.FindLinks(post.SelfTextHtml);
+                }
+                if (Links.Count == 0 && !sub.ArchivePost)
+                {
+                    state.Archive24Hours(post.Id);
+                    continue;
+                }
+                if (Links.Count > 0)
+                {
+                    foreach (string s in Links)
+                    {
+                        Console.WriteLine($"Found {s} in post {post.Id}");
+                    }
+                }
+                ArchivedLinks = ArchiveLinks.ArchivePostLinks(Links, new Regex[] { exclusions, providers, ImageRegex }, reddit.GetUser(post.AuthorName));
+                lock (LockConfigObject)
+                {
+                    PostArchives.ArchivePostLinks(sub, config, state, post, ArchivedLinks);
+                }
             }
         }
         #endregion

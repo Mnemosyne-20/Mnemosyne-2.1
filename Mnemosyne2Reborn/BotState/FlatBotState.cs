@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 namespace Mnemosyne2Reborn.BotState
 {
     public class FlatBotState : IBotState
@@ -69,12 +70,22 @@ namespace Mnemosyne2Reborn.BotState
             {
                 CheckedPosts = JsonConvert.DeserializeObject<List<string>>(File.ReadAllText(dataDir + "CheckedPosts.json")) ?? new List<string>();
             }
+            if (!File.Exists(dataDir + "ReArchivedPosts.json"))
+            {
+                ReArchviedPosts = new Dictionary<string, bool>();
+                File.Create(dataDir + "ReArchivedPosts.json").Dispose();
+            }
+            else
+            {
+                ReArchviedPosts = JsonConvert.DeserializeObject<Dictionary<string, bool>>(File.ReadAllText(dataDir + "ReArchivedPosts.json")) ?? new Dictionary<string, bool>();
+            }
         }
         private enum DictionaryEnum
         {
             Dictionary,
             Comments,
             Posts,
+            ReArchivePosts,
             All
         }
         private void DumpDictionary(DictionaryEnum en)
@@ -85,6 +96,10 @@ namespace Mnemosyne2Reborn.BotState
                     File.WriteAllText(DataDir + "Dictionary.json", JsonConvert.SerializeObject(CommentDictionary));
                     File.WriteAllText(DataDir + "CheckedComments.json", JsonConvert.SerializeObject(CheckedComments));
                     File.WriteAllText(DataDir + "CheckedPosts.json", JsonConvert.SerializeObject(CheckedPosts));
+                    File.WriteAllText(DataDir + "ReArchivedPosts.json", JsonConvert.SerializeObject(ReArchviedPosts));
+                    break;
+                case DictionaryEnum.ReArchivePosts:
+                    File.WriteAllText(DataDir + "ReArchivedPosts.json", JsonConvert.SerializeObject(ReArchviedPosts));
                     break;
                 case DictionaryEnum.Comments:
                     File.WriteAllText(DataDir + "CheckedComments.json", JsonConvert.SerializeObject(CheckedComments));
@@ -103,11 +118,15 @@ namespace Mnemosyne2Reborn.BotState
         Dictionary<string, string> CommentDictionary;
         [JsonProperty("CheckedPosts")]
         List<string> CheckedPosts;
+        [JsonProperty("ReArchivedPosts")]
+        Dictionary<string, bool> ReArchviedPosts;
         /// <inheritdoc />
         public void AddBotComment(string postID, string commentID)
         {
             CommentDictionary.Add(postID, commentID);
             DumpDictionary(DictionaryEnum.Dictionary);
+            ReArchviedPosts.Add(postID, false);
+            DumpDictionary(DictionaryEnum.ReArchivePosts);
         }
         /// <inheritdoc />
         public void UpdateBotComment(string postID, string commentID)
@@ -163,9 +182,17 @@ namespace Mnemosyne2Reborn.BotState
         /// </summary>
         /// <param name="postID">A post ID to add to the thing</param>
         /// <returns>A boolean stating whether it has been archived or not</returns>
-        /// <exception cref="NotImplementedException">Currently unimplemented</exception>
-        public bool Is24HourArchived(string postId) => throw new NotImplementedException();
-        public void Archive24Hours(string postId) => throw new NotImplementedException();
+        public bool Is24HourArchived(string postId) => ReArchviedPosts.ContainsKey(postId) ? ReArchviedPosts[postId] : false;
+        /// <summary>
+        /// Sets the post to having been archived after 24 hours
+        /// </summary>
+        /// <param name="postId">A <see cref="RedditSharp.Things.Post"/> ID used</param>
+        /// <remarks>This assumes you've actually handled archiving it yourself</remarks>
+        public void Archive24Hours(string postId) => ReArchviedPosts[postId] = true;
+        public string[] GetNon24HourArchivedPosts()
+        {
+            return (from a in ReArchviedPosts where !a.Value select a.Key).ToArray();
+        }
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls
         protected virtual void Dispose(bool disposing)

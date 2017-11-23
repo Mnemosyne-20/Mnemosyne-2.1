@@ -56,5 +56,6 @@ namespace Mnemosyne2Reborn.BotState
         /// <returns>A boolean stating whether it has been archived or not</returns>
         bool Is24HourArchived(string postID);
         void Archive24Hours(string postID);
+        string[] GetNon24HourArchivedPosts();
     }
 }

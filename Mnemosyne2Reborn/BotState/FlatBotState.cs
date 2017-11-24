@@ -125,8 +125,6 @@ namespace Mnemosyne2Reborn.BotState
         {
             CommentDictionary.Add(postID, commentID);
             DumpDictionary(DictionaryEnum.Dictionary);
-            ReArchviedPosts.Add(postID, false);
-            DumpDictionary(DictionaryEnum.ReArchivePosts);
         }
         /// <inheritdoc />
         public void UpdateBotComment(string postID, string commentID)
@@ -170,6 +168,8 @@ namespace Mnemosyne2Reborn.BotState
         {
             CheckedPosts.Add(postId);
             DumpDictionary(DictionaryEnum.Posts);
+            ReArchviedPosts.Add(postId, false);
+            DumpDictionary(DictionaryEnum.ReArchivePosts);
         }
         /// <summary>
         /// Checks if a post has been checked

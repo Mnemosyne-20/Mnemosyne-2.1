@@ -53,7 +53,7 @@ namespace Mnemosyne2Reborn
         /// <summary>
         /// This is intentional to be this way, it's so that the editor can get the headers easily
         /// </summary>
-        public static readonly string[] Headers = new string[] { "Archives for this post:\n\n", "Archive for this post:\n\n", "Archives for the links in comments:\n\n", "----\nI am Mnemosyne 2.1, {0} ^^^^/r/botsrights ^^^^[Contribute](https://github.com/Mnemosyne-20/Mnemosyne-2.1) ^^^^message ^^^^me ^^^^suggestions ^^^^at ^^^^any ^^^^time ^^^^Opt ^^^^out ^^^^of ^^^^tracking ^^^^by ^^^^messaging ^^^^me ^^^^\"Opt ^^^^Out\" ^^^^at ^^^^any ^^^^time" };
+        public static readonly string[] Headers = new string[] { "Archives for this post:\n\n", "Archive for this post:\n\n", "Archives for the links in comments:\n\n", "----\nI am Mnemosyne 2.1, {0} ^^^^/r/botsrights ^^^^[Contribute](https://github.com/Mnemosyne-20/Mnemosyne-2.1) ^^^^message ^^^^me ^^^^suggestions ^^^^at ^^^^any ^^^^time ^^^^Opt ^^^^out ^^^^of ^^^^tracking ^^^^by ^^^^messaging ^^^^me ^^^^\"Opt ^^^^Out\" ^^^^at ^^^^any ^^^^time", "Archives after 24 hours:\n\n" };
         /// <summary>
         /// These three being separate is important because it is used for data tracking
         /// </summary>
@@ -392,6 +392,10 @@ namespace Mnemosyne2Reborn
             foreach (var postId in state.GetNon24HourArchivedPosts())
             {
                 Post post = (Post)reddit.GetThingByFullname($"t3_{Regex.Replace(postId, "^(t[0-6]_)", "")}");
+                if(DateTime.Now.Subtract(new TimeSpan(TimeSpan.TicksPerDay)) > post.Created)
+                {
+                    continue;
+                }
                 ArchiveSubreddit sub = subreddits.FirstOrDefault((a) => a.Name == post.SubredditName);
                 if (sub == default(ArchiveSubreddit))
                 {
@@ -424,7 +428,7 @@ namespace Mnemosyne2Reborn
                 ArchivedLinks = ArchiveLinks.ArchivePostLinks(Links, new Regex[] { exclusions, providers, ImageRegex }, post.Author);
                 lock (LockConfigObject)
                 {
-                    PostArchives.ArchivePostLinks(sub, config, state, post, ArchivedLinks);
+                    PostArchives.ArchivePostLinks24Hours(sub, reddit, config, state, post, ArchivedLinks);
                 }
                 state.Archive24Hours(post.Id);
             }

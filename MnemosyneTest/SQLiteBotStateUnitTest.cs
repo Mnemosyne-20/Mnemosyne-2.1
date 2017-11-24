@@ -1,4 +1,4 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿    using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Mnemosyne2Reborn.BotState;
 namespace MnemosyneTest
 {
@@ -43,6 +43,19 @@ namespace MnemosyneTest
             sqliteBotState.AddBotComment("post", "postcomment");
             sqliteBotState.UpdateBotComment("post", "postcomment2");
             Assert.IsTrue(sqliteBotState.GetCommentForPost("post") == "postcomment2");
+        }
+        [TestMethod]
+        [DeploymentItem("Test.sqlite", "Data\\5")]
+        [TestCategory("SQLiteBotState")]
+        public void TestArchive24HoursSqlite()
+        {
+            SQLiteBotState sqliteBotState = new SQLiteBotState("5\\Test.sqlite");
+            sqliteBotState.AddCheckedPost("post");
+            Assert.IsFalse(sqliteBotState.Is24HourArchived("post"));
+            Assert.IsFalse(sqliteBotState.GetNon24HourArchivedPosts().Length == 0);
+            sqliteBotState.Archive24Hours("post");
+            Assert.IsTrue(sqliteBotState.Is24HourArchived("post"));
+            Assert.IsTrue(sqliteBotState.GetNon24HourArchivedPosts().Length == 0);
         }
     }
 }

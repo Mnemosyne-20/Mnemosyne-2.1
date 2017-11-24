@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.SQLite;
 using System.IO;
@@ -8,7 +9,17 @@ namespace Mnemosyne2Reborn.BotState
     public class SQLiteBotState : IBotState
     {
         SQLiteConnection dbConnection;
-        SQLiteCommand SQLCmd_AddBotComment, SQLCmd_AddCheckedComment, SQLCmd_DoesBotCommentExist, SQLCmd_GetBotComment, SQLCmd_HasCommentBeenChecked, SQLCmd_HasPostBeenChecked, SQLCmd_AddCheckedPost, SQLCmd_UpdateBotComment, SQLCmd_Update24HourArchive, SQLCmd_Is24HourArchived;
+        SQLiteCommand SQLCmd_AddBotComment,
+            SQLCmd_AddCheckedComment,
+            SQLCmd_DoesBotCommentExist,
+            SQLCmd_GetBotComment,
+            SQLCmd_HasCommentBeenChecked,
+            SQLCmd_HasPostBeenChecked,
+            SQLCmd_AddCheckedPost,
+            SQLCmd_UpdateBotComment,
+            SQLCmd_Update24HourArchive,
+            SQLCmd_Is24HourArchived,
+            SQLCmd_GetNon24HourArchived;
         public SQLiteBotState(string filename = "botstate.sqlite")
         {
             if (!File.Exists($"{AppDomain.CurrentDomain.BaseDirectory.TrimEnd('/')}/Data/{filename}"))
@@ -98,11 +109,13 @@ namespace Mnemosyne2Reborn.BotState
             SQLCmd_UpdateBotComment.Parameters.Add(BotReplyParam);
             SQLCmd_UpdateBotComment.Parameters.Add(PostParam);
 
-            SQLCmd_Update24HourArchive = new SQLiteCommand("update posts set reArchived = 1 where postID = @postID");
+            SQLCmd_Update24HourArchive = new SQLiteCommand("update posts set reArchived = 1 where postID = @postID", dbConnection);
             SQLCmd_Update24HourArchive.Parameters.Add(PostParam);
 
-            SQLCmd_Is24HourArchived = new SQLiteCommand("select reArchived from posts where postID = @postID");
+            SQLCmd_Is24HourArchived = new SQLiteCommand("select reArchived from posts where postID = @postID", dbConnection);
             SQLCmd_Is24HourArchived.Parameters.Add(PostParam);
+
+            SQLCmd_GetNon24HourArchived = new SQLiteCommand("select postID from posts where reArchived = 0", dbConnection);
         }
         public void AddBotComment(string postID, string commentID)
         {
@@ -157,7 +170,7 @@ namespace Mnemosyne2Reborn.BotState
         public bool Is24HourArchived(string postId)
         {
             SQLCmd_Is24HourArchived.Parameters["@postID"].Value = postId;
-            return Convert.ToBoolean(SQLCmd_Is24HourArchived.ExecuteScalarAsync());
+            return Convert.ToBoolean(SQLCmd_Is24HourArchived.ExecuteScalar());
         }
 
         public void Archive24Hours(string postId)
@@ -165,7 +178,18 @@ namespace Mnemosyne2Reborn.BotState
             SQLCmd_Update24HourArchive.Parameters["@postID"].Value = postId;
             SQLCmd_Update24HourArchive.ExecuteNonQuery();
         }
-        public string[] GetNon24HourArchivedPosts() => throw new NotImplementedException();
+        public string[] GetNon24HourArchivedPosts()
+        {
+            List<string> readerCounter = new List<string>();
+            using (SQLiteDataReader reader = SQLCmd_GetNon24HourArchived.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    readerCounter.Add((string)reader["postID"]);
+                }
+            }
+            return readerCounter.ToArray();
+        }
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls
 
@@ -183,6 +207,9 @@ namespace Mnemosyne2Reborn.BotState
                     SQLCmd_HasPostBeenChecked.Dispose();
                     SQLCmd_AddCheckedPost.Dispose();
                     SQLCmd_UpdateBotComment.Dispose();
+                    SQLCmd_Is24HourArchived.Dispose();
+                    SQLCmd_Update24HourArchive.Dispose();
+                    SQLCmd_GetNon24HourArchived.Dispose();
                     dbConnection.Dispose();
                     // TODO: dispose managed state (managed objects).
                 }

@@ -38,5 +38,17 @@ namespace MnemosyneTest
             flatBotState.UpdateBotComment("post", "postcomment2");
             Assert.IsTrue(flatBotState.GetCommentForPost("post") == "postcomment2");
         }
+        [TestCategory("FlatFileBotState")]
+        [TestMethod]
+        public void Test24HourArchiveFlatFile()
+        {
+            FlatBotState flatBotState = new FlatBotState("./Data/5\\");
+            flatBotState.AddCheckedPost("post");
+            Assert.IsFalse(flatBotState.Is24HourArchived("post"));
+            Assert.IsFalse(flatBotState.GetNon24HourArchivedPosts().Length == 0);
+            flatBotState.Archive24Hours("post");
+            Assert.IsTrue(flatBotState.Is24HourArchived("post"));
+            Assert.IsTrue(flatBotState.GetNon24HourArchivedPosts().Length == 0);
+        }
     }
 }

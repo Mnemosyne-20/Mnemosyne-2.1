@@ -9,11 +9,11 @@ namespace Mnemosyne2Reborn.Configuration
 {
     public class ArchiveSubredditEqualityCompararer : IEqualityComparer<ArchiveSubreddit>
     {
-        public bool Equals(ArchiveSubreddit x, ArchiveSubreddit y) => x.Name == y.Name;
+        public bool Equals(ArchiveSubreddit x, ArchiveSubreddit y) => this.GetHashCode(x) == this.GetHashCode(y);
 
         public int GetHashCode(ArchiveSubreddit obj)
         {
-            throw new NotImplementedException();
+            return obj.sub.GetHashCode();
         }
     }
     public class ArchiveSubredditEventArgs : EventArgs

@@ -58,6 +58,38 @@ namespace Mnemosyne2Reborn.Commenting
             }
             PostArchiveLinks(config, state, Program.Headers[0], post, LinksToPost);
         }
+        /// <summary>
+        /// Archives post links for a <see cref="ArchiveSubreddit"/>
+        /// </summary>
+        /// <param name="sub">An <see cref="ArchiveSubreddit"/> used for archiving the post with a specific <see cref="IArchiveService"/></param>
+        /// <param name="config">A <see cref="Config"/> for flavortext</param>
+        /// <param name="state">An <see cref="IBotState"/> used to keep track of comments and other things</param>
+        /// <param name="post">A <see cref="Post"/> that you are replying to</param>
+        /// <param name="archivedLinks">A <see cref="List{T}"/> of <see cref="ArchiveLink"/> used for keeping track of original and archived links</param>
+        public static void ArchivePostLinks24Hours(ArchiveSubreddit sub, Reddit reddit, Config config, IBotState state, Post post, List<ArchiveLink> archivedLinks)
+        {
+            List<string> LinksToPost = new List<string>();
+            if (sub.ArchivePost && sub.SubredditArchiveService.Verify(post.Url))
+            {
+                LinksToPost.Add($"* **Post:** {sub.SubredditArchiveService.Save(post.Url)}\n"); // saves post if you want to archive something
+            }
+            if (archivedLinks.Count != 0)
+            {
+                foreach (var link in archivedLinks)
+                {
+                    if (link.IsExcluded)
+                    {
+                        continue;
+                    }
+                    LinksToPost.Add($"* **Link: {link.Position}** ([{link.Hostname}]({link.OriginalLink})): {link.ArchivedLink}\n");
+                }
+            }
+            if (LinksToPost.Count == 0)
+            {
+                return;
+            }
+            PostArchiveLinksToComment24Hours(config, state, Program.Headers[4], (Comment)reddit.GetThingByFullname(state.GetCommentForPost(post.Id)), LinksToPost);
+        }
         public static void ArchiveCommentLinks(Config config, IBotState state, Reddit reddit, Comment comment, List<ArchiveLink> archiveLinks)
         {
             if (archiveLinks.Count < 1) return;
@@ -156,6 +188,36 @@ namespace Mnemosyne2Reborn.Commenting
                 throw new ArgumentNullException(config == null ? nameof(config) : state == null ? nameof(state) : head == null ? nameof(head) : comment == null ? nameof(comment) : nameof(ArchiveList));
             }
             Console.Title = $"Posting new comment to comment {comment.Id}";
+            string LinksListBody = string.Join("", ArchiveList);
+            string c = head + LinksListBody + "\n" + string.Format(Program.Headers[3], config.FlavorText[rand.Next(0, config.FlavorText.Length)]);
+            Comment botComment = comment.Reply(c);
+            try
+            {
+                state.UpdateBotComment(comment.Id, botComment.Id);
+                Console.WriteLine(c);
+            }
+            catch (InvalidOperationException e)
+            {
+                Console.WriteLine($"Caught exception replying to comment {comment.Id} with new comment  {Regex.Replace(botComment.Id, "t1_", "")}: {e.Message}");
+                botComment.Del();
+            }
+        }
+        /// <summary>
+        /// Posts all links archived, throws <see cref="ArgumentNullException"/> if you attempt to call this with any null arguments
+        /// </summary>
+        /// <param name="config">A <see cref="Config"/> that is used for flavortext and nothing else</param>
+        /// <param name="state">An <see cref="IBotState"/> that will update the list with the replies</param>
+        /// <param name="head">A header used for a header for the comment</param>
+        /// <param name="comment">A <see cref="Comment"/> that you're replying to</param>
+        /// <param name="ArchiveList">A <see cref="List{string}"/> for a list of archives to post to a comment</param>
+        /// <exception cref="ArgumentNullException"></exception>
+        public static void PostArchiveLinksToComment24Hours(Config config, IBotState state, string head, Comment comment, List<string> ArchiveList)
+        {
+            if (config == null || state == null || head == null || comment == null || ArchiveList == null)
+            {
+                throw new ArgumentNullException(config == null ? nameof(config) : state == null ? nameof(state) : head == null ? nameof(head) : comment == null ? nameof(comment) : nameof(ArchiveList));
+            }
+            Console.Title = $"Posting new comment to comment {comment.Id} for post after 24 hours";
             string LinksListBody = string.Join("", ArchiveList);
             string c = head + LinksListBody + "\n" + string.Format(Program.Headers[3], config.FlavorText[rand.Next(0, config.FlavorText.Length)]);
             Comment botComment = comment.Reply(c);

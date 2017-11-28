@@ -19,7 +19,7 @@ namespace Mnemosyne2Reborn
     {
 
         #region static values
-        public static string[] ArchiveBots = new string[]
+        public readonly static string[] ArchiveBots = new string[]
         {
             "mnemosyne-0001",
             "mnemosyne-0002",// I've seen you!
@@ -44,12 +44,12 @@ namespace Mnemosyne2Reborn
         /// <param name="state"></param>
         /// <param name="subbreddit"></param>
         public delegate void IterateThing(Reddit reddit, IBotState state, ArchiveSubreddit subbreddit);
-        public delegate void IterateCheckedThing(Reddit reddit, IBotState state, ArchiveSubreddit[] subreddits, Config config);
-        public delegate void IterateConfiguratedThing(Reddit reddit, IBotState state, ArchiveSubreddit subreddit, Config config);
-        public static IterateConfiguratedThing IteratePost;
-        public static IterateConfiguratedThing IterateComment;
+        public delegate void IterateSeparateConfigThing(Reddit reddit, IBotState state, ArchiveSubreddit[] subreddits, Config config);
+        public delegate void IterateSubredditThing(Reddit reddit, IBotState state, ArchiveSubreddit subreddit, Config config);
+        public static IterateSubredditThing IteratePost;
+        public static IterateSubredditThing IterateComment;
         public static IterateThing IterateMessage;
-        public static IterateCheckedThing Iterate24Hours;
+        public static IterateSeparateConfigThing Iterate24Hours;
         /// <summary>
         /// This is intentional to be this way, it's so that the editor can get the headers easily
         /// </summary>
@@ -57,9 +57,9 @@ namespace Mnemosyne2Reborn
         /// <summary>
         /// These three being separate is important because it is used for data tracking
         /// </summary>
-        public static Regex exclusions = new Regex(@"(facebook\.com|giphy\.com|youtube\.com|streamable\.com|www\.gobrickindustry\.us|gyazo\.com|sli\.mg|imgur\.com|reddit\.com/message|youtube\.com|youtu\.be|wiki/rules|politics_feedback_results_and_where_it_goes_from|urbandictionary\.com)");
-        public static Regex providers = new Regex(@"(web-beta.archive.org|archive\.is|archive\.fo|archive\.org|archive\.today|megalodon\.jp|web\.archive\.org|webcache\.googleusercontent\.com|archive\.li)");
-        public static Regex ImageRegex = new Regex(@"(\.gif|\.jpg|\.png|\.pdf|\.webm|\.mp4)$");
+        public readonly static Regex exclusions = new Regex(@"(facebook\.com|giphy\.com|youtube\.com|streamable\.com|www\.gobrickindustry\.us|gyazo\.com|sli\.mg|imgur\.com|reddit\.com/message|youtube\.com|youtu\.be|wiki/rules|politics_feedback_results_and_where_it_goes_from|urbandictionary\.com)");
+        public readonly static Regex providers = new Regex(@"(web-beta.archive.org|archive\.is|archive\.fo|archive\.org|archive\.today|megalodon\.jp|web\.archive\.org|webcache\.googleusercontent\.com|archive\.li)");
+        public readonly static Regex ImageRegex = new Regex(@"(\.gif|\.jpg|\.png|\.pdf|\.webm|\.mp4)$");
         #region Locks
         static object LockConfigObject = new object();
         static object LockArchiveSubredditsObject = new object();
@@ -88,7 +88,10 @@ namespace Mnemosyne2Reborn
         ArchiveSubreddit[] _archiveSubreddits;
         public ArchiveSubreddit[] ArchiveSubreddits
         {
-            get => _archiveSubreddits;
+            get
+            {
+                return _archiveSubreddits;
+            }
             set
             {
                 lock (LockArchiveSubredditsObject)
@@ -99,6 +102,12 @@ namespace Mnemosyne2Reborn
             }
         }
         #endregion
+        public static void GetHelp()
+        {
+            Console.WriteLine("Mnemosyne - 2.1 by chugga_fan");
+            Console.WriteLine("Currently no supported command line options, but future options will be:");
+            Console.WriteLine("\t--server | -s\tWill be used to start a web hosted version, with an ASP.NET host");
+        }
         static void Main(string[] args)
         {
             Console.Title = "Mnemosyne-2.1 by chugga_fan";
@@ -120,11 +129,14 @@ namespace Mnemosyne2Reborn
             }
             Program p = new Program();
         }
-        public static void GetHelp()
+        public static ArchiveSubreddit[] InitializeArchiveSubreddits(Reddit reddit, Config config)
         {
-            Console.WriteLine("Mnemosyne - 2.1 by chugga_fan");
-            Console.WriteLine("Currently no supported command line options, but future options will be:");
-            Console.WriteLine("\t--server | -s\tWill be used to start a web hosted version, with an ASP.NET host");
+            ArchiveSubreddit[] ArchiveSubreddits = new ArchiveSubreddit[config.Subreddits.Length];
+            for (int i = 0; i < config.Subreddits.Length; i++)
+            {
+                ArchiveSubreddits[i] = reddit.GetArchiveSubreddit(config.Subreddits[i]);
+            }
+            return ArchiveSubreddits;
         }
         public Program()
         {
@@ -146,6 +158,7 @@ namespace Mnemosyne2Reborn
             }
             reddit.InitOrUpdateUser();
             UpdatedConfig += (sender, e) => { ArchiveSubreddits = InitializeArchiveSubreddits(reddit, e.Config); };
+            UpdatedArchiveSubreddits += (sender, e) => { Console.Title = "Updated Archive Subreddits"; };
             lock (LockConfigObject)
             {
                 ArchiveSubreddits = InitializeArchiveSubreddits(reddit, Config);
@@ -166,33 +179,21 @@ namespace Mnemosyne2Reborn
             PostArchives.SetArchiveService(service);
             MainLoop(reddit, botstate);
         }
-        public static ArchiveSubreddit[] InitializeArchiveSubreddits(Reddit reddit, Config config)
-        {
-            ArchiveSubreddit[] ArchiveSubreddits = new ArchiveSubreddit[config.Subreddits.Length];
-            for (int i = 0; i < config.Subreddits.Length; i++)
-            {
-                ArchiveSubreddits[i] = reddit.GetArchiveSubreddit(config.Subreddits[i]);
-            }
-            return ArchiveSubreddits;
-        }
         public void MainLoop(Reddit reddit, IBotState botstate)
         {
             while (true) // main loop, calls delegates that move thrugh every subreddit allowed iteratively
             {
                 try
                 {
-                    lock (LockConfigObject)
+                    lock (LockArchiveSubredditsObject)
                     {
-                        lock (LockArchiveSubredditsObject)
+                        foreach (ArchiveSubreddit sub in ArchiveSubreddits) // Iterates allowed subreddits
                         {
-                            foreach (ArchiveSubreddit sub in ArchiveSubreddits) // Iterates allowed subreddits
-                            {
-                                IteratePost?.Invoke(reddit, botstate, sub, Config);
-                                IterateComment?.Invoke(reddit, botstate, sub, Config);
-                                IterateMessage?.Invoke(reddit, botstate, sub);
-                            }
-                            Iterate24Hours?.Invoke(reddit, botstate, ArchiveSubreddits, Config);
+                            IteratePost?.Invoke(reddit, botstate, sub, Config);
+                            IterateComment?.Invoke(reddit, botstate, sub, Config);
+                            IterateMessage?.Invoke(reddit, botstate, sub);
                         }
+                        Iterate24Hours?.Invoke(reddit, botstate, ArchiveSubreddits, Config);
                     }
                     Console.Title = $"Sleeping, New messages: {reddit.User.UnreadMessages.Count() >= 1}";
                 }
@@ -391,24 +392,19 @@ namespace Mnemosyne2Reborn
             var compararer = new ArchiveSubredditEqualityCompararer();
             foreach (var postId in state.GetNon24HourArchivedPosts())
             {
+                List<ArchiveLink> ArchivedLinks = new List<ArchiveLink>();
+                List<string> Links = new List<string>();
                 Post post = (Post)reddit.GetThingByFullname($"t3_{Regex.Replace(postId, "^(t[0-6]_)", "")}");
-                if(DateTime.Now.Subtract(new TimeSpan(TimeSpan.TicksPerDay)) > post.Created)
+                if (DateTime.UtcNow.Subtract(new TimeSpan(TimeSpan.TicksPerDay)) < post.Created)
                 {
                     continue;
                 }
-                ArchiveSubreddit sub = subreddits.FirstOrDefault((a) => a.Name == post.SubredditName);
-                if (sub == default(ArchiveSubreddit))
-                {
-                    state.Archive24Hours(post.Id);
-                    throw new Exception($"Post {post.Id} is not in a listed subreddit");
-                }
+                ArchiveSubreddit sub = subreddits.First((a) => a.Name == post.SubredditName);
                 if (!sub.ArchiveAfter24Hours)
                 {
                     state.Archive24Hours(post.Id);
                     continue;
                 }
-                List<ArchiveLink> ArchivedLinks = new List<ArchiveLink>();
-                List<string> Links = new List<string>();
                 if (post.IsSelfPost && !string.IsNullOrEmpty(post.SelfTextHtml))
                 {
                     Links = RegularExpressions.FindLinks(post.SelfTextHtml);

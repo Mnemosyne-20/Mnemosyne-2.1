@@ -1,6 +1,5 @@
 ﻿using RedditSharp;
 using RedditSharp.Things;
-using System.Collections.Generic;
 namespace Mnemosyne2Reborn.Commenting
 {
     public static class Extensions
@@ -8,11 +7,12 @@ namespace Mnemosyne2Reborn.Commenting
         /// <summary>
         /// Gets a post the comment replies to
         /// </summary>
-        /// <param name="comment">A comment to get the post from</param>
+        /// <param name="comment">A <see cref="Comment"/> to get the post from</param>
+        /// <param name="reddit">A <see cref="Reddit"/> used for getting the post</param>
         /// <returns>Post obtained <see cref="Post"/></returns>
         public static Post GetCommentPost(this Comment comment, Reddit reddit) => (Post)reddit.GetThingByFullname(comment.LinkId);
-        static string[] types = new string[] { "*", "^", "~~", "[", "]", "_" };
-        static string[] replacement = new string[] { "\\*", "\\^", "\\~~", "\\[", "\\]", "\\_" };
+        readonly static string[] types = new string[] { "*", "^", "~~", "[", "]", "_" };
+        readonly static string[] replacement = new string[] { "\\*", "\\^", "\\~~", "\\[", "\\]", "\\_" };
         /// <summary>
         /// Removes (Reddit) markup from a string
         /// </summary>

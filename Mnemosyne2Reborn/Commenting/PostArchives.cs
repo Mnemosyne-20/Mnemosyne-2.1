@@ -99,7 +99,7 @@ namespace Mnemosyne2Reborn.Commenting
             foreach (var link in archiveLinks)
             {
                 if (link.IsExcluded) continue;
-                Links.Add($"* **By [{comment.AuthorName.DeMarkup()}]({comment.Shortlink.Replace("oauth", "www")})** ([{link.Hostname}]({link.OriginalLink})): {link.ArchivedLink}\n");
+                Links.Add($"* **By [{comment.AuthorName.DeMarkup()}]({comment.Shortlink.Replace("oauth.", "www.")})** ([{link.Hostname}]({link.OriginalLink})): {link.ArchivedLink}\n");
             }
             if (Links.Count == 0) return;
             if (state.DoesCommentExist(postID))
@@ -146,7 +146,7 @@ namespace Mnemosyne2Reborn.Commenting
                 {
                     if (link.IsExcluded)
                         continue;
-                    links.Add($"* **By [{comment.AuthorName.DeMarkup()}]({comment.Shortlink.Replace("oauth", "www")})** ([{link.Hostname}]({link.OriginalLink})): {link.ArchivedLink}\n");
+                    links.Add($"* **By [{comment.AuthorName.DeMarkup()}]({comment.Shortlink.Replace("oauth.", "www.")})** ([{link.Hostname}]({link.OriginalLink})): {link.ArchivedLink}\n");
                 }
                 return links;
             });
@@ -203,14 +203,14 @@ namespace Mnemosyne2Reborn.Commenting
             }
         }
         /// <summary>
-        /// Posts all links archived, throws <see cref="ArgumentNullException"/> if you attempt to call this with any null arguments
+        /// Posts all links archived
         /// </summary>
         /// <param name="config">A <see cref="Config"/> that is used for flavortext and nothing else</param>
         /// <param name="state">An <see cref="IBotState"/> that will update the list with the replies</param>
         /// <param name="head">A header used for a header for the comment</param>
         /// <param name="comment">A <see cref="Comment"/> that you're replying to</param>
         /// <param name="ArchiveList">A <see cref="List{string}"/> for a list of archives to post to a comment</param>
-        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="ArgumentNullException">throws if any arguments are null</exception>
         public static void PostArchiveLinksToComment24Hours(Config config, IBotState state, string head, Comment comment, List<string> ArchiveList)
         {
             if (config == null || state == null || head == null || comment == null || ArchiveList == null)

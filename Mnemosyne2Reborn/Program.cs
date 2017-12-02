@@ -166,7 +166,7 @@ namespace Mnemosyne2Reborn
             IteratePost = IteratePosts;
             IterateComment = IterateComments;
             IterateMessage = IterateMessages;
-            //Iterate24Hours = Iterate24HourArchive;
+            Iterate24Hours = Iterate24HourArchive; // currently neutered so that it just does regular 24 hour passes
             new RedditUserProfileSqlite();
             if (File.Exists("./Data/Users.json"))
             {
@@ -418,14 +418,16 @@ namespace Mnemosyne2Reborn
                 {
                     foreach (string s in Links)
                     {
-                        Console.WriteLine($"Found {s} in post {post.Id}");
+                        Console.WriteLine($"Found {s} in post {post.Id} when rearchiving after 24 hours");
                     }
                 }
+#if POSTTEST
                 ArchivedLinks = ArchiveLinks.ArchivePostLinks(Links, new Regex[] { exclusions, providers, ImageRegex }, post.Author);
                 lock (LockConfigObject)
                 {
                     PostArchives.ArchivePostLinks24Hours(sub, reddit, config, state, post, ArchivedLinks);
                 }
+#endif
                 state.Archive24Hours(post.Id);
             }
         }

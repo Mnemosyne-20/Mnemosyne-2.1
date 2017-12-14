@@ -35,7 +35,8 @@ namespace Mnemosyne2Reborn
             "deepsalter-001",
             "GoodBot_BadBot",
             "PORTMANTEAU-BOT",
-            "GoodBot_BadBot_Karma"
+            "GoodBot_BadBot_Karma",
+            "MTGCardFetcher"
         };
         /// <summary>
         /// Iterates each "thing" you make, subreddit is required for a few of them

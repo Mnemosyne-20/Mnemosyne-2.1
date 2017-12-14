@@ -37,7 +37,7 @@ namespace Mnemosyne2Reborn.Commenting
         public static void ArchivePostLinks(ArchiveSubreddit sub, Config config, IBotState state, Post post, List<ArchiveLink> archivedLinks)
         {
             List<string> LinksToPost = new List<string>();
-            if (sub.ArchivePost && !sub.SubredditArchiveService.Verify(post.Url))
+            if (sub.ArchivePost && sub.SubredditArchiveService.Verify(post.Url))
             {
                 LinksToPost.Add($"* **Post:** {sub.SubredditArchiveService.Save(post.Url)}\n"); // saves post if you want to archive something
             }
@@ -109,9 +109,10 @@ namespace Mnemosyne2Reborn.Commenting
                 {
                     botCommentThingID = "t1_" + botCommentThingID;
                 }
-                if (!EditArchiveComment((Comment)reddit.GetThingByFullname(botCommentThingID), Links))
+                Comment commentEdit = (Comment)reddit.GetThingByFullname(botCommentThingID);
+                if (!EditArchiveComment(commentEdit, Links))
                 {
-                    PostArchiveLinksToComment(config, state, Program.Headers[2], comment, Links);
+                    PostArchiveLinksToComment(config, state, Program.Headers[2], commentEdit, Links);
                 }
             }
             else

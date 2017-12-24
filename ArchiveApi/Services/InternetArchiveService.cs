@@ -22,9 +22,8 @@ namespace ArchiveApi.Services
 
         public Task<string> SaveAsync(string Url)
         {
-            var response = client.GetAsync(new Uri(SubmitEndpoint, Url));
-
             throw new NotImplementedException();
+            var response = client.GetAsync(new Uri(SubmitEndpoint, Url));
         }
 
         public Task<Uri> SaveAsync(Uri Url)

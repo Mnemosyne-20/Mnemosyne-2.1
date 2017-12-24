@@ -40,7 +40,7 @@ namespace ArchiveApi.Services
         /// </summary>
         /// <param name="ArchiveUrl"></param>
         /// <returns>true if it is not the submit uri or base uri to archive with</returns>
-        public bool Verify(Uri ArchiveUrl) => !ArchiveUrl.AbsolutePath.Contains("submit") && ArchiveUrl.ToString() == $"http://archive.{_tld}";
+        public bool Verify(Uri ArchiveUrl) => !ArchiveUrl.AbsolutePath.Contains("submit") && ArchiveUrl.ToString() != $"http://archive.{_tld}";
         /// <summary>
         /// Saves a webpage
         /// </summary>

@@ -146,39 +146,41 @@ namespace Mnemosyne2Reborn
             {
                 Config = !File.Exists("./Data/Settings.json") ? CreateNewConfig() : Config.GetConfig();
             }
-            IBotState botstate = Config.SQLite ? (IBotState)new SQLiteBotState() : new FlatBotState();
-            WebAgent agent = null;
-            if (Config.UseOAuth)
+            using (IBotState botstate = Config.SQLite ? (IBotState)new SQLiteBotState() : new FlatBotState())
             {
-                agent = new BotWebAgent(Config.UserName, Config.Password, Config.OAuthClientId, Config.OAuthSecret, Config.RedirectURI);
-            }
+                WebAgent agent = null;
+                if (Config.UseOAuth)
+                {
+                    agent = new BotWebAgent(Config.UserName, Config.Password, Config.OAuthClientId, Config.OAuthSecret, Config.RedirectURI);
+                }
 #pragma warning disable CS0618 // Type or member is obsolete
-            lock (LockConfigObject)
-            {
-                reddit = Config.UseOAuth ? new Reddit(agent) : new Reddit(Config.UserName, Config.Password);
-            }
-            reddit.InitOrUpdateUser();
-            UpdatedConfig += (sender, e) => { ArchiveSubreddits = InitializeArchiveSubreddits(reddit, e.Config); };
-            UpdatedArchiveSubreddits += (sender, e) => { Console.Title = "Updated Archive Subreddits"; };
-            lock (LockConfigObject)
-            {
-                ArchiveSubreddits = InitializeArchiveSubreddits(reddit, Config);
-            }
-            IteratePost = IteratePosts;
-            IterateComment = IterateComments;
-            IterateMessage = IterateMessages;
-            Iterate24Hours = Iterate24HourArchive; // currently neutered so that it just does regular 24 hour passes
-            new RedditUserProfileSqlite();
-            if (File.Exists("./Data/Users.json"))
-            {
-                RedditUserProfileSqlite.TransferProfilesToSqlite(RedditUserProfile.Users);
-                File.Delete("./Data/Users.json");
-            }
+                lock (LockConfigObject)
+                {
+                    reddit = Config.UseOAuth ? new Reddit(agent) : new Reddit(Config.UserName, Config.Password);
+                }
+                reddit.InitOrUpdateUser();
+                UpdatedConfig += (sender, e) => { ArchiveSubreddits = InitializeArchiveSubreddits(reddit, e.Config); };
+                UpdatedArchiveSubreddits += (sender, e) => { Console.Title = "Updated Archive Subreddits"; };
+                lock (LockConfigObject)
+                {
+                    ArchiveSubreddits = InitializeArchiveSubreddits(reddit, Config);
+                }
+                IteratePost = IteratePosts;
+                IterateComment = IterateComments;
+                IterateMessage = IterateMessages;
+                Iterate24Hours = Iterate24HourArchive; // currently neutered so that it just does regular 24 hour passes
+                new RedditUserProfileSqlite();
+                if (File.Exists("./Data/Users.json"))
+                {
+                    RedditUserProfileSqlite.TransferProfilesToSqlite(RedditUserProfile.Users);
+                    File.Delete("./Data/Users.json");
+                }
 #pragma warning restore CS0618 // Type or member is obsolete
-            IArchiveService service = new ArchiveService(DefaultServices.ArchiveFo).CreateNewService();
-            ArchiveLinks.SetArchiveService(service);
-            PostArchives.SetArchiveService(service);
-            MainLoop(reddit, botstate);
+                IArchiveService service = new ArchiveService(DefaultServices.ArchiveFo).CreateNewService();
+                ArchiveLinks.SetArchiveService(service);
+                PostArchives.SetArchiveService(service);
+                MainLoop(reddit, botstate);
+            }
         }
         public void MainLoop(Reddit reddit, IBotState botstate)
         {

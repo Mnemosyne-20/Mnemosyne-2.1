@@ -180,7 +180,7 @@ namespace Mnemosyne2Reborn.BotState
         /// <summary>
         /// Checks if it has been archived after 24 hours
         /// </summary>
-        /// <param name="postID">A post ID to add to the thing</param>
+        /// <param name="postId">A post ID to add to the thing</param>
         /// <returns>A boolean stating whether it has been archived or not</returns>
         public bool Is24HourArchived(string postId) => ReArchviedPosts.ContainsKey(postId) ? ReArchviedPosts[postId] : false;
         /// <summary>

@@ -266,6 +266,8 @@ namespace Mnemosyne2Reborn.Commenting
         /// </summary>
         /// <param name="targetComment">A <see cref="Comment"/> to edit</param>
         /// <param name="ArchivedToInsert">The <see cref="List{string}"/> of items to insert, not the archives themselves, this is usually used internally</param>
+        /// <returns>Whether or not an edit is greater than 10000 characters, or the edit failed</returns>
+        /// <exception cref="Exception">Throws if the head of the comment is something unexpected</exception>
         public static bool EditArchiveComment(Comment targetComment, List<string> ArchivesToInsert)
         {
             bool bEditGood = false;

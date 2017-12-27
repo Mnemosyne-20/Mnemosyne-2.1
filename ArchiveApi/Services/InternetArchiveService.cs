@@ -22,8 +22,10 @@ namespace ArchiveApi.Services
 
         public Task<string> SaveAsync(string Url)
         {
+#pragma warning disable 0162
             throw new NotImplementedException();
             var response = client.GetAsync(new Uri(SubmitEndpoint, Url));
+#pragma warning restore
         }
 
         public Task<Uri> SaveAsync(Uri Url)

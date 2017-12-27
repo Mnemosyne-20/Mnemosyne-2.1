@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 namespace Mnemosyne2Reborn
 {
-    public struct ArchiveLink : IComparable<ArchiveLink>
+    public struct ArchiveLink : IComparable<ArchiveLink>, IEquatable<ArchiveLink>
     {
         public string OriginalLink;
         public string ArchivedLink;
@@ -19,6 +19,26 @@ namespace Mnemosyne2Reborn
             ArchivedLink = null;
             Position = position;
             IsExcluded = false;
+        }
+        public bool Equals(ArchiveLink other)
+        {
+            if(other.OriginalLink != this.OriginalLink)
+            {
+                return false;
+            }
+            if(other.ArchivedLink != this.ArchivedLink)
+            {
+                return false;
+            }
+            return true;
+        }
+        public static bool operator ==(ArchiveLink a, ArchiveLink b)
+        {
+            return a.Equals(b);
+        }
+        public static bool operator !=(ArchiveLink a, ArchiveLink b)
+        {
+            return !a.Equals(b);
         }
         public ArchiveLink(string OriginalLink, string ArchivedLink, int Position) : this(OriginalLink, Position) => this.ArchivedLink = ArchivedLink;
         public int CompareTo(ArchiveLink other) => this.Position.CompareTo(other.Position);

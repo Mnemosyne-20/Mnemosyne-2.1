@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ArchiveApi.Services
 {
-    public class ArchiveTodayInternal : IArchiveService
+    public class ArchiveTodayInternal : IArchiveService, IDisposable
     {
         private string _tld;
         /// <summary>
@@ -32,7 +32,7 @@ namespace ArchiveApi.Services
         /// <summary>
         /// Checks if the ArchiveUrl is a successful URL
         /// </summary>
-        /// <param name="ArchiveUrl"></param>
+        /// <param name="ArchiveUrl">A string that is a valid URI to check if it is valid</param>
         /// <returns>true if it does not contain "submit" in the uri</returns>
         public bool Verify(string ArchiveUrl) => Verify(new Uri(ArchiveUrl));
         /// <summary>
@@ -90,7 +90,6 @@ namespace ArchiveApi.Services
             /// </remarks>
             if (!Verify(ReturnUrl) && !response.IsSuccessStatusCode)
             {
-                #region fixing issues with return because this works somehow!?!?
                 using (StringReader reader = new StringReader(response.ToString()))
                 {
                     for (int i = 0; i < 3; i++)
@@ -104,10 +103,9 @@ namespace ArchiveApi.Services
                     }
                     catch (Exception e)
                     {
-                        Console.WriteLine("Error from archive.is: \n" + e.Message);
+                        Console.WriteLine($"Error from archive.{_tld}: \n" + e.Message);
                     }
                 }
-                #endregion
             }
             if (!Verify(ReturnUrl))
             {
@@ -139,7 +137,6 @@ namespace ArchiveApi.Services
                 disposedValue = true;
             }
         }
-
         // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
         // ~ArchiveIsService() {
         //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.

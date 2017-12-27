@@ -35,7 +35,8 @@ namespace Mnemosyne2Reborn
             "deepsalter-001",
             "GoodBot_BadBot",
             "PORTMANTEAU-BOT",
-            "GoodBot_BadBot_Karma"
+            "GoodBot_BadBot_Karma",
+            "MTGCardFetcher"
         };
         /// <summary>
         /// Iterates each "thing" you make, subreddit is required for a few of them
@@ -346,8 +347,12 @@ namespace Mnemosyne2Reborn
                         PostArchives.ArchivePostLinks(subreddit, config, state, post, ArchivedLinks);
                     }
                     state.AddCheckedPost(post.Id);
+                    Console.WriteLine("Added post: " + post.Id);
                     if (!subreddit.ArchiveAfter24Hours)
+                    {
+                        Console.WriteLine("Checked post: " + post.Id);
                         state.Archive24Hours(post.Id);
+                    }
                 }
             }
         }
@@ -399,6 +404,7 @@ namespace Mnemosyne2Reborn
                 {
                     continue;
                 }
+                Console.WriteLine("Got past the 24 hours marker");
                 ArchiveSubreddit sub = subreddits.First((a) => a.Name == post.SubredditName);
                 if (!sub.ArchiveAfter24Hours)
                 {

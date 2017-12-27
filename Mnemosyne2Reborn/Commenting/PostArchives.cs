@@ -109,9 +109,10 @@ namespace Mnemosyne2Reborn.Commenting
                 {
                     botCommentThingID = "t1_" + botCommentThingID;
                 }
-                if (!EditArchiveComment((Comment)reddit.GetThingByFullname(botCommentThingID), Links))
+                Comment commentEdit = (Comment)reddit.GetThingByFullname(botCommentThingID);
+                if (!EditArchiveComment(commentEdit, Links))
                 {
-                    PostArchiveLinksToComment(config, state, Program.Headers[2], comment, Links);
+                    PostArchiveLinksToComment(config, state, Program.Headers[2], commentEdit, Links);
                 }
             }
             else

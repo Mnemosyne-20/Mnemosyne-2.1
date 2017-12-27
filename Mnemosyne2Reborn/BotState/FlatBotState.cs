@@ -188,7 +188,11 @@ namespace Mnemosyne2Reborn.BotState
         /// </summary>
         /// <param name="postId">A <see cref="RedditSharp.Things.Post"/> ID used</param>
         /// <remarks>This assumes you've actually handled archiving it yourself</remarks>
-        public void Archive24Hours(string postId) => ReArchviedPosts[postId] = true;
+        public void Archive24Hours(string postId)
+        {
+            ReArchviedPosts[postId] = true;
+            DumpDictionary(DictionaryEnum.ReArchivePosts);
+        }
         /// <summary>
         /// Gets all posts that have not been archived after 24 hours yet
         /// </summary>

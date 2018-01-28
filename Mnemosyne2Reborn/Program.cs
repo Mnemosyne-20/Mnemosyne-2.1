@@ -204,7 +204,7 @@ namespace Mnemosyne2Reborn
                 {
                     Console.WriteLine("Connect to the internet, Error: " + e.Message);
                 }
-                catch (Exception e)
+                catch (Exception e) when (!(e is NullReferenceException))
                 {
                     if (e.Message.Contains("(502)") || e.Message.Contains("(503)") || e.Message.Contains("The remote name could not be resolved"))
                     {
@@ -436,9 +436,10 @@ namespace Mnemosyne2Reborn
                     PostArchives.ArchivePostLinks24Hours(sub, reddit, config, state, post, ArchivedLinks);
                 }
 #endif
+                Console.WriteLine("Sucessfully made a 24 hour archive comment");
                 state.Archive24Hours(post.Id);
             }
         }
-        #endregion
+#endregion
     }
 }

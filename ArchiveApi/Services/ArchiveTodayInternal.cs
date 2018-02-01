@@ -4,12 +4,31 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
-
+using System.Text.RegularExpressions;
 namespace ArchiveApi.Services
 {
     public class ArchiveTodayInternal : IArchiveService, IDisposable
     {
         private string _tld;
+        private static List<string> _tlds = new List<string>();
+        private string TldRegexBuilder {
+            get
+            {
+                string app = "";
+                for(int i = 0; i < _tlds.Count; i++)
+                {
+                    if(i == 0)
+                    {
+                        app += _tlds[i];
+                    }
+                    else
+                    {
+                        app += $"|{_tlds[i]}";
+                    }
+                }
+                return $"[{app}]";
+            }
+        }
         /// <summary>
         /// Endpoint for obtaining a <see cref="TimeMap"/>
         /// </summary>
@@ -27,20 +46,21 @@ namespace ArchiveApi.Services
         {
             internalBase = new Uri($"http://archive.{TLD}");
             _tld = TLD;
+            _tlds.Add(_tld);
         }
         HttpClient client = new HttpClient(new ClearanceHandler() { InnerHandler = new HttpClientHandler() { AllowAutoRedirect = true }, MaxRetries = 5 });
         /// <summary>
         /// Checks if the ArchiveUrl is a successful URL
         /// </summary>
         /// <param name="ArchiveUrl">A string that is a valid URI to check if it is valid</param>
-        /// <returns>true if it does not contain "submit" in the uri</returns>
+        /// <returns>False if it is an archive website</returns>
         public bool Verify(string ArchiveUrl) => Verify(new Uri(ArchiveUrl));
         /// <summary>
         /// Checks if the ArchiveUrl is a successful URL
         /// </summary>
         /// <param name="ArchiveUrl"></param>
-        /// <returns>true if it is not the submit uri or base uri to archive with</returns>
-        public bool Verify(Uri ArchiveUrl) => !ArchiveUrl.AbsolutePath.Contains("submit") && ArchiveUrl.ToString() != $"http://archive.{_tld}";
+        /// <returns>False if it is an archive website</returns>
+        public bool Verify(Uri ArchiveUrl) => !ArchiveUrl.AbsolutePath.Contains("submit") && Regex.IsMatch(ArchiveUrl.ToString(),$"http[s]://archive.{TldRegexBuilder}[/](^/submit)[/]");
         /// <summary>
         /// Saves a webpage
         /// </summary>

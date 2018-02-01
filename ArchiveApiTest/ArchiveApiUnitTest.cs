@@ -20,6 +20,15 @@ namespace ArchiveApiTest
             Assert.IsFalse(archiveService.Verify("http://archive.fo/submit/"));
             Assert.IsFalse(archiveService.Verify(new Uri("http://archive.fo/submit")));
             Assert.IsFalse(archiveService.Verify(new Uri("http://archive.fo/submit/")));
+            // Archive.is failures
+            Assert.IsFalse(archiveService.Verify(new Uri("http://archive.is")));
+            Assert.IsFalse(archiveService.Verify(new Uri("http://archive.is/")));
+            Assert.IsFalse(archiveService.Verify("http://archive.is"));
+            Assert.IsFalse(archiveService.Verify("http://archive.is/"));
+            Assert.IsFalse(archiveService.Verify("http://archive.is/submit"));
+            Assert.IsFalse(archiveService.Verify("http://archive.is/submit/"));
+            Assert.IsFalse(archiveService.Verify(new Uri("http://archive.is/submit")));
+            Assert.IsFalse(archiveService.Verify(new Uri("http://archive.is/submit/")));
         }
         [TestCategory("ArchiveIsTest")]
         [TestMethod]
@@ -34,6 +43,15 @@ namespace ArchiveApiTest
             Assert.IsFalse(archiveService.Verify("http://archive.is/submit/"));
             Assert.IsFalse(archiveService.Verify(new Uri("http://archive.is/submit")));
             Assert.IsFalse(archiveService.Verify(new Uri("http://archive.is/submit/")));
+            // Archive.FO failures
+            Assert.IsFalse(archiveService.Verify(new Uri("http://archive.fo")));
+            Assert.IsFalse(archiveService.Verify(new Uri("http://archive.fo/")));
+            Assert.IsFalse(archiveService.Verify("http://archive.fo"));
+            Assert.IsFalse(archiveService.Verify("http://archive.fo/"));
+            Assert.IsFalse(archiveService.Verify("http://archive.fo/submit"));
+            Assert.IsFalse(archiveService.Verify("http://archive.fo/submit/"));
+            Assert.IsFalse(archiveService.Verify(new Uri("http://archive.fo/submit")));
+            Assert.IsFalse(archiveService.Verify(new Uri("http://archive.fo/submit/")));
         }
     }
 }

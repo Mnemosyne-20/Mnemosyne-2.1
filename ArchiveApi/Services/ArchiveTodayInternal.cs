@@ -11,13 +11,14 @@ namespace ArchiveApi.Services
     {
         private string _tld;
         private static List<string> _tlds = new List<string>();
-        private string TldRegexBuilder {
+        private string TldRegexBuilder
+        {
             get
             {
                 string app = "";
-                for(int i = 0; i < _tlds.Count; i++)
+                for (int i = 0; i < _tlds.Count; i++)
                 {
-                    if(i == 0)
+                    if (i == 0)
                     {
                         app += _tlds[i];
                     }
@@ -46,7 +47,7 @@ namespace ArchiveApi.Services
         {
             internalBase = new Uri($"http://archive.{TLD}");
             _tld = TLD;
-            _tlds.Add(_tld);
+            if (!_tlds.Contains(_tld)) _tlds.Add(_tld);
         }
         HttpClient client = new HttpClient(new ClearanceHandler() { InnerHandler = new HttpClientHandler() { AllowAutoRedirect = true }, MaxRetries = 5 });
         /// <summary>
@@ -60,7 +61,8 @@ namespace ArchiveApi.Services
         /// </summary>
         /// <param name="ArchiveUrl"></param>
         /// <returns>False if it is an archive website</returns>
-        public bool Verify(Uri ArchiveUrl) => !ArchiveUrl.AbsolutePath.Contains("submit") && Regex.IsMatch(ArchiveUrl.ToString(),$"http[s]://archive.{TldRegexBuilder}[/](^/submit)[/]");
+        public bool Verify(Uri ArchiveUrl) => !ArchiveUrl.AbsolutePath.Contains("submit") && Regex.IsMatch(ArchiveUrl.ToString(), $"https{{0,1}}://archive\\.{TldRegexBuilder}/{{0,1}}[^(submit)]*/{{0,1}}");
+
         /// <summary>
         /// Saves a webpage
         /// </summary>
@@ -129,7 +131,7 @@ namespace ArchiveApi.Services
             }
             if (!Verify(ReturnUrl))
             {
-                throw new ArchiveException($"Archive failed with original link {Url.ToString()} at {DateTime.Now}");
+                throw new ArchiveException($"Archive failed with original link {Url.ToString()} at {DateTime.Now}, link gotten: {ReturnUrl}.");
             }
             return ReturnUrl;
         }

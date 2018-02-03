@@ -8,7 +8,7 @@ namespace ArchiveApi.Services
     [Obsolete("In development, do not use")]
     public class InternetArchiveService : IArchiveService
     {
-        public Uri TimeMapEndpoint => throw new NotImplementedException();
+        public Uri TimeMapEndpoint => new Uri(BaseUri, "/web/timemap/link/");
 
         public Uri BaseUri => new Uri("https://web.archive.org/");
 

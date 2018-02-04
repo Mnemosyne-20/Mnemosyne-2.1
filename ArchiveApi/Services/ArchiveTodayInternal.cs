@@ -63,7 +63,6 @@ namespace ArchiveApi.Services
         /// <returns>False if it is an archive website that isn't an actual webpage</returns>
         public bool Verify(Uri ArchiveUrl)
         {
-            Console.WriteLine(string.Join(",", _tlds));
             return Regex.IsMatch(ArchiveUrl.ToString(), $"https?://archive\\.{TldRegexBuilder}") && !ArchiveUrl.AbsolutePath.Contains("submit") && ArchiveUrl.AbsolutePath != "/";
         }
 

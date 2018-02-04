@@ -27,7 +27,7 @@ namespace ArchiveApi.Services
                         app += $"|{_tlds[i]}";
                     }
                 }
-                return $"[{app}]";
+                return $"({app})";
             }
         }
         /// <summary>
@@ -54,14 +54,18 @@ namespace ArchiveApi.Services
         /// Checks if the ArchiveUrl is a successful URL
         /// </summary>
         /// <param name="ArchiveUrl">A string that is a valid URI to check if it is valid</param>
-        /// <returns>False if it is an archive website</returns>
+        /// <returns>False if it is an archive website that isn't an actual webpage</returns>
         public bool Verify(string ArchiveUrl) => Verify(new Uri(ArchiveUrl));
         /// <summary>
         /// Checks if the ArchiveUrl is a successful URL
         /// </summary>
         /// <param name="ArchiveUrl"></param>
-        /// <returns>False if it is an archive website</returns>
-        public bool Verify(Uri ArchiveUrl) => !ArchiveUrl.AbsolutePath.Contains("submit") && Regex.IsMatch(ArchiveUrl.ToString(), $"https{{0,1}}://archive\\.{TldRegexBuilder}/{{0,1}}[^(submit)]*/{{0,1}}");
+        /// <returns>False if it is an archive website that isn't an actual webpage</returns>
+        public bool Verify(Uri ArchiveUrl)
+        {
+            Console.WriteLine(string.Join(",", _tlds));
+            return Regex.IsMatch(ArchiveUrl.ToString(), $"https?://archive\\.{TldRegexBuilder}") && !ArchiveUrl.AbsolutePath.Contains("submit") && ArchiveUrl.AbsolutePath != "/";
+        }
 
         /// <summary>
         /// Saves a webpage
@@ -139,7 +143,7 @@ namespace ArchiveApi.Services
         Uri IArchiveService.Save(Uri Url) => new Uri(Save(Url));
 
         async Task<Uri> IArchiveService.SaveAsync(Uri Url) => new Uri(await SaveAsync(Url));
-
+        public void ClearDomains() => _tlds.RemoveAll(a => a != _tld);
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls
 

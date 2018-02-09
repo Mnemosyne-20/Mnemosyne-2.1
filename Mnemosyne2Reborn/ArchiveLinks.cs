@@ -6,7 +6,9 @@ using System.Linq;
 using System.Text.RegularExpressions;
 namespace Mnemosyne2Reborn
 {
+#pragma warning disable
     public struct ArchiveLink : IComparable<ArchiveLink>, IEquatable<ArchiveLink>
+#pragma warning restore 
     {
         public string OriginalLink;
         public string ArchivedLink;
@@ -61,6 +63,9 @@ namespace Mnemosyne2Reborn
                 {
                     ArchiveLink link2 = ArchivedLinks[ArchivedLinks.Count - 1];
                     link2.IsExcluded = true;
+#if DEBUGEXCLUDE
+                    Console.WriteLine(link2.OriginalLink);
+#endif
                     ArchivedLinks[ArchivedLinks.Count - 1] = link2;
                     i--;
                 }

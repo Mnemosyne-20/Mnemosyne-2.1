@@ -59,7 +59,7 @@ namespace ArchiveApi.Services
         /// <summary>
         /// Checks if the ArchiveUrl is a successful URL
         /// </summary>
-        /// <param name="ArchiveUrl"></param>
+        /// <param name="ArchiveUrl">A <see cref="Uri"/> to check if it is an archive.is website</param>
         /// <returns>False if it is an archive website that isn't an actual webpage</returns>
         public bool Verify(Uri ArchiveUrl)
         {

@@ -152,7 +152,7 @@ namespace Mnemosyne2Reborn.UserData
             {
                 return;
             }
-            if (Program.exclusions.IsMatch(url.ToString()))
+            if (Program.exclusions.IsMatch(url.ToString()) || Program.YoutubeRegex.IsMatch(url))
             {
                 Excluded++;
                 return;

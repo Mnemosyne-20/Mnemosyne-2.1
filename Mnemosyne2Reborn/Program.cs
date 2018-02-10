@@ -55,10 +55,12 @@ namespace Mnemosyne2Reborn
         /// This is intentional to be this way, it's so that the editor can get the headers easily
         /// </summary>
         public static readonly string[] Headers = new string[] { "Archives for this post:\n\n", "Archive for this post:\n\n", "Archives for the links in comments:\n\n", "----\nI am Mnemosyne 2.1, {0} ^^^^/r/botsrights ^^^^[Contribute](https://github.com/Mnemosyne-20/Mnemosyne-2.1) ^^^^message ^^^^me ^^^^suggestions ^^^^at ^^^^any ^^^^time ^^^^Opt ^^^^out ^^^^of ^^^^tracking ^^^^by ^^^^messaging ^^^^me ^^^^\"Opt ^^^^Out\" ^^^^at ^^^^any ^^^^time", "Archives after 24 hours:\n\n" };
+        private static readonly string youtubeRegex = @"(https?://youtu\.be/[a-zA-Z0-9]+|https?://www\.youtube\.com/(watch\?v=[a-zA-Z0-9]+)?($|.+))";
         /// <summary>
         /// These three being separate is important because it is used for data tracking
         /// </summary>
-        public readonly static Regex exclusions = new Regex(@"(facebook\.com|giphy\.com|youtube\.com|streamable\.com|www\.gobrickindustry\.us|gyazo\.com|sli\.mg|imgur\.com|reddit\.com/message|youtube\.com|youtu\.be|wiki/rules|politics_feedback_results_and_where_it_goes_from|urbandictionary\.com)");
+        public readonly static Regex exclusions = new Regex(@"(facebook\.com|giphy\.com|streamable\.com|www\.gobrickindustry\.us|ushmm\.org|gyazo\.com|sli\.mg|imgur\.com|reddit\.com/message|wiki/rules|politics_feedback_results_and_where_it_goes_from|urbandictionary\.com)");
+        public readonly static Regex YoutubeRegex = new Regex(youtubeRegex);
         public readonly static Regex providers = new Regex(@"(web-beta.archive.org|archive\.is|archive\.fo|archive\.org|archive\.today|megalodon\.jp|web\.archive\.org|webcache\.googleusercontent\.com|archive\.li)");
         public readonly static Regex ImageRegex = new Regex(@"(\.gif|\.jpg|\.png|\.pdf|\.webm|\.mp4)$");
         #region Locks
@@ -148,6 +150,8 @@ namespace Mnemosyne2Reborn
             }
             using (IBotState botstate = Config.SQLite ? (IBotState)new SQLiteBotState() : new FlatBotState())
             {
+                // create another filter so archive.is is also filtered
+                new ArchiveService(DefaultServices.ArchiveIs).CreateNewService();
                 WebAgent agent = null;
                 if (Config.UseOAuth)
                 {
@@ -168,7 +172,7 @@ namespace Mnemosyne2Reborn
                 IteratePost = IteratePosts;
                 IterateComment = IterateComments;
                 IterateMessage = IterateMessages;
-                Iterate24Hours = Iterate24HourArchive; // currently neutered so that it just does regular 24 hour passes
+                //Iterate24Hours = Iterate24HourArchive; // currently neutered so that it just does regular 24 hour passes
                 new RedditUserProfileSqlite();
                 if (File.Exists("./Data/Users.json"))
                 {
@@ -343,7 +347,7 @@ namespace Mnemosyne2Reborn
                             Console.WriteLine($"Found {s} in post {post.Id}");
                         }
                     }
-                    ArchivedLinks = ArchiveLinks.ArchivePostLinks(Links, new Regex[] { exclusions, providers, ImageRegex }, post.Author);
+                    ArchivedLinks = ArchiveLinks.ArchivePostLinks(Links, new Regex[] { YoutubeRegex, exclusions, providers, ImageRegex }, post.Author);
                     lock (LockConfigObject)
                     {
                         PostArchives.ArchivePostLinks(subreddit, config, state, post, ArchivedLinks);
@@ -380,7 +384,7 @@ namespace Mnemosyne2Reborn
                 {
                     Console.WriteLine($"Found {s} in comment {comment.Id}");
                 }
-                List<ArchiveLink> ArchivedLinks = ArchiveLinks.ArchivePostLinks(Links, new[] { exclusions, providers, ImageRegex }, reddit.GetUser(comment.AuthorName));
+                List<ArchiveLink> ArchivedLinks = ArchiveLinks.ArchivePostLinks(Links, new[] { YoutubeRegex, exclusions, providers, ImageRegex }, reddit.GetUser(comment.AuthorName));
                 lock (LockConfigObject)
                 {
                     PostArchives.ArchiveCommentLinks(config, state, reddit, comment, ArchivedLinks);
@@ -430,7 +434,7 @@ namespace Mnemosyne2Reborn
                     }
                 }
 #if POSTTEST
-                ArchivedLinks = ArchiveLinks.ArchivePostLinks(Links, new Regex[] { exclusions, providers, ImageRegex }, post.Author);
+                ArchivedLinks = ArchiveLinks.ArchivePostLinks(Links, new Regex[] { YoutubeRegex, exclusions, providers, ImageRegex }, post.Author);
                 lock (LockConfigObject)
                 {
                     PostArchives.ArchivePostLinks24Hours(sub, reddit, config, state, post, ArchivedLinks);

@@ -63,9 +63,6 @@ namespace Mnemosyne2Reborn
                 {
                     ArchiveLink link2 = ArchivedLinks[ArchivedLinks.Count - 1];
                     link2.IsExcluded = true;
-#if DEBUGEXCLUDE
-                    Console.WriteLine(link2.OriginalLink);
-#endif
                     ArchivedLinks[ArchivedLinks.Count - 1] = link2;
                     i--;
                 }

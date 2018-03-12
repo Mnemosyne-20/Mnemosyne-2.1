@@ -100,9 +100,9 @@ namespace MnemosyneTest
             new Mnemosyne2Reborn.UserData.RedditUserProfileSqlite("1\\Testing.sqlite");
             List<string> test = new List<string>()
             {
-                "help",
-                "wat",
-                "k"
+                "https://www.example.com",
+                "http://example.com?test=test",
+                "http://example.com?test=test&test"
             };
             ArchiveLinks.ArchivePostLinks(test, new Regex[] { new Regex("") }, red.GetUser("chugga_fan"));
             Mnemosyne2Reborn.UserData.RedditUserProfileSqlite redditUserProfileSqlite = new Mnemosyne2Reborn.UserData.RedditUserProfileSqlite(red.GetUser("chugga_fan"));

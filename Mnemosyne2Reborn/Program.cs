@@ -62,7 +62,7 @@ namespace Mnemosyne2Reborn
         public readonly static Regex exclusions = new Regex(@"(facebook\.com|giphy\.com|streamable\.com|www\.gobrickindustry\.us|ushmm\.org|gyazo\.com|sli\.mg|imgur\.com|reddit\.com/message|wiki/rules|politics_feedback_results_and_where_it_goes_from|urbandictionary\.com)");
         public readonly static Regex YoutubeRegex = new Regex(youtubeRegex);
         public readonly static Regex providers = new Regex(@"(web-beta.archive.org|archive\.is|archive\.fo|archive\.org|archive\.today|megalodon\.jp|web\.archive\.org|webcache\.googleusercontent\.com|archive\.li)");
-        public readonly static Regex ImageRegex = new Regex(@"(\.gif|\.jpg|\.png|\.pdf|\.webm|\.mp4)$");
+        public readonly static Regex ImageRegex = new Regex(@"(\.gif|\.jpg|\.png|\.pdf|\.webm|\.mp4|\.jpeg)$");
         #region Locks
         static object LockConfigObject = new object();
         static object LockArchiveSubredditsObject = new object();

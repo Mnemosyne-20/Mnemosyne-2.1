@@ -165,7 +165,7 @@ namespace Mnemosyne2Reborn.UserData
             {
                 Unarchived++;
             }
-            if (Program.ImageRegex.IsMatch(url.ToString()))
+            if (Program.ImageRegex.IsMatch(url.ToString()) || Program.ImageRegex.IsMatch(new Uri(url).AbsolutePath))
             {
                 Image++;
             }

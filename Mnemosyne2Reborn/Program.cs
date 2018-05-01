@@ -305,12 +305,12 @@ namespace Mnemosyne2Reborn
                 {
                     case "opt out":
                         Console.WriteLine($"User {message.Author} has opted out.");
-                        new RedditUserProfileSqlite(reddit.GetUser(message.Author)).OptedOut = true;
+                        new RedditUserProfile(reddit.GetUser(message.Author), false).OptOut(false);
                         message.SetAsRead();
                         break;
                     case "opt in":
                         Console.WriteLine($"User {message.Author} has opted in");
-                        new RedditUserProfileSqlite(reddit.GetUser(message.Author)).OptedOut = false;
+                        new RedditUserProfile(reddit.GetUser(message.Author), false).OptOut(true);
                         message.SetAsRead();
                         break;
                 }

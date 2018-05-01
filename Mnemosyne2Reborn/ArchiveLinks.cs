@@ -58,7 +58,9 @@ namespace Mnemosyne2Reborn
             {
                 string link = FoundLinks[i];
                 ArchivedLinks.Add(new ArchiveLink(link, i2));
+#if !ARM
                 new RedditUserProfileSqlite(user).AddUrlUsed(link);
+#endif
                 if (exclusions.Sum(a => (a.IsMatch(link) ? 1 : 0) + (a.IsMatch(new Uri(link).AbsolutePath) ? 1 : 0)) != 0)
                 {
                     ArchiveLink link2 = ArchivedLinks[ArchivedLinks.Count - 1];

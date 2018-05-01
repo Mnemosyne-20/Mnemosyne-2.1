@@ -55,12 +55,11 @@ namespace Mnemosyne2Reborn
         /// This is intentional to be this way, it's so that the editor can get the headers easily
         /// </summary>
         public static readonly string[] Headers = new string[] { "Archives for this post:\n\n", "Archive for this post:\n\n", "Archives for the links in comments:\n\n", "----\nI am Mnemosyne 2.1, {0} ^^^^/r/botsrights ^^^^[Contribute](https://github.com/Mnemosyne-20/Mnemosyne-2.1) ^^^^message ^^^^me ^^^^suggestions ^^^^at ^^^^any ^^^^time ^^^^Opt ^^^^out ^^^^of ^^^^tracking ^^^^by ^^^^messaging ^^^^me ^^^^\"Opt ^^^^Out\" ^^^^at ^^^^any ^^^^time", "Archives after 24 hours:\n\n" };
-        private static readonly string youtubeRegex = @"(https?://youtu\.be(/[a-zA-Z0-9])?|https?://www\.youtube\.com/(watch\?v=[a-zA-Z0-9]+)?($|.+))";
         /// <summary>
         /// These three being separate is important because it is used for data tracking
         /// </summary>
         public readonly static Regex exclusions = new Regex(@"(facebook\.com|giphy\.com|streamable\.com|www\.gobrickindustry\.us|ushmm\.org|gyazo\.com|sli\.mg|imgur\.com|reddit\.com/message|wiki/rules|politics_feedback_results_and_where_it_goes_from|urbandictionary\.com)");
-        public readonly static Regex YoutubeRegex = new Regex(youtubeRegex);
+        public readonly static Regex YoutubeRegex = new Regex(@"(https?://youtu\.be(/[a-zA-Z0-9])?|https?://www\.youtube\.com/(watch\?v=[a-zA-Z0-9]+)?($|.+))");
         public readonly static Regex providers = new Regex(@"(web-beta.archive.org|archive\.is|archive\.fo|archive\.org|archive\.today|megalodon\.jp|web\.archive\.org|webcache\.googleusercontent\.com|archive\.li)");
         public readonly static Regex ImageRegex = new Regex(@"(\.gif|\.jpg|\.png|\.pdf|\.webm|\.mp4|\.jpeg)$");
         #region Locks
@@ -173,12 +172,14 @@ namespace Mnemosyne2Reborn
                 IterateComment = IterateComments;
                 IterateMessage = IterateMessages;
                 //Iterate24Hours = Iterate24HourArchive; // currently neutered so that it just does regular 24 hour passes
+#if !ARM
                 new RedditUserProfileSqlite();
                 if (File.Exists("./Data/Users.json"))
                 {
                     RedditUserProfileSqlite.TransferProfilesToSqlite(RedditUserProfile.Users);
                     File.Delete("./Data/Users.json");
                 }
+#endif
 #pragma warning restore CS0618 // Type or member is obsolete
                 IArchiveService service = new ArchiveService(DefaultServices.ArchiveFo).CreateNewService();
                 ArchiveLinks.SetArchiveService(service);
@@ -214,11 +215,7 @@ namespace Mnemosyne2Reborn
                     {
                         continue;
                     }
-                    // Catches errors and documents them, I should switch to a System.Diagnostics logger but I have no experience with it
-                    if (!Directory.Exists("./Errors"))
-                    {
-                        Directory.CreateDirectory("./Errors");
-                    }
+                    Directory.CreateDirectory("./Errors");
                     File.AppendAllText("./Errors/Failures.txt", $"{e.ToString()}{Environment.NewLine}");
                     Console.WriteLine($"Caught an exception of type {e.GetType()} output is in ./Errors/Failures.txt");
                 }

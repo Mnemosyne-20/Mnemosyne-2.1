@@ -30,10 +30,7 @@ namespace Mnemosyne2Reborn.BotState
         /// </summary>
         public FlatBotState(string dataDir = "./Data/")
         {
-            if (!Directory.Exists(dataDir))
-            {
-                Directory.CreateDirectory(dataDir);
-            }
+            Directory.CreateDirectory(dataDir);
             DataDir = dataDir;
             if (File.Exists(dataDir + "ReplyTracker.txt"))
             { // takes the old reply checking file and updates it to the new format
@@ -42,42 +39,42 @@ namespace Mnemosyne2Reborn.BotState
             }
             else
             { //Dictonary of replies
-                if (!File.Exists(dataDir + "Dictionary.json"))
+                if (File.Exists(dataDir + "Dictionary.json"))
+                {
+                    CommentDictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(dataDir + "Dictionary.json")) ?? new Dictionary<string, string>();
+                }
+                else
                 {
                     CommentDictionary = new Dictionary<string, string>();
                     File.Create(dataDir + "Dictionary.json").Dispose();
                 }
-                else
-                {
-                    CommentDictionary = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(dataDir + "Dictionary.json")) ?? new Dictionary<string, string>();
-                }
             }
-            if (!File.Exists(dataDir + "CheckedComments.json"))
+            if (File.Exists(dataDir + "CheckedComments.json"))
+            {
+                CheckedComments = JsonConvert.DeserializeObject<List<string>>(File.ReadAllText(dataDir + "CheckedComments.json")) ?? new List<string>();
+            }
+            else
             {
                 CheckedComments = new List<string>();
                 File.Create(dataDir + "CheckedComments.json").Dispose();
             }
-            else
+            if (File.Exists(dataDir + "CheckedPosts.json"))
             {
-                CheckedComments = JsonConvert.DeserializeObject<List<string>>(File.ReadAllText(dataDir + "CheckedComments.json")) ?? new List<string>();
+                CheckedPosts = JsonConvert.DeserializeObject<List<string>>(File.ReadAllText(dataDir + "CheckedPosts.json")) ?? new List<string>();
             }
-            if (!File.Exists(dataDir + "CheckedPosts.json"))
+            else
             {
                 CheckedPosts = new List<string>();
                 File.Create(dataDir + "CheckedPosts.json").Dispose();
             }
-            else
+            if (File.Exists(dataDir + "ReArchivedPosts.json"))
             {
-                CheckedPosts = JsonConvert.DeserializeObject<List<string>>(File.ReadAllText(dataDir + "CheckedPosts.json")) ?? new List<string>();
+                ReArchviedPosts = JsonConvert.DeserializeObject<Dictionary<string, bool>>(File.ReadAllText(dataDir + "ReArchivedPosts.json")) ?? new Dictionary<string, bool>();
             }
-            if (!File.Exists(dataDir + "ReArchivedPosts.json"))
+            else
             {
                 ReArchviedPosts = new Dictionary<string, bool>();
                 File.Create(dataDir + "ReArchivedPosts.json").Dispose();
-            }
-            else
-            {
-                ReArchviedPosts = JsonConvert.DeserializeObject<Dictionary<string, bool>>(File.ReadAllText(dataDir + "ReArchivedPosts.json")) ?? new Dictionary<string, bool>();
             }
         }
         private enum DictionaryEnum

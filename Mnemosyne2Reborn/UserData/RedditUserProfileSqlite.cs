@@ -1,4 +1,5 @@
-﻿using RedditSharp;
+﻿#if !ARM
+using RedditSharp;
 using RedditSharp.Things;
 using System;
 using System.Collections.Generic;
@@ -10,7 +11,23 @@ namespace Mnemosyne2Reborn.UserData
 {
     public class RedditUserProfileSqlite
     {
-        static SQLiteCommand SQLiteSetUnarchived, SQLiteSetArchived, SQLiteSetExcluded, SQLiteSetImage, SQLiteGetImage, SQLiteAddUser, SQLiteGetArchived, SQLiteGetUnarchived, SQLiteGetExcluded, SQLiteGetOptOut, SQLiteSetOptOut, SQLiteGetUserExists, SQLiteAvgExcluded, SQLiteAvgImage, SQLiteAvgArchived, SQLiteAvgUnarchived;
+        static SQLiteCommand
+            SQLiteSetUnarchived,
+            SQLiteSetArchived,
+            SQLiteSetExcluded,
+            SQLiteSetImage,
+            SQLiteGetImage,
+            SQLiteAddUser,
+            SQLiteGetArchived, 
+            SQLiteGetUnarchived, 
+            SQLiteGetExcluded, 
+            SQLiteGetOptOut, 
+            SQLiteSetOptOut, 
+            SQLiteGetUserExists, 
+            SQLiteAvgExcluded, 
+            SQLiteAvgImage, 
+            SQLiteAvgArchived, 
+            SQLiteAvgUnarchived;
         public static SQLiteConnection Connection { get; private set; }
         static bool Initialized = false;
 #pragma warning disable CS0618 // Type or member is obsolete
@@ -253,3 +270,4 @@ namespace Mnemosyne2Reborn.UserData
         }
     }
 }
+#endif

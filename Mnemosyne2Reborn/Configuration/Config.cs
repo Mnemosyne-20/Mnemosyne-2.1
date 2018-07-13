@@ -86,6 +86,10 @@ namespace Mnemosyne2Reborn.Configuration
             Ver = 4;
             this.RedirectURI = RedirectURI;
             this.ConvertToSQLite = false;
+            DumpConfig();
+        }
+        public void DumpConfig()
+        {
             File.WriteAllText("./Data/Settings.json", JsonConvert.SerializeObject(this, Formatting.Indented));
         }
         public static Config GetConfig() => JsonConvert.DeserializeObject<Config>(File.ReadAllText("./Data/Settings.json"));

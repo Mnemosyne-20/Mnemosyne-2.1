@@ -190,6 +190,7 @@ namespace Mnemosyne2Reborn
                     }
                     Config.ConvertToSQLite = false;
                     Config.SQLite = true;
+                    Config.DumpConfig();
                     return;
                 }
                 IArchiveService service = new ArchiveService(DefaultServices.ArchiveFo).CreateNewService();

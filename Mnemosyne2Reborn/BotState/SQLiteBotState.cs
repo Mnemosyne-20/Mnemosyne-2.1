@@ -19,7 +19,43 @@ namespace Mnemosyne2Reborn.BotState
             SQLCmd_UpdateBotComment,
             SQLCmd_Update24HourArchive,
             SQLCmd_Is24HourArchived,
-            SQLCmd_GetNon24HourArchived;
+            SQLCmd_GetNon24HourArchived,
+            SQLCmd_RemoveBotPost;
+        public SQLiteBotState(FlatBotState flatBotState, string filename = "botstate.sqlite")
+        {
+            if (flatBotState == null)
+            {
+                throw new ArgumentNullException(nameof(flatBotState));
+            }
+            if (!File.Exists($"{AppDomain.CurrentDomain.BaseDirectory.TrimEnd('/')}/Data/{filename}"))
+            {
+                SQLiteConnection.CreateFile($"{AppDomain.CurrentDomain.BaseDirectory.TrimEnd('/')}/Data/{filename}");
+            }
+            AppDomain.CurrentDomain.SetData("DataDirectory", $"{AppDomain.CurrentDomain.BaseDirectory.TrimEnd('/')}/Data/");
+            dbConnection = new SQLiteConnection($"Data Source=|DataDirectory|{filename};Version=3;");
+            dbConnection.Open();
+            InitializeDatabase();
+            InitializeCommands();
+            foreach(var thing in flatBotState.GetAllCheckedPosts())
+            {
+                this.AddCheckedPost(thing);
+            }
+            foreach(var thing in flatBotState.GetAllPosts24Hours())
+            {
+                if(thing.Value)
+                {
+                    this.Archive24Hours(thing.Key);
+                }
+            }
+            foreach(var thing in flatBotState.GetAllBotComments())
+            {
+                this.AddBotComment(thing.Key, thing.Value);
+            }
+            foreach(var thing in flatBotState.GetAllCheckedComments())
+            {
+                this.AddCheckedComment(thing);
+            }
+        }
         public SQLiteBotState(string filename = "botstate.sqlite")
         {
             if (!File.Exists($"{AppDomain.CurrentDomain.BaseDirectory.TrimEnd('/')}/Data/{filename}"))
@@ -27,7 +63,7 @@ namespace Mnemosyne2Reborn.BotState
                 SQLiteConnection.CreateFile($"{AppDomain.CurrentDomain.BaseDirectory.TrimEnd('/')}/Data/{filename}");
             }
             AppDomain.CurrentDomain.SetData("DataDirectory", $"{AppDomain.CurrentDomain.BaseDirectory.TrimEnd('/')}/Data/");
-            dbConnection = new SQLiteConnection($"Data Source=|DataDirectory|{filename};Version=3;");
+            dbConnection = new SQLiteConnection($"Data Source=|DataDirectory|{filename};Version=3;foreign keys=True;");
             dbConnection.Open();
             InitializeDatabase();
             InitializeCommands();
@@ -56,7 +92,12 @@ namespace Mnemosyne2Reborn.BotState
         }
         void InitializeDatabase()
         {
-            string query = "create table if not exists replies (postID text unique, botReplyID text)";
+            string query = "create table if not exists posts (postID TEXT NOT NULL UNIQUE, reArchived INTEGER NOT NULL, PRIMARY KEY(postID))";
+            using (SQLiteCommand cmd = new SQLiteCommand(query, dbConnection))
+            {
+                cmd.ExecuteNonQuery();
+            }
+            query = "create table if not exists replies (postID TEXT NOT NULL UNIQUE, botReplyID text, FOREIGN KEY (postID) REFERENCES posts(postID) ON DELETE CASCADE)";
             using (SQLiteCommand cmd = new SQLiteCommand(query, dbConnection))
             {
                 cmd.ExecuteNonQuery();
@@ -67,11 +108,6 @@ namespace Mnemosyne2Reborn.BotState
                 cmd.ExecuteNonQuery();
             }
             query = "create table if not exists archives (originalURL text unique, numArchives integer)";
-            using (SQLiteCommand cmd = new SQLiteCommand(query, dbConnection))
-            {
-                cmd.ExecuteNonQuery();
-            }
-            query = "create table if not exists posts (postID text unique, reArchived integer)";
             using (SQLiteCommand cmd = new SQLiteCommand(query, dbConnection))
             {
                 cmd.ExecuteNonQuery();
@@ -116,6 +152,8 @@ namespace Mnemosyne2Reborn.BotState
             SQLCmd_Is24HourArchived.Parameters.Add(PostParam);
 
             SQLCmd_GetNon24HourArchived = new SQLiteCommand("select postID from posts where reArchived = 0", dbConnection);
+            SQLCmd_RemoveBotPost = new SQLiteCommand("DELETE FROM posts WHERE postID = @postID", dbConnection);
+            SQLCmd_RemoveBotPost.Parameters.Add(PostParam);
         }
         public void AddBotComment(string postID, string commentID)
         {
@@ -127,7 +165,7 @@ namespace Mnemosyne2Reborn.BotState
             }
             catch (SQLiteException ex) when (ex.ResultCode == SQLiteErrorCode.Constraint)
             {
-                throw new InvalidOperationException($"The post {postID} already exists in database");
+                throw new InvalidOperationException($"The post {postID} already exists in database or has not been checked before");
             }
         }
 
@@ -190,6 +228,11 @@ namespace Mnemosyne2Reborn.BotState
             }
             return readerCounter.ToArray();
         }
+        public void DeletePostChecked(string postID)
+        {
+            SQLCmd_RemoveBotPost.Parameters["@postID"].Value = postID;
+            SQLCmd_RemoveBotPost.ExecuteNonQuery();
+        }
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls
 
@@ -210,6 +253,7 @@ namespace Mnemosyne2Reborn.BotState
                     SQLCmd_Is24HourArchived.Dispose();
                     SQLCmd_Update24HourArchive.Dispose();
                     SQLCmd_GetNon24HourArchived.Dispose();
+                    SQLCmd_RemoveBotPost.Dispose();
                     dbConnection.Dispose();
                     // TODO: dispose managed state (managed objects).
                 }

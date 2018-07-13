@@ -194,7 +194,7 @@ namespace Mnemosyne2Reborn.Commenting
             Comment botComment = comment.Reply(c);
             try
             {
-                state.UpdateBotComment(comment.Id, botComment.Id);
+                state.UpdateBotComment(comment.LinkId, botComment.Id);
                 Console.WriteLine(c);
             }
             catch (InvalidOperationException e)
@@ -253,6 +253,7 @@ namespace Mnemosyne2Reborn.Commenting
             Comment botComment = post.Comment(c);
             try
             {
+                state.AddCheckedPost(post.Id);
                 state.AddBotComment(post.Id, botComment.Id);
                 Console.WriteLine(c);
             }
@@ -260,6 +261,7 @@ namespace Mnemosyne2Reborn.Commenting
             {
                 Console.WriteLine($"Caught exception replying to post {post.Id} with new comment  {Regex.Replace(botComment.Id, "t1_", "")}: {e.Message}");
                 botComment.Del();
+                state.DeletePostChecked(post.Id);
             }
         }
         /// <summary>

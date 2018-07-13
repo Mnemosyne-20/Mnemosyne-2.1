@@ -1,4 +1,5 @@
 ﻿using System;
+
 namespace Mnemosyne2Reborn.BotState
 {
     public interface IBotState : IDisposable
@@ -56,6 +57,16 @@ namespace Mnemosyne2Reborn.BotState
         /// <returns>A boolean stating whether it has been archived or not</returns>
         bool Is24HourArchived(string postID);
         void Archive24Hours(string postID);
+        /// <summary>
+        /// Gets all posts that haven't been 24 hour archived
+        /// </summary>
+        /// <returns>All non-24 hour archived posts</returns>
         string[] GetNon24HourArchivedPosts();
+        /// <summary>
+        /// Delets a post that has been checked before
+        /// This endpoint assumes it already exists, calling it on something that doesn't kills this
+        /// </summary>
+        /// <param name="postID">A previously checked post</param>
+        void DeletePostChecked(string postID);
     }
 }

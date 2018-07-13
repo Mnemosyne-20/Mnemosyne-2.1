@@ -29,10 +29,10 @@ namespace ArchiveApi
         public TimeMap(string TimeMapUri, DateTime From, DateTime Until) : this(new Uri(TimeMapUri), From, Until) { }
         public TimeMap(WebLink web) : this(new Uri(web.Uri))
         {
-            if (web.Attributes.GetValues("rel").Contains("self"))
+            if (web.GetAttrRelValues().Contains("self"))
             {
-                Until = DateTime.Parse(string.Join(" ", web.Attributes.GetValues("until")));
-                From = DateTime.Parse(string.Join(" ", web.Attributes.GetValues("from")));
+                Until = DateTime.Parse(string.Join(" ", web.GetAttrValues("until")));
+                From = DateTime.Parse(string.Join(" ", web.GetAttrValues("from")));
             }
             else
             {

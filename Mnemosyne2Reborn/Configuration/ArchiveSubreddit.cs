@@ -18,7 +18,7 @@ namespace Mnemosyne2Reborn.Configuration
     }
     public class ArchiveSubredditEventArgs : EventArgs
     {
-        ArchiveSubreddit[] _archiveSubreddits;
+        readonly ArchiveSubreddit[] _archiveSubreddits;
         public ArchiveSubredditEventArgs(ArchiveSubreddit[] archiveSubreddits)
         {
             _archiveSubreddits = archiveSubreddits;

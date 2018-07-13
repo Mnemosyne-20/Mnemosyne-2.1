@@ -162,7 +162,8 @@ namespace Mnemosyne2Reborn.UserData
                 SQLiteSetExcluded.ExecuteNonQuery();
             }
         }
-        string User;
+
+        readonly string User;
         public void AddUrlUsed(string url)
         {
             if (OptedOut)

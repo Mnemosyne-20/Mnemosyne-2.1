@@ -9,7 +9,7 @@ namespace ArchiveApi.Services
 {
     public class ArchiveTodayInternal : IArchiveService, IDisposable
     {
-        private string _tld;
+        private readonly string _tld;
         private static List<string> _tlds = new List<string>();
         private string TldRegexBuilder
         {
@@ -41,11 +41,10 @@ namespace ArchiveApi.Services
         /// <summary>
         /// The base URI that archiving, timemaps, etc. are based around
         /// </summary>
-        public Uri BaseUri => internalBase;
-        private Uri internalBase;
+        public Uri BaseUri { get; }
         internal ArchiveTodayInternal(string TLD)
         {
-            internalBase = new Uri($"http://archive.{TLD}");
+            BaseUri = new Uri($"http://archive.{TLD}");
             _tld = TLD;
             if (!_tlds.Contains(_tld)) _tlds.Add(_tld);
         }

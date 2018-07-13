@@ -24,7 +24,7 @@ namespace Mnemosyne2Reborn.BotState
             }
             return replyDict;
         }
-        private string DataDir;
+        private readonly string DataDir;
         /// <summary>
         /// Main constructor, creates all data files used within this class
         /// </summary>
@@ -197,6 +197,30 @@ namespace Mnemosyne2Reborn.BotState
         public string[] GetNon24HourArchivedPosts()
         {
             return (from a in ReArchviedPosts where !a.Value select a.Key).ToArray();
+        }
+        public string[] GetAllCheckedComments()
+        {
+            return CheckedComments.ToArray();
+        }
+
+        public string[] GetAllCheckedPosts()
+        {
+            return CheckedPosts.ToArray();
+        }
+
+        public Dictionary<string, string> GetAllBotComments()
+        {
+            return CommentDictionary;
+        }
+        public Dictionary<string, bool> GetAllPosts24Hours()
+        {
+            return ReArchviedPosts;
+        }
+
+        public void DeletePostChecked(string postID)
+        {
+            CheckedPosts.Remove(postID);
+            DumpDictionary(DictionaryEnum.Posts);
         }
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls

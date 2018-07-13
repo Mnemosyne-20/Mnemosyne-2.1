@@ -42,15 +42,14 @@ namespace ArchiveApi
 
         public static IEnumerable<Cookie> GetCookiesByName(this CookieContainer container, Uri uri, params string[] names)
         {
-            return container.GetCookies(uri).Cast<Cookie>().Where(c => names.Contains(c.Name)).ToList();
+            return container.GetCookies(uri).Cast<Cookie>().Where(c => names.Contains(c.Name));
         }
     }
     internal static class HttpMessageHandlerExtensions
     {
         public static HttpMessageHandler GetMostInnerHandler(this HttpMessageHandler self)
         {
-            var delegatingHandler = self as DelegatingHandler;
-            return delegatingHandler == null ? self : delegatingHandler.InnerHandler.GetMostInnerHandler();
+            return !(self is DelegatingHandler delegatingHandler) ? self : delegatingHandler.InnerHandler.GetMostInnerHandler();
         }
     }
     internal static class HttpHeader

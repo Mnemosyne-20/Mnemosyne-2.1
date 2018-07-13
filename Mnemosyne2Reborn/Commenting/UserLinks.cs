@@ -27,7 +27,7 @@ namespace Mnemosyne2Reborn.Commenting
             /// </summary>
             Comment
         }
-        private Thing Thing;
+        private readonly Thing Thing;
         public UserLinkType UserLinksType { get; private set; }
         /// <summary>
         /// Username of the reddit user, used to build the archive listing comments later

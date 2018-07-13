@@ -8,7 +8,7 @@ namespace Mnemosyne2Reborn.Configuration
     /// </summary>
     public class ConfigEventArgs : EventArgs
     {
-        private Config conf;
+        private readonly Config conf;
         public ConfigEventArgs(Config c)
         {
             conf = c;
@@ -50,7 +50,8 @@ namespace Mnemosyne2Reborn.Configuration
         public bool UseOAuth { get; set; }
         [JsonProperty("RedirectURI")]
         public string RedirectURI { get; set; }
-
+        [JsonProperty("ConvertToSQLite")]
+        public bool ConvertToSQLite { get; set; }
         /// <summary>
         /// EXISTS ONLY FOR JSONCONVERT
         /// DO NOT USE
@@ -84,6 +85,7 @@ namespace Mnemosyne2Reborn.Configuration
             this.ArchiveService = ArchiveService;
             Ver = 4;
             this.RedirectURI = RedirectURI;
+            this.ConvertToSQLite = false;
             File.WriteAllText("./Data/Settings.json", JsonConvert.SerializeObject(this, Formatting.Indented));
         }
         public static Config GetConfig() => JsonConvert.DeserializeObject<Config>(File.ReadAllText("./Data/Settings.json"));

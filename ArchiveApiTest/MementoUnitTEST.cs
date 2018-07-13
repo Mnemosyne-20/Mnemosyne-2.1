@@ -9,7 +9,7 @@ namespace ArchiveApiTest
     public class MementoUnitTest
     {
         #region teststring
-        static string Test = @"<http://kernel.org/>; rel=""original"",
+        static readonly string Test = @"<http://kernel.org/>; rel=""original"",
 <http://archive.is/timegate/http://kernel.org/>; rel=""timegate"",
 <http://archive.is/20120523210412/http://kernel.org/>; rel=""first memento""; datetime=""Wed, 23 May 2012 21:04:12 GMT"",
 <http://archive.is/20130109172600/http://kernel.org/>; rel=""memento""; datetime=""Wed, 09 Jan 2013 17:26:00 GMT"",

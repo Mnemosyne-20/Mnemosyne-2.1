@@ -10,7 +10,7 @@ namespace ArchiveApi
     }
     public class ArchiveService : IArchiveServiceFactory
     {
-        DefaultServices service;
+        readonly DefaultServices service;
         public ArchiveService(DefaultServices service = DefaultServices.ArchiveFo) => this.service = service;
         public ArchiveService(string service)
         {

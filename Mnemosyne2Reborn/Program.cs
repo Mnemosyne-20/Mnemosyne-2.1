@@ -59,7 +59,7 @@ namespace Mnemosyne2Reborn
         /// These three being separate is important because it is used for data tracking
         /// </summary>
         public readonly static Regex exclusions = new Regex(@"(facebook\.com|giphy\.com|streamable\.com|www\.gobrickindustry\.us|ushmm\.org|gyazo\.com|sli\.mg|imgur\.com|reddit\.com/message|wiki/rules|politics_feedback_results_and_where_it_goes_from|urbandictionary\.com)");
-        public readonly static Regex YoutubeRegex = new Regex(@"(https?://youtu\.be(/[a-zA-Z0-9])?|https?://www\.youtube\.com/(watch\?v=[a-zA-Z0-9]+)?($|.+))");
+        public readonly static Regex YoutubeRegex = new Regex(@"(https?://youtu\.be(?<url>/[a-zA-Z0-9])?|https?://www\.youtube\.com/(?<url>watch\?v=[a-zA-Z0-9]+)?($|.+))");
         public readonly static Regex providers = new Regex(@"(web-beta.archive.org|archive\.is|archive\.fo|archive\.org|archive\.today|megalodon\.jp|web\.archive\.org|webcache\.googleusercontent\.com|archive\.li)");
         public readonly static Regex ImageRegex = new Regex(@"(\.gif|\.jpg|\.png|\.pdf|\.webm|\.mp4|\.jpeg)$");
         #region Locks
@@ -172,15 +172,26 @@ namespace Mnemosyne2Reborn
                 IterateComment = IterateComments;
                 IterateMessage = IterateMessages;
                 //Iterate24Hours = Iterate24HourArchive; // currently neutered so that it just does regular 24 hour passes
-#if !ARM
                 new RedditUserProfileSqlite();
                 if (File.Exists("./Data/Users.json"))
                 {
                     RedditUserProfileSqlite.TransferProfilesToSqlite(RedditUserProfile.Users);
                     File.Delete("./Data/Users.json");
                 }
-#endif
 #pragma warning restore CS0618 // Type or member is obsolete
+                if(Config.ConvertToSQLite)
+                {
+                    if(botstate is FlatBotState)
+                    { 
+                        using (IBotState botstate2 = new SQLiteBotState(botstate as FlatBotState))
+                        {
+                            // Intentional, create and dispose
+                        }
+                    }
+                    Config.ConvertToSQLite = false;
+                    Config.SQLite = true;
+                    return;
+                }
                 IArchiveService service = new ArchiveService(DefaultServices.ArchiveFo).CreateNewService();
                 ArchiveLinks.SetArchiveService(service);
                 PostArchives.SetArchiveService(service);
@@ -305,12 +316,12 @@ namespace Mnemosyne2Reborn
                 {
                     case "opt out":
                         Console.WriteLine($"User {message.Author} has opted out.");
-                        new RedditUserProfile(reddit.GetUser(message.Author), false).OptOut(false);
+                        new RedditUserProfileSqlite(reddit.GetUser(message.Author)).OptedOut = true;
                         message.SetAsRead();
                         break;
                     case "opt in":
                         Console.WriteLine($"User {message.Author} has opted in");
-                        new RedditUserProfile(reddit.GetUser(message.Author), false).OptOut(true);
+                        new RedditUserProfileSqlite(reddit.GetUser(message.Author)).OptedOut = false;
                         message.SetAsRead();
                         break;
                 }
@@ -335,6 +346,7 @@ namespace Mnemosyne2Reborn
                     }
                     if (Links.Count == 0 && !subreddit.ArchivePost)
                     {
+                        state.AddCheckedPost(post.Id);
                         continue;
                     }
                     if (Links.Count > 0)
@@ -349,7 +361,6 @@ namespace Mnemosyne2Reborn
                     {
                         PostArchives.ArchivePostLinks(subreddit, config, state, post, ArchivedLinks);
                     }
-                    state.AddCheckedPost(post.Id);
                     Console.WriteLine("Added post: " + post.Id);
                     if (!subreddit.ArchiveAfter24Hours)
                     {

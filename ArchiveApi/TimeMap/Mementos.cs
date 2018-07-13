@@ -5,12 +5,17 @@ using System.Collections.Generic;
 using System.Linq;
 namespace ArchiveApi
 {
+    internal static class Extension
+    {
+        internal static IEnumerable<String> GetAttrValues(this WebLink link, string val) => link.Attributes.GetValues(val);
+        internal static IEnumerable<String> GetAttrRelValues(this WebLink link) => link.GetAttrValues("rel");
+    }
     public class Memento : IEquatable<Uri>, IEquatable<string>
     {
-        public bool IsFirst => webLink.Attributes.GetValues("rel").Contains("first");
-        public bool IsLast => webLink.Attributes.GetValues("rel").Contains("last");
-        public DateTime TimeArchived => DateTime.Parse(string.Join(" ", webLink.Attributes.GetValues("datetime")));
-        public bool IsActuallyMemento => webLink.Attributes.GetValues("rel").Contains("memento");
+        public bool IsFirst => webLink.GetAttrRelValues().Contains("first");
+        public bool IsLast => webLink.GetAttrRelValues().Contains("last");
+        public DateTime TimeArchived => DateTime.Parse(string.Join(" ", webLink.GetAttrValues("datetime")));
+        public bool IsActuallyMemento => webLink.GetAttrRelValues().Contains("memento");
         public Uri Url => new Uri(webLink.Uri);
         WebLink webLink;
         public Memento(WebLink memento) => webLink = memento;
@@ -41,11 +46,11 @@ namespace ArchiveApi
         }
         public Mementos(IEnumerable<WebLink> mementoList)
         {
-            _mementos = new Memento[((mementoList.Where(a => a.Attributes.GetValues("rel").Contains("memento"))).Count())];
+            _mementos = new Memento[((mementoList.Where(a => a.GetAttrRelValues().Contains("memento"))).Count())];
             for (int i = 0, i2 = 0; i < mementoList.Count(); i++)
             {
                 var link = mementoList.ElementAt(i);
-                var linkAttributes = link.Attributes.GetValues("rel");
+                var linkAttributes = link.GetAttrRelValues();
                 if (linkAttributes.Contains("timegate"))
                     TimeGate = link.Uri;
                 else if (linkAttributes.Contains("timemap"))

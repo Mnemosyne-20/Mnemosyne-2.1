@@ -7,7 +7,7 @@ namespace MnemosyneTest
     [TestClass]
     public class RegularExpressionsUnitTest
     {
-        string TestString = "\"https://www.nearlyfreespeech.net/\"" + "is supposed to be good.";
+        readonly string TestString = "\"https://www.nearlyfreespeech.net/\"" + "is supposed to be good.";
         [TestMethod]
         public void TestFindLinks()
         {

@@ -1,5 +1,6 @@
-﻿    using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Mnemosyne2Reborn.BotState;
+using System.Linq;
 namespace MnemosyneTest
 {
     [TestClass]
@@ -13,8 +14,9 @@ namespace MnemosyneTest
         public void TestAddBotCommentSqlite()
         {
             SQLiteBotState sqliteBotState = new SQLiteBotState("1\\Test.sqlite");
+            sqliteBotState.AddCheckedPost("sad");
             sqliteBotState.AddBotComment("sad", "postcomment");
-            Assert.IsTrue(sqliteBotState.GetCommentForPost("sad") == "postcomment");
+            Assert.AreEqual(sqliteBotState.GetCommentForPost("sad"), "postcomment");
         }
         [TestMethod]
         [DeploymentItem("Test.sqlite", "Data\\2")]
@@ -40,9 +42,10 @@ namespace MnemosyneTest
         public void TestUpdateCommentSqlite()
         {
             SQLiteBotState sqliteBotState = new SQLiteBotState("4\\Test.sqlite");
+            sqliteBotState.AddCheckedPost("post");
             sqliteBotState.AddBotComment("post", "postcomment");
             sqliteBotState.UpdateBotComment("post", "postcomment2");
-            Assert.IsTrue(sqliteBotState.GetCommentForPost("post") == "postcomment2");
+            Assert.AreEqual(sqliteBotState.GetCommentForPost("post"), "postcomment2");
         }
         [TestMethod]
         [DeploymentItem("Test.sqlite", "Data\\5")]
@@ -52,10 +55,42 @@ namespace MnemosyneTest
             SQLiteBotState sqliteBotState = new SQLiteBotState("5\\Test.sqlite");
             sqliteBotState.AddCheckedPost("post");
             Assert.IsFalse(sqliteBotState.Is24HourArchived("post"));
-            Assert.IsFalse(sqliteBotState.GetNon24HourArchivedPosts().Length == 0);
+            Assert.AreEqual(sqliteBotState.GetNon24HourArchivedPosts().Length, 1);
             sqliteBotState.Archive24Hours("post");
             Assert.IsTrue(sqliteBotState.Is24HourArchived("post"));
-            Assert.IsTrue(sqliteBotState.GetNon24HourArchivedPosts().Length == 0);
+            Assert.AreEqual(sqliteBotState.GetNon24HourArchivedPosts().Length, 0);
+        }
+        [TestMethod]
+        [DeploymentItem("Test.sqlite", "Data\\6")]
+        [TestCategory("SQLiteBotState")]
+        public void TestDeleteCommentSqlite()
+        {
+            SQLiteBotState sqliteBotState = new SQLiteBotState("6\\Test.sqlite");
+            sqliteBotState.AddCheckedPost("post");
+            sqliteBotState.AddBotComment("post", "thing");
+            Assert.IsTrue(sqliteBotState.HasPostBeenChecked("post"));
+            Assert.AreEqual(sqliteBotState.GetCommentForPost("post"), "thing");
+            sqliteBotState.DeletePostChecked("post");
+            Assert.IsFalse(sqliteBotState.HasPostBeenChecked("post"));
+            Assert.ThrowsException<System.InvalidOperationException>(() => sqliteBotState.AddBotComment("post", "thing"));
+        }
+        [TestMethod]
+        [DeploymentItem("Test.sqlite", "Data\\7")]
+        [TestCategory("SQLiteBotState")]
+        public void TestTransferSqlite()
+        {
+            FlatBotState flatBotState = new FlatBotState(".\\Data\\7");
+            flatBotState.AddCheckedPost("post");
+            flatBotState.AddBotComment("post", "thing");
+            flatBotState.AddCheckedComment("things");
+            flatBotState.AddCheckedPost("post2");
+            flatBotState.Archive24Hours("post2");
+            SQLiteBotState sqliteBotState = new SQLiteBotState(flatBotState, "7\\Test.sqlite");
+            Assert.IsTrue(sqliteBotState.HasPostBeenChecked("post"));
+            Assert.AreEqual(sqliteBotState.GetCommentForPost("post"), "thing");
+            Assert.IsTrue(sqliteBotState.HasCommentBeenChecked("things"));
+            Assert.IsTrue(sqliteBotState.Is24HourArchived("post2"));
+            Assert.IsTrue(sqliteBotState.GetNon24HourArchivedPosts().Contains("post"));
         }
     }
 }

@@ -182,7 +182,8 @@ namespace Mnemosyne2Reborn
                 if(Config.ConvertToSQLite)
                 {
                     if(botstate is FlatBotState)
-                    { 
+                    {
+                        Console.WriteLine("Beginning conversion to sqlite");
                         using (IBotState botstate2 = new SQLiteBotState(botstate as FlatBotState))
                         {
                             // Intentional, create and dispose

@@ -192,6 +192,7 @@ namespace Mnemosyne2Reborn
                     Config.ConvertToSQLite = false;
                     Config.SQLite = true;
                     Config.DumpConfig();
+                    Console.WriteLine("Done with SQLite conversion, please re-run this program and you will automatically be using sqlite");
                     return;
                 }
                 IArchiveService service = new ArchiveService(DefaultServices.ArchiveFo).CreateNewService();

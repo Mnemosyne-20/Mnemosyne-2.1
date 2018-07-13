@@ -36,10 +36,13 @@ namespace Mnemosyne2Reborn.BotState
             dbConnection.Open();
             InitializeDatabase();
             InitializeCommands();
+            Console.WriteLine("Beginning to add all checked posts");
             foreach(var thing in flatBotState.GetAllCheckedPosts())
             {
                 this.AddCheckedPost(thing);
             }
+            Console.WriteLine("Done adding checked posts");
+            Console.WriteLine("Adding 24 hour archive information");
             foreach(var thing in flatBotState.GetAllPosts24Hours())
             {
                 if(thing.Value)
@@ -47,14 +50,19 @@ namespace Mnemosyne2Reborn.BotState
                     this.Archive24Hours(thing.Key);
                 }
             }
+            Console.WriteLine("Done adding 24 hour archive information");
+            Console.WriteLine("Getting all bot comments");
             foreach(var thing in flatBotState.GetAllBotComments())
             {
                 this.AddBotComment(thing.Key, thing.Value);
             }
+            Console.WriteLine("Done getting all bot comments");
+            Console.WriteLine("Getting all checked comments");
             foreach(var thing in flatBotState.GetAllCheckedComments())
             {
                 this.AddCheckedComment(thing);
             }
+            Console.WriteLine("Done getting all checked comments");
         }
         public SQLiteBotState(string filename = "botstate.sqlite")
         {

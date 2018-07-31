@@ -14,7 +14,7 @@ namespace ArchiveApi
         public ArchiveService(DefaultServices service = DefaultServices.ArchiveFo) => this.service = service;
         public ArchiveService(string service)
         {
-            switch(service.ToLower())
+            switch (service.ToLower())
             {
                 case "archive.is":
                     this.service = DefaultServices.ArchiveIs;

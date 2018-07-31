@@ -77,7 +77,6 @@
     <Compile Include="FlatFileBostStateUnitTest.cs" />
     <Compile Include="RegularExpressionsUnitTest.cs" />
     <Compile Include="ArchiveLinksUnitTest.cs" />
-    <Compile Include="UserLinksUnitTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

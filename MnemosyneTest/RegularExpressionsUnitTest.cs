@@ -22,7 +22,7 @@ namespace MnemosyneTest
         public void TestSameResults()
         {
             List<string> list1 = RegularExpressions.FindLinks(TestString);
-            List<string> list2 = RegularExpressions.FindLinksE(TestString).ToList();
+            IEnumerable<string> list2 = RegularExpressions.FindLinksE(TestString);
             Assert.IsTrue(list1.TrueForAll((s) => { return list2.Contains(s); }));
         }
     }

@@ -62,6 +62,7 @@ namespace Mnemosyne2Reborn
         public readonly static Regex YoutubeRegex = new Regex(@"(https?://youtu\.be(?<url>/[a-zA-Z0-9])?|https?://www\.youtube\.com/(?<url>watch\?v=[a-zA-Z0-9]+)?($|.+))");
         public readonly static Regex providers = new Regex(@"(web-beta.archive.org|archive\.is|archive\.fo|archive\.org|archive\.today|megalodon\.jp|web\.archive\.org|webcache\.googleusercontent\.com|archive\.li)");
         public readonly static Regex ImageRegex = new Regex(@"(\.gif|\.jpg|\.png|\.pdf|\.webm|\.mp4|\.jpeg)$");
+        private readonly static Regex[] allRegex = new Regex[] { exclusions, YoutubeRegex, providers, ImageRegex };
         #region Locks
         static object LockConfigObject = new object();
         static object LockArchiveSubredditsObject = new object();
@@ -152,13 +153,13 @@ namespace Mnemosyne2Reborn
                 // create another filter so archive.is is also filtered
                 new ArchiveService(DefaultServices.ArchiveIs).CreateNewService();
                 WebAgent agent = null;
-                if (Config.UseOAuth)
-                {
-                    agent = new BotWebAgent(Config.UserName, Config.Password, Config.OAuthClientId, Config.OAuthSecret, Config.RedirectURI);
-                }
 #pragma warning disable CS0618 // Type or member is obsolete
                 lock (LockConfigObject)
                 {
+                    if (Config.UseOAuth)
+                    {
+                        agent = new BotWebAgent(Config.UserName, Config.Password, Config.OAuthClientId, Config.OAuthSecret, Config.RedirectURI);
+                    }
                     reddit = Config.UseOAuth ? new Reddit(agent) : new Reddit(Config.UserName, Config.Password);
                 }
                 reddit.InitOrUpdateUser();
@@ -166,34 +167,40 @@ namespace Mnemosyne2Reborn
                 UpdatedArchiveSubreddits += (sender, e) => { Console.Title = "Updated Archive Subreddits"; };
                 lock (LockConfigObject)
                 {
-                    ArchiveSubreddits = InitializeArchiveSubreddits(reddit, Config);
+                    lock (LockArchiveSubredditsObject)
+                    {
+                        ArchiveSubreddits = InitializeArchiveSubreddits(reddit, Config);
+                    }
                 }
                 IteratePost = IteratePosts;
                 IterateComment = IterateComments;
                 IterateMessage = IterateMessages;
                 //Iterate24Hours = Iterate24HourArchive; // currently neutered so that it just does regular 24 hour passes
                 new RedditUserProfileSqlite();
-                if (File.Exists("./Data/Users.json"))
+                if (File.Exists("./Data/Users.json")) // Forces going to sqlite for user profiles because it's THAT MUCH BETTER
                 {
                     RedditUserProfileSqlite.TransferProfilesToSqlite(RedditUserProfile.Users);
                     File.Delete("./Data/Users.json");
                 }
 #pragma warning restore CS0618 // Type or member is obsolete
-                if(Config.ConvertToSQLite)
+                lock (LockConfigObject)
                 {
-                    if(botstate is FlatBotState)
+                    if (Config.ConvertToSQLite)
                     {
-                        Console.WriteLine("Beginning conversion to sqlite");
-                        using (IBotState botstate2 = new SQLiteBotState(botstate as FlatBotState))
+                        if (botstate is FlatBotState)
                         {
-                            // Intentional, create and dispose
+                            Console.WriteLine("Beginning conversion to sqlite");
+                            using (IBotState botstate2 = new SQLiteBotState(botstate as FlatBotState))
+                            {
+                                // Intentional, create and dispose
+                            }
                         }
+                        Config.ConvertToSQLite = false;
+                        Config.SQLite = true;
+                        Config.DumpConfig();
+                        Console.WriteLine("Done with SQLite conversion, please re-run this program and you will automatically be using sqlite");
+                        return;
                     }
-                    Config.ConvertToSQLite = false;
-                    Config.SQLite = true;
-                    Config.DumpConfig();
-                    Console.WriteLine("Done with SQLite conversion, please re-run this program and you will automatically be using sqlite");
-                    return;
                 }
                 IArchiveService service = new ArchiveService(DefaultServices.ArchiveFo).CreateNewService();
                 ArchiveLinks.SetArchiveService(service);
@@ -359,7 +366,7 @@ namespace Mnemosyne2Reborn
                             Console.WriteLine($"Found {s} in post {post.Id}");
                         }
                     }
-                    ArchivedLinks = ArchiveLinks.ArchivePostLinks(Links, new Regex[] { YoutubeRegex, exclusions, providers, ImageRegex }, post.Author);
+                    ArchivedLinks = ArchiveLinks.ArchivePostLinks(Links, allRegex, post.Author);
                     lock (LockConfigObject)
                     {
                         PostArchives.ArchivePostLinks(subreddit, config, state, post, ArchivedLinks);
@@ -395,7 +402,7 @@ namespace Mnemosyne2Reborn
                 {
                     Console.WriteLine($"Found {s} in comment {comment.Id}");
                 }
-                List<ArchiveLink> ArchivedLinks = ArchiveLinks.ArchivePostLinks(Links, new[] { YoutubeRegex, exclusions, providers, ImageRegex }, reddit.GetUser(comment.AuthorName));
+                List<ArchiveLink> ArchivedLinks = ArchiveLinks.ArchivePostLinks(Links, allRegex, reddit.GetUser(comment.AuthorName));
                 lock (LockConfigObject)
                 {
                     PostArchives.ArchiveCommentLinks(config, state, reddit, comment, ArchivedLinks);
@@ -445,7 +452,7 @@ namespace Mnemosyne2Reborn
                     }
                 }
 #if POSTTEST
-                ArchivedLinks = ArchiveLinks.ArchivePostLinks(Links, new Regex[] { YoutubeRegex, exclusions, providers, ImageRegex }, post.Author);
+                ArchivedLinks = ArchiveLinks.ArchivePostLinks(Links, allRegex, post.Author);
                 lock (LockConfigObject)
                 {
                     PostArchives.ArchivePostLinks24Hours(sub, reddit, config, state, post, ArchivedLinks);
@@ -455,6 +462,6 @@ namespace Mnemosyne2Reborn
                 state.Archive24Hours(post.Id);
             }
         }
-#endregion
+        #endregion
     }
 }

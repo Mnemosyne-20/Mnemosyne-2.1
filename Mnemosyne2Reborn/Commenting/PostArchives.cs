@@ -120,7 +120,6 @@ namespace Mnemosyne2Reborn.Commenting
                 Console.WriteLine($"No comment in {postID} to edit, making new one");
                 PostArchiveLinks(config, state, Program.Headers[2], comment.GetCommentPost(reddit), Links);
             }
-            state.AddCheckedComment(commentID);
         }
         /// <summary>
         /// An asyncronous version of <seealso cref="ArchiveCommentLinks(Config, IBotState, Reddit, Comment, List{string}, List{string})"/> with <see cref="List{ArchiveLink}"/> support instead

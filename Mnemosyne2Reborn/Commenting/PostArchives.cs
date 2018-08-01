@@ -254,7 +254,8 @@ namespace Mnemosyne2Reborn.Commenting
             Comment botComment = post.Comment(c);
             try
             {
-                state.AddCheckedPost(post.Id);
+                if (!state.HasPostBeenChecked(post.Id))
+                    state.AddCheckedPost(post.Id);
                 state.AddBotComment(post.Id, botComment.Id);
                 Console.WriteLine(c);
             }

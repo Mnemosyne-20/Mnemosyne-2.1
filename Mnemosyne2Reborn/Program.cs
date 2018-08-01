@@ -31,6 +31,10 @@ namespace Mnemosyne2Reborn
         {
             File.AppendAllText("./Errors/" + FileName, $"{message}{e.Message}{Environment.NewLine}");
         }
+        public static void Log(string error)
+        {
+            File.AppendAllText("./Errors/" + FileName, error + Environment.NewLine);
+        }
     }
     public class Program
     {

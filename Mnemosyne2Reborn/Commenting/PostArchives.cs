@@ -87,7 +87,6 @@ namespace Mnemosyne2Reborn.Commenting
             }
             if (LinksToPost.Count == 0)
             {
-                state.AddCheckedPost(post.Id);
                 return;
             }
             PostArchiveLinksToComment24Hours(config, state, Program.Headers[4], (Comment)reddit.GetThingByFullname(state.GetCommentForPost(post.Id)), LinksToPost);

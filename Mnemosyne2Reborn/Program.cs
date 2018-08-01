@@ -15,9 +15,25 @@ using System.Text.RegularExpressions;
 using System.Threading;
 namespace Mnemosyne2Reborn
 {
+    internal class InternalLogger
+    {
+        static string FileName;
+        static InternalLogger()
+        {
+            FileName = "Failures.txt";
+            Directory.CreateDirectory("./Errors");
+        }
+        public static void Log(Exception e)
+        {
+            EnhancedLog("", e);
+        }
+        public static void EnhancedLog(string message, Exception e)
+        {
+            File.AppendAllText("./Errors/" + FileName, $"{message}{e.Message}{Environment.NewLine}");
+        }
+    }
     public class Program
     {
-
         #region static values
         public readonly static string[] ArchiveBots = new string[]
         {
@@ -236,8 +252,7 @@ namespace Mnemosyne2Reborn
                     {
                         continue;
                     }
-                    Directory.CreateDirectory("./Errors");
-                    File.AppendAllText("./Errors/Failures.txt", $"{e.ToString()}{Environment.NewLine}");
+                    InternalLogger.Log(e);
                     Console.WriteLine($"Caught an exception of type {e.GetType()} output is in ./Errors/Failures.txt");
                 }
                 Thread.Sleep(1000); // sleeps for one second to help with the reddit calls
@@ -371,7 +386,7 @@ namespace Mnemosyne2Reborn
                     {
                         PostArchives.ArchivePostLinks(subreddit, config, state, post, ArchivedLinks);
                     }
-                    Console.WriteLine("Added post: " + post.Id);
+                    Console.WriteLine($"Added post: {post.Id} in subreddit {post.SubredditName}");
                     if (!subreddit.ArchiveAfter24Hours)
                     {
                         Console.WriteLine("Checked post: " + post.Id);

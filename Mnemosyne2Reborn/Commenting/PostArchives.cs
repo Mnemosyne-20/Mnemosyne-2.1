@@ -199,6 +199,7 @@ namespace Mnemosyne2Reborn.Commenting
             catch (InvalidOperationException e)
             {
                 Console.WriteLine($"Caught exception replying to comment {comment.Id} with new comment  {Regex.Replace(botComment.Id, "t1_", "")}: {e.Message}");
+                InternalLogger.EnhancedLog($"Exception generated and caught replying to comment {comment.Id} with new comment {Regex.Replace(botComment.Id, "t1_", "")}: ", e);
                 botComment.Del();
             }
         }
@@ -229,6 +230,7 @@ namespace Mnemosyne2Reborn.Commenting
             catch (InvalidOperationException e)
             {
                 Console.WriteLine($"Caught exception replying to comment {comment.Id} with new comment  {Regex.Replace(botComment.Id, "t1_", "")}: {e.Message}");
+                InternalLogger.EnhancedLog($"Exception generated and caught replying to comment {comment.Id} with new comment {Regex.Replace(botComment.Id, "t1_", "")}: ", e);
                 botComment.Del();
             }
         }
@@ -259,6 +261,7 @@ namespace Mnemosyne2Reborn.Commenting
             catch (InvalidOperationException e)
             {
                 Console.WriteLine($"Caught exception replying to post {post.Id} with new comment  {Regex.Replace(botComment.Id, "t1_", "")}: {e.Message}");
+                InternalLogger.EnhancedLog($"Exception generated and caught replying to post {post.Id} with new comment {Regex.Replace(botComment.Id, "t1_", "")}: ", e);
                 botComment.Del();
                 state.DeletePostChecked(post.Id);
             }

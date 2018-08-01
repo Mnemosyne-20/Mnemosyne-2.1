@@ -54,6 +54,7 @@ namespace Mnemosyne2Reborn.Commenting
             }
             if (LinksToPost.Count == 0)
             {
+                state.AddCheckedPost(post.Id);
                 return;
             }
             PostArchiveLinks(config, state, Program.Headers[0], post, LinksToPost);

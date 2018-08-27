@@ -189,13 +189,12 @@ namespace Mnemosyne2Reborn.Commenting
                 throw new ArgumentNullException(config == null ? nameof(config) : state == null ? nameof(state) : head == null ? nameof(head) : comment == null ? nameof(comment) : nameof(ArchiveList));
             }
             Console.Title = $"Posting new comment to comment {comment.Id}";
-            string LinksListBody = string.Join("", ArchiveList);
-            string c = head + LinksListBody + "\n" + string.Format(Program.Headers[3], config.FlavorText[rand.Next(0, config.FlavorText.Length)]);
+            string c = head + string.Join("", ArchiveList) + "\n" + string.Format(Program.Headers[3], config.FlavorText[rand.Next(0, config.FlavorText.Length)]);
             Comment botComment = comment.Reply(c);
             InternalLogger.Log($"Attempting to update bot comment for post: {comment.LinkId}: {comment.Id}");
             try
             {
-                state.UpdateBotComment(comment.LinkId, botComment.Id);
+                state.UpdateBotComment(comment.LinkId.Substring(3), botComment.Id);
                 Console.WriteLine(c);
             }
             catch (InvalidOperationException e)

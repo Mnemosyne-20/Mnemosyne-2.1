@@ -29,7 +29,7 @@ namespace Mnemosyne2Reborn
         }
         public static void EnhancedLog(string message, Exception e)
         {
-            File.AppendAllText("./Errors/" + FileName, $"{message}{e.Message}{Environment.NewLine}");
+            File.AppendAllText("./Errors/" + FileName, $"{message}{e}{Environment.NewLine}");
         }
         public static void Log(string error)
         {

@@ -192,6 +192,7 @@ namespace Mnemosyne2Reborn.Commenting
             string LinksListBody = string.Join("", ArchiveList);
             string c = head + LinksListBody + "\n" + string.Format(Program.Headers[3], config.FlavorText[rand.Next(0, config.FlavorText.Length)]);
             Comment botComment = comment.Reply(c);
+            InternalLogger.Log($"Attempting to update bot comment for post: {comment.LinkId}: {comment.Id}");
             try
             {
                 state.UpdateBotComment(comment.LinkId, botComment.Id);
@@ -203,6 +204,7 @@ namespace Mnemosyne2Reborn.Commenting
                 InternalLogger.EnhancedLog($"Exception generated and caught replying to comment {comment.Id} with new comment {Regex.Replace(botComment.Id, "t1_", "")}: ", e);
                 botComment.Del();
             }
+            InternalLogger.Log($"Comment with ID {comment.Id} has been updated to comment {botComment.Id} for post {comment.LinkId}");
         }
         /// <summary>
         /// Posts all links archived

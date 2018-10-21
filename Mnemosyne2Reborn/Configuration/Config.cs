@@ -8,12 +8,11 @@ namespace Mnemosyne2Reborn.Configuration
     /// </summary>
     public class ConfigEventArgs : EventArgs
     {
-        private readonly Config conf;
         public ConfigEventArgs(Config c)
         {
-            conf = c;
+            Config = c;
         }
-        public Config Config => conf;
+        public Config Config { get; }
     }
     [Serializable]
     public class Config

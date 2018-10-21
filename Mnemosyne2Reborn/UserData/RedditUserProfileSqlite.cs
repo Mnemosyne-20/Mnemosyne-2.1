@@ -35,7 +35,7 @@ namespace Mnemosyne2Reborn.UserData
 #pragma warning restore CS0618 // Type or member is obsolete
         {
             CheckInitialized();
-            var optedOut = from a in dict.AsParallel() where a.Value.OptedOut == true select a; // parallel because the dictionary can be absolutely enormous depending on length of runtime
+            var optedOut = from a in dict.AsParallel() where a.Value.OptedOut select a; // parallel because the dictionary can be absolutely enormous depending on length of runtime
             foreach (var user in optedOut)
             {
                 try

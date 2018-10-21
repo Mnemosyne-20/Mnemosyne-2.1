@@ -18,12 +18,11 @@ namespace Mnemosyne2Reborn.Configuration
     }
     public class ArchiveSubredditEventArgs : EventArgs
     {
-        readonly ArchiveSubreddit[] _archiveSubreddits;
         public ArchiveSubredditEventArgs(ArchiveSubreddit[] archiveSubreddits)
         {
-            _archiveSubreddits = archiveSubreddits;
+            ArchiveSubreddits = archiveSubreddits;
         }
-        public ArchiveSubreddit[] ArchiveSubreddits => _archiveSubreddits;
+        public ArchiveSubreddit[] ArchiveSubreddits { get; }
     }
     public static class ArchiveSubredditExtensions
     {

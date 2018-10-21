@@ -198,24 +198,12 @@ namespace Mnemosyne2Reborn.BotState
         {
             return (from a in ReArchviedPosts where !a.Value select a.Key).ToArray();
         }
-        public string[] GetAllCheckedComments()
-        {
-            return CheckedComments.ToArray();
-        }
+        public string[] GetAllCheckedComments() => CheckedComments.ToArray();
 
-        public string[] GetAllCheckedPosts()
-        {
-            return CheckedPosts.ToArray();
-        }
+        public string[] GetAllCheckedPosts() => CheckedPosts.ToArray();
 
-        public Dictionary<string, string> GetAllBotComments()
-        {
-            return CommentDictionary;
-        }
-        public Dictionary<string, bool> GetAllPosts24Hours()
-        {
-            return ReArchviedPosts;
-        }
+        public Dictionary<string, string> GetAllBotComments() => CommentDictionary;
+        public Dictionary<string, bool> GetAllPosts24Hours() => ReArchviedPosts;
 
         public void DeletePostChecked(string postID)
         {

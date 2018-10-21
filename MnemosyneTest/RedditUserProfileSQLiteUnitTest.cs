@@ -77,6 +77,8 @@ namespace MnemosyneTest
             Assert.IsTrue(redditUserProfileSqlite.Excluded == 1);
             redditUserProfileSqlite.AddUrlUsed("help.gif");
             Assert.IsTrue(redditUserProfileSqlite.Image == 1);
+            redditUserProfileSqlite.AddUrlUsed("http://i.4cdn.org/pol/1539553235254.png");
+            Assert.IsTrue(redditUserProfileSqlite.Image == 2);
             redditUserProfileSqlite.OptedOut = true;
             // TEST OPT OUT WORKS
             redditUserProfileSqlite.AddUrlUsed("http://archive.fo");
@@ -84,7 +86,9 @@ namespace MnemosyneTest
             redditUserProfileSqlite.AddUrlUsed("http://youtu.be");
             Assert.IsTrue(redditUserProfileSqlite.Excluded == 1);
             redditUserProfileSqlite.AddUrlUsed("help.gif");
-            Assert.IsTrue(redditUserProfileSqlite.Image == 1);
+            Assert.IsTrue(redditUserProfileSqlite.Image == 2);
+            redditUserProfileSqlite.AddUrlUsed("http://i.4cdn.org/pol/1539553235254.png");
+            Assert.IsTrue(redditUserProfileSqlite.Image == 2);
         }
     }
 }

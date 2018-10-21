@@ -23,10 +23,7 @@ namespace Mnemosyne2Reborn
             FileName = "Failures.txt";
             Directory.CreateDirectory("./Errors");
         }
-        public static void Log(Exception e)
-        {
-            EnhancedLog("", e);
-        }
+        public static void Log(Exception e) => EnhancedLog("", e);
         public static void EnhancedLog(string message, Exception e)
         {
             File.AppendAllText("./Errors/" + FileName, $"{message}{e}{Environment.NewLine}");
@@ -223,6 +220,7 @@ namespace Mnemosyne2Reborn
                     }
                 }
                 IArchiveService service = new ArchiveService(DefaultServices.ArchiveFo).CreateNewService();
+                new ArchiveService(DefaultServices.ArchiveIs).CreateNewService(); new ArchiveService(DefaultServices.ArchiveLi).CreateNewService();
                 ArchiveLinks.SetArchiveService(service);
                 PostArchives.SetArchiveService(service);
                 MainLoop(reddit, botstate);

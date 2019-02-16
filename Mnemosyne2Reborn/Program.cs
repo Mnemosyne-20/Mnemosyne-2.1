@@ -17,7 +17,7 @@ namespace Mnemosyne2Reborn
 {
     internal class InternalLogger
     {
-        static string FileName;
+        static readonly string FileName;
         static InternalLogger()
         {
             FileName = "Failures.txt";
@@ -220,7 +220,7 @@ namespace Mnemosyne2Reborn
                     }
                 }
                 IArchiveService service = new ArchiveService(DefaultServices.ArchiveFo).CreateNewService();
-                new ArchiveService(DefaultServices.ArchiveIs).CreateNewService(); new ArchiveService(DefaultServices.ArchiveLi).CreateNewService();
+                new ArchiveService(DefaultServices.ArchiveIs).CreateNewService(); new ArchiveService(DefaultServices.ArchiveLi).CreateNewService(); new ArchiveService(DefaultServices.ArchivePh).CreateNewService(); new ArchiveService(DefaultServices.ArchiveVn).CreateNewService();
                 ArchiveLinks.SetArchiveService(service);
                 PostArchives.SetArchiveService(service);
                 MainLoop(reddit, botstate);

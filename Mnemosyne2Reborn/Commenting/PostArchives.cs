@@ -49,7 +49,7 @@ namespace Mnemosyne2Reborn.Commenting
                     {
                         continue;
                     }
-                    LinksToPost.Add($"* **Link: {link.Position}** ([{link.Hostname}]({link.OriginalLink})): {link.ArchivedLink}\n");
+                    LinksToPost.Add($"* **Link: {link.Position}** ([{link.HostName}]({link.OriginalLink})): {link.ArchivedLink}\n");
                 }
             }
             if (LinksToPost.Count == 0)
@@ -82,7 +82,7 @@ namespace Mnemosyne2Reborn.Commenting
                     {
                         continue;
                     }
-                    LinksToPost.Add($"* **Link: {link.Position}** ([{link.Hostname}]({link.OriginalLink})): {link.ArchivedLink}\n");
+                    LinksToPost.Add($"* **Link: {link.Position}** ([{link.HostName}]({link.OriginalLink})): {link.ArchivedLink}\n");
                 }
             }
             if (LinksToPost.Count == 0)
@@ -100,7 +100,7 @@ namespace Mnemosyne2Reborn.Commenting
             foreach (var link in archiveLinks)
             {
                 if (link.IsExcluded) continue;
-                Links.Add($"* **By [{comment.AuthorName.DeMarkup()}]({comment.Shortlink.Replace("oauth.", "www.")})** ([{link.Hostname}]({link.OriginalLink})): {link.ArchivedLink}\n");
+                Links.Add($"* **By [{comment.AuthorName.DeMarkup()}]({comment.Shortlink.Replace("oauth.", "www.")})** ([{link.HostName}]({link.OriginalLink})): {link.ArchivedLink}\n");
             }
             if (Links.Count == 0) return;
             if (state.DoesCommentExist(postID))
@@ -147,7 +147,7 @@ namespace Mnemosyne2Reborn.Commenting
                 {
                     if (link.IsExcluded)
                         continue;
-                    links.Add($"* **By [{comment.AuthorName.DeMarkup()}]({comment.Shortlink.Replace("oauth.", "www.")})** ([{link.Hostname}]({link.OriginalLink})): {link.ArchivedLink}\n");
+                    links.Add($"* **By [{comment.AuthorName.DeMarkup()}]({comment.Shortlink.Replace("oauth.", "www.")})** ([{link.HostName}]({link.OriginalLink})): {link.ArchivedLink}\n");
                 }
                 return links;
             });

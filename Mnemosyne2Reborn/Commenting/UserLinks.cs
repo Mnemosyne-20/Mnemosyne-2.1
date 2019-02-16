@@ -114,7 +114,7 @@ namespace Mnemosyne2Reborn.Commenting
                     {
                         if (link.IsExcluded)
                             continue;
-                        temp[i] = $"* **Link: {link.Position}** ([{link.Hostname}]({link.OriginalLink})): {link.ArchivedLink}\n";
+                        temp[i] = $"* **Link: {link.Position}** ([{link.HostName}]({link.OriginalLink})): {link.ArchivedLink}\n";
                     }
                 }
             }

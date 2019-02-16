@@ -6,7 +6,9 @@ namespace ArchiveApi
     {
         ArchiveIs,
         ArchiveFo,
-        ArchiveLi
+        ArchiveLi,
+        ArchivePh,
+        ArchiveVn
     }
     public class ArchiveService : IArchiveServiceFactory
     {
@@ -25,6 +27,12 @@ namespace ArchiveApi
                 case "archive.li":
                     this.service = DefaultServices.ArchiveLi;
                     break;
+                case "archive.vn":
+                    this.service = DefaultServices.ArchiveVn;
+                    break;
+                case "archive.ph":
+                    this.service = DefaultServices.ArchivePh;
+                    break;
                 default:
                     this.service = DefaultServices.ArchiveFo;
                     break;
@@ -40,6 +48,10 @@ namespace ArchiveApi
                     return new ArchiveFoService();
                 case DefaultServices.ArchiveLi:
                     return new ArchiveLiService();
+                case DefaultServices.ArchivePh:
+                    return new ArchivePhService();
+                case DefaultServices.ArchiveVn:
+                    return new ArchiveVnService();
                 default:
                     return new ArchiveFoService();
             }

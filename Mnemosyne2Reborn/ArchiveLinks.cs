@@ -14,7 +14,7 @@ namespace Mnemosyne2Reborn
         public string ArchivedLink;
         public int Position;
         public bool IsExcluded;
-        public string Hostname => new Uri(OriginalLink).Host.Replace("www.", "");
+        public string HostName => new Uri(OriginalLink).Host.Replace("www.", "");
         public ArchiveLink(string originalLink, int position)
         {
             OriginalLink = originalLink;
@@ -34,17 +34,12 @@ namespace Mnemosyne2Reborn
             }
             return true;
         }
-        public static bool operator ==(ArchiveLink a, ArchiveLink b)
-        {
-            return a.Equals(b);
-        }
-        public static bool operator !=(ArchiveLink a, ArchiveLink b)
-        {
-            return !a.Equals(b);
-        }
+        public static bool operator ==(ArchiveLink a, ArchiveLink b) => a.Equals(b);
+        public static bool operator !=(ArchiveLink a, ArchiveLink b) => !a.Equals(b);
         public ArchiveLink(string OriginalLink, string ArchivedLink, int Position) : this(OriginalLink, Position) => this.ArchivedLink = ArchivedLink;
         public int CompareTo(ArchiveLink other) => this.Position.CompareTo(other.Position);
         public void SetArchivedLink(string ArchivedLink) => this.ArchivedLink = ArchivedLink;
+        public override bool Equals(object obj) => base.Equals(obj);
     }
     public static class ArchiveLinks
     {

@@ -24,14 +24,8 @@ namespace Mnemosyne2Reborn
             Directory.CreateDirectory("./Errors");
         }
         public static void Log(Exception e) => EnhancedLog("", e);
-        public static void EnhancedLog(string message, Exception e)
-        {
-            File.AppendAllText("./Errors/" + FileName, $"{message}{e}{Environment.NewLine}");
-        }
-        public static void Log(string error)
-        {
-            File.AppendAllText("./Errors/" + FileName, error + Environment.NewLine);
-        }
+        public static void EnhancedLog(string message, Exception e) => File.AppendAllText("./Errors/" + FileName, $"{message}{e}{Environment.NewLine}");
+        public static void Log(string error) => File.AppendAllText("./Errors/" + FileName, error + Environment.NewLine);
     }
     public class Program
     {
@@ -220,7 +214,14 @@ namespace Mnemosyne2Reborn
                     }
                 }
                 IArchiveService service = new ArchiveService(DefaultServices.ArchiveFo).CreateNewService();
-                new ArchiveService(DefaultServices.ArchiveIs).CreateNewService(); new ArchiveService(DefaultServices.ArchiveLi).CreateNewService(); new ArchiveService(DefaultServices.ArchivePh).CreateNewService(); new ArchiveService(DefaultServices.ArchiveVn).CreateNewService();
+                #region ServiceCreation
+                new ArchiveService(DefaultServices.ArchiveIs).CreateNewService();
+                new ArchiveService(DefaultServices.ArchiveLi).CreateNewService();
+                new ArchiveService(DefaultServices.ArchivePh).CreateNewService();
+                new ArchiveService(DefaultServices.ArchiveVn).CreateNewService();
+                new ArchiveService(DefaultServices.ArchiveMd).CreateNewService();
+                new ArchiveService(DefaultServices.ArchiveToday).CreateNewService();
+                #endregion
                 ArchiveLinks.SetArchiveService(service);
                 PostArchives.SetArchiveService(service);
                 MainLoop(reddit, botstate);
@@ -273,7 +274,7 @@ namespace Mnemosyne2Reborn
                 Username = Console.ReadLine();
                 Console.WriteLine("Input a password");
                 Password = Console.ReadLine();
-                AuthenticatedUser user = red.RegisterAccount(Username, Password);
+                _ = red.RegisterAccount(Username, Password);
             }
             Console.WriteLine("What is your username?");
             Username = Console.ReadLine();

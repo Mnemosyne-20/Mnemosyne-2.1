@@ -11,10 +11,7 @@ namespace Mnemosyne2Reborn.Configuration
     {
         public bool Equals(ArchiveSubreddit x, ArchiveSubreddit y) => this.GetHashCode(x) == this.GetHashCode(y);
 
-        public int GetHashCode(ArchiveSubreddit obj)
-        {
-            return obj.sub.GetHashCode();
-        }
+        public int GetHashCode(ArchiveSubreddit obj) => obj.sub.GetHashCode();
     }
     public class ArchiveSubredditEventArgs : EventArgs
     {

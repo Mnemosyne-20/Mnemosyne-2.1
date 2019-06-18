@@ -35,4 +35,18 @@
 
         }
     }
+    public sealed class ArchiveMdService : ArchiveTodayInternal
+    {
+        public ArchiveMdService() : base("md")
+        {
+
+        }
+    }
+    public sealed class ArchiveTodayService : ArchiveTodayInternal
+    {
+        public ArchiveTodayService() : base("today")
+        {
+
+        }
+    }
 }

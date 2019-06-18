@@ -95,7 +95,6 @@ namespace Mnemosyne2Reborn.Commenting
         {
             if (archiveLinks.Count < 1) return;
             List<string> Links = new List<string>();
-            string commentID = comment.Id;
             string postID = comment.LinkId.Substring(3);
             foreach (var link in archiveLinks)
             {

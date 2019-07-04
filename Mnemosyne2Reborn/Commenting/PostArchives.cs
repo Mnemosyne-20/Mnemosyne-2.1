@@ -24,7 +24,7 @@ namespace Mnemosyne2Reborn.Commenting
         /// </summary>
         /// <param name="service">An <see cref="IArchiveService"/> to use</param>
         public static void SetArchiveService(IArchiveService service) => PostArchives.service = service;
-        static Random rand = new Random();
+        static readonly Random rand = new Random();
         #endregion
         /// <summary>
         /// Archives post links for a <see cref="ArchiveSubreddit"/>
@@ -250,6 +250,11 @@ namespace Mnemosyne2Reborn.Commenting
             Console.Title = $"Posting new comment to post {post.Id}";
             string LinksListBody = string.Join("", ArchiveList);
             string c = head + LinksListBody + "\n" + string.Format(Program.Headers[3], config.FlavorText[rand.Next(0, config.FlavorText.Length)]);
+            if (c == null) // Somehow this really was a problem in long runtimes, I'm confused as to how, but will do this nonetheless as it seems to have solved the problem
+            {
+                Console.WriteLine("How in the hell did the comment get null'd?");
+            }
+
             Comment botComment = post.Comment(c);
             try
             {

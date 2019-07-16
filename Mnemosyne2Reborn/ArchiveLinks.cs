@@ -46,6 +46,7 @@ namespace Mnemosyne2Reborn
         static IArchiveService service;
         public static void SetArchiveService(IArchiveServiceFactory factory) => service = factory.CreateNewService();
         public static void SetArchiveService(IArchiveService service) => ArchiveLinks.service = service;
+        public static bool TestInternalVerify(string uri) => service.Verify(uri);
         public static List<ArchiveLink> ArchivePostLinks(List<string> FoundLinks, Regex[] exclusions, RedditSharp.Things.RedditUser user)
         {
             List<ArchiveLink> ArchivedLinks = new List<ArchiveLink>();

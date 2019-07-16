@@ -1,4 +1,5 @@
 ﻿using ArchiveApi.Interfaces;
+using ArchiveApi;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Mnemosyne2Reborn;
 using RedditSharp;
@@ -107,6 +108,25 @@ namespace MnemosyneTest
             ArchiveLinks.ArchivePostLinks(test, new Regex[] { new Regex("") }, red.GetUser("chugga_fan"));
             Mnemosyne2Reborn.UserData.RedditUserProfileSqlite redditUserProfileSqlite = new Mnemosyne2Reborn.UserData.RedditUserProfileSqlite(red.GetUser("chugga_fan"));
             Assert.IsTrue(redditUserProfileSqlite.Unarchived == 3);
+        }
+    }
+    [TestClass]
+    public class ArchiveLinksServiceClass
+    {
+        [TestMethod]
+        public void TestArchiveApiServiceWorks()
+        {
+            IArchiveService service = new ArchiveService(DefaultServices.ArchiveFo).CreateNewService();
+            #region ServiceCreation
+            new ArchiveService(DefaultServices.ArchiveIs).CreateNewService();
+            new ArchiveService(DefaultServices.ArchiveLi).CreateNewService();
+            new ArchiveService(DefaultServices.ArchivePh).CreateNewService();
+            new ArchiveService(DefaultServices.ArchiveVn).CreateNewService();
+            new ArchiveService(DefaultServices.ArchiveMd).CreateNewService();
+            new ArchiveService(DefaultServices.ArchiveToday).CreateNewService();
+            #endregion
+            ArchiveLinks.SetArchiveService(service);
+            ArchiveLinks.TestInternalVerify("https://archive.md/XJwrn");
         }
     }
 }

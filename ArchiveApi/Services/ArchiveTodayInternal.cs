@@ -90,6 +90,10 @@ namespace ArchiveApi.Services
         /// <returns>Archive link</returns>
         public async Task<string> SaveAsync(Uri Url)
         {
+            if(Verify(Url))
+            {
+                return Url.ToString();
+            }
             /// <summary>
             /// This puts a request to the archive site, so yhea...
             /// </summary>

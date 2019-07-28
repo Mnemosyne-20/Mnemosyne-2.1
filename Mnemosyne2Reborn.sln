@@ -20,8 +20,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArchiveApiTest", "ArchiveAp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mnemosyne2NetCore", "Mnemosyne2NetCore\Mnemosyne2NetCore.csproj", "{9410CB91-19A4-4AF3-AC43-1886CF68256B}"
 	ProjectSection(ProjectDependencies) = postProject
-		{A6934466-5403-4AF8-B20E-119836CFFE05} = {A6934466-5403-4AF8-B20E-119836CFFE05}
+		{0DA9B267-0BEE-4848-8835-63B5EE6DFFC3} = {0DA9B267-0BEE-4848-8835-63B5EE6DFFC3}
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArchiveApiNetCore", "ArchiveApiNetCore\ArchiveApiNetCore.csproj", "{0DA9B267-0BEE-4848-8835-63B5EE6DFFC3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,6 +43,10 @@ Global
 		{9410CB91-19A4-4AF3-AC43-1886CF68256B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9410CB91-19A4-4AF3-AC43-1886CF68256B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9410CB91-19A4-4AF3-AC43-1886CF68256B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0DA9B267-0BEE-4848-8835-63B5EE6DFFC3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0DA9B267-0BEE-4848-8835-63B5EE6DFFC3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0DA9B267-0BEE-4848-8835-63B5EE6DFFC3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0DA9B267-0BEE-4848-8835-63B5EE6DFFC3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

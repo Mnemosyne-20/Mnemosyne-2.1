@@ -37,3 +37,9 @@ Well, thanks for noticing that! The data collected is simple, what kinds of link
 ### Can I opt out?
 
 Yes! Just message the bot the text "opt out" (without quotes). It will still have the data previously collected but will mark your username with an "opt-out" marking and then stop tracking it further. Though to be honest the tracking is entirely useless except for people interesting in link-kinds, and the data is so non-granular it's stupid.
+
+Notes on licenses: All licensed items used have their respective licenses displayed in the files they're used in, as the majority of things used are MIT licensed I shall just say they are MIT licensed and tell you what are used:
+Code from CoAP.NET (due to not being able to get their NuGet package working on .NET core)
+I use the nuget package RedditSharp
+Non-MIT:
+Various stackoverflow people, I honestly don't have the time to track down the original authors at this point so I'll just say stackoverflow and leave it at that

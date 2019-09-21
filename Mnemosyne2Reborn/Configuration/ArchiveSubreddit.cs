@@ -59,7 +59,7 @@ namespace Mnemosyne2Reborn.Configuration
     public class ArchiveSubreddit
     {
         public readonly Subreddit sub;
-        public ArchiveSubreddit(Reddit reddit, ArchiveSubredditJson json) : this(reddit.GetSubreddit(json.Name))
+        public ArchiveSubreddit(Reddit reddit, ArchiveSubredditJson json) : this(reddit.GetSubredditAsync(json.Name).Result)
         {
             SubredditArchiveService = new ArchiveService(json.ArchiveWebsite).CreateNewService();
             ArchivePost = json.ArchivePost;
@@ -67,9 +67,9 @@ namespace Mnemosyne2Reborn.Configuration
             ArchiveAfter24Hours = json.ArchiveAfter24Hours;
         }
         public ArchiveSubreddit(Subreddit sub) => this.sub = sub;
-        public Listing<Post> New { get => sub.New; }
-        public Listing<Post> Posts { get => sub.Posts; }
-        public Listing<Comment> Comments => sub.Comments;
+        public Listing<Post> New { get => sub.GetPosts(Subreddit.Sort.New); }
+        public Listing<Post> Posts { get => sub.GetPosts(); }
+        public Listing<Comment> Comments => sub.GetComments();
         public string Name => sub.Name;
         public bool ArchiveCommentLinks { get; set; }
         public bool ArchivePost { get; set; }

@@ -171,9 +171,14 @@ namespace Mnemosyne2Reborn
                     {
                         agent = new BotWebAgent(Config.UserName, Config.Password, Config.OAuthClientId, Config.OAuthSecret, Config.RedirectURI);
                     }
-                    reddit = Config.UseOAuth ? new Reddit(agent) : new Reddit(Config.UserName, Config.Password);
+                    else
+                    {
+                        Console.WriteLine("Error: redditsharp no longer allows non-oauth connections in updated versions, use oauth");
+                        Environment.Exit(1);
+                    }
+                    reddit = new Reddit(agent);
                 }
-                reddit.InitOrUpdateUser();
+                reddit.InitOrUpdateUserAsync().RunSynchronously();
                 UpdatedConfig += (sender, e) => { ArchiveSubreddits = InitializeArchiveSubreddits(reddit, e.Config); };
                 UpdatedArchiveSubreddits += (sender, e) => { Console.Title = "Updated Archive Subreddits"; };
                 lock (LockConfigObject)
@@ -243,7 +248,7 @@ namespace Mnemosyne2Reborn
                         }
                         Iterate24Hours?.Invoke(reddit, botstate, ArchiveSubreddits, Config);
                     }
-                    Console.Title = $"Sleeping, New messages: {reddit.User.UnreadMessages.Count() >= 1}";
+                    Console.Title = $"Sleeping, New messages: {reddit.User.GetUnreadMessages().Any().Result}";
                 }
                 catch (WebException e) when (e.Message.Contains("(404)") || e.Message.Contains("Cannot resolve hostname") && (int)((HttpWebResponse)e.Response).StatusCode <= 500 && (int)((HttpWebResponse)e.Response).StatusCode >= 600)
                 {
@@ -274,7 +279,7 @@ namespace Mnemosyne2Reborn
                 Username = Console.ReadLine();
                 Console.WriteLine("Input a password");
                 Password = Console.ReadLine();
-                _ = red.RegisterAccount(Username, Password);
+                _ = red.RegisterAccountAsync(Username, Password).Result;
             }
             Console.WriteLine("What is your username?");
             Username = Console.ReadLine();
@@ -334,7 +339,7 @@ namespace Mnemosyne2Reborn
             {
                 throw new ArgumentNullException(reddit == null ? nameof(reddit) : state == null ? nameof(state) : nameof(subreddit));
             }
-            foreach (var message in reddit.User.PrivateMessages.Take(25))
+            foreach (var message in reddit.User.GetPrivateMessages().Take(25).ToEnumerable())
             {
                 if (!message.Unread)
                 {
@@ -343,14 +348,14 @@ namespace Mnemosyne2Reborn
                 switch (message.Body.ToLower())
                 {
                     case "opt out":
-                        Console.WriteLine($"User {message.Author} has opted out.");
-                        new RedditUserProfileSqlite(reddit.GetUser(message.Author)).OptedOut = true;
-                        message.SetAsRead();
+                        Console.WriteLine($"User {message.AuthorName} has opted out.");
+                        new RedditUserProfileSqlite(reddit.GetUserAsync(message.AuthorName).Result).OptedOut = true;
+                        message.SetAsReadAsync().RunSynchronously();
                         break;
                     case "opt in":
-                        Console.WriteLine($"User {message.Author} has opted in");
-                        new RedditUserProfileSqlite(reddit.GetUser(message.Author)).OptedOut = false;
-                        message.SetAsRead();
+                        Console.WriteLine($"User {message.AuthorName} has opted in");
+                        new RedditUserProfileSqlite(reddit.GetUserAsync(message.AuthorName).Result).OptedOut = false;
+                        message.SetAsReadAsync().RunSynchronously();
                         break;
                 }
             }
@@ -361,8 +366,8 @@ namespace Mnemosyne2Reborn
             {
                 throw new ArgumentNullException(reddit == null ? nameof(reddit) : state == null ? nameof(state) : config == null ? nameof(config) : nameof(subreddit));
             }
-            Console.Title = $"Finding posts in {subreddit.Name} New messages: {reddit.User.UnreadMessages.Count() >= 1}";
-            foreach (var post in subreddit.New.Take(25))
+            Console.Title = $"Finding posts in {subreddit.Name} New messages: {reddit.User.GetUnreadMessages().Any().Result}";
+            foreach (var post in subreddit.New.Take(25).ToEnumerable())
             {
                 if (!state.DoesCommentExist(post.Id) && !state.HasPostBeenChecked(post.Id))
                 {
@@ -384,7 +389,7 @@ namespace Mnemosyne2Reborn
                             Console.WriteLine($"Found {s} in post {post.Id}");
                         }
                     }
-                    ArchivedLinks = ArchiveLinks.ArchivePostLinks(Links, allRegex, post.Author);
+                    ArchivedLinks = ArchiveLinks.ArchivePostLinks(Links, allRegex, post.User);
                     lock (LockConfigObject)
                     {
                         PostArchives.ArchivePostLinks(subreddit, config, state, post, ArchivedLinks);
@@ -408,8 +413,8 @@ namespace Mnemosyne2Reborn
             {
                 return;
             }
-            Console.Title = $"Finding comments in {subreddit.Name} New messages: {reddit.User.UnreadMessages.Count() >= 1}";
-            foreach (var comment in subreddit.Comments.Take(25))
+            Console.Title = $"Finding comments in {subreddit.Name} New messages: {reddit.User.GetUnreadMessages().Any().Result}";
+            foreach (var comment in subreddit.Comments.Take(25).ToEnumerable())
             {
                 List<string> Links = RegularExpressions.FindLinks(comment.BodyHtml);
                 if (state.HasCommentBeenChecked(comment.Id) || ArchiveBots.Contains(comment.AuthorName) || Links.Count == 0)
@@ -420,7 +425,7 @@ namespace Mnemosyne2Reborn
                 {
                     Console.WriteLine($"Found {s} in comment {comment.Id}");
                 }
-                List<ArchiveLink> ArchivedLinks = ArchiveLinks.ArchivePostLinks(Links, allRegex, reddit.GetUser(comment.AuthorName));
+                List<ArchiveLink> ArchivedLinks = ArchiveLinks.ArchivePostLinks(Links, allRegex, reddit.GetUserAsync(comment.AuthorName).Result);
                 lock (LockConfigObject)
                 {
                     PostArchives.ArchiveCommentLinks(config, state, reddit, comment, ArchivedLinks);
@@ -441,7 +446,7 @@ namespace Mnemosyne2Reborn
             {
                 List<ArchiveLink> ArchivedLinks = new List<ArchiveLink>();
                 List<string> Links = new List<string>();
-                Post post = (Post)reddit.GetThingByFullname($"t3_{Regex.Replace(postId, "^(t[0-6]_)", "")}");
+                Post post = (Post)reddit.GetThingByFullnameAsync($"t3_{Regex.Replace(postId, "^(t[0-6]_)", "")}").Result;
                 if (DateTime.UtcNow.Subtract(new TimeSpan(TimeSpan.TicksPerDay)) < post.Created)
                 {
                     continue;

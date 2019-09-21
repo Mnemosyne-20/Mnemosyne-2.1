@@ -10,7 +10,7 @@ namespace Mnemosyne2Reborn.Commenting
         /// <param name="comment">A <see cref="Comment"/> to get the post from</param>
         /// <param name="reddit">A <see cref="Reddit"/> used for getting the post</param>
         /// <returns>Post obtained <see cref="Post"/></returns>
-        public static Post GetCommentPost(this Comment comment, Reddit reddit) => (Post)reddit.GetThingByFullname(comment.LinkId);
+        public static Post GetCommentPost(this Comment comment, Reddit reddit) => (Post)reddit.GetThingByFullnameAsync(comment.LinkId).Result;
         readonly static string[] types = new string[] { "*", "^", "~~", "[", "]", "_" };
         readonly static string[] replacement = new string[] { "\\*", "\\^", "\\~~", "\\[", "\\]", "\\_" };
         /// <summary>

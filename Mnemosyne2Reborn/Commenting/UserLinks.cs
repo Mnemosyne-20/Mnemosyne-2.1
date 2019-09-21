@@ -49,7 +49,7 @@ namespace Mnemosyne2Reborn.Commenting
             this.Thing = comment;
             Name = comment.AuthorName;
             UserLinksType = UserLinkType.Comment;
-            ArchiveLinks = Mnemosyne2Reborn.ArchiveLinks.ArchivePostLinks(RegularExpressions.FindLinks(comment.BodyHtml), regexes, reddit.GetUser(comment.AuthorName));
+            ArchiveLinks = Mnemosyne2Reborn.ArchiveLinks.ArchivePostLinks(RegularExpressions.FindLinks(comment.BodyHtml), regexes, reddit.GetUserAsync(comment.AuthorName).Result);
         }
         /// <summary>
         /// Initializes the UserLinks class with Post items determining nessecary things
@@ -62,7 +62,7 @@ namespace Mnemosyne2Reborn.Commenting
             this.Thing = post;
             this.UserLinksType = UserLinkType.Post;
             Name = post.AuthorName;
-            ArchiveLinks = Mnemosyne2Reborn.ArchiveLinks.ArchivePostLinks(RegularExpressions.FindLinks(post.SelfTextHtml), regexes, post.Author);
+            ArchiveLinks = Mnemosyne2Reborn.ArchiveLinks.ArchivePostLinks(RegularExpressions.FindLinks(post.SelfTextHtml), regexes, post.User);
         }
         /// <summary>
         /// Sets the internal <see cref="IArchiveService"/>
@@ -90,7 +90,7 @@ namespace Mnemosyne2Reborn.Commenting
         /// <param name="r">A <see cref="Reddit"/> used for getting user information, cheifly the name of a user</param>
         public void AddToProfile(Reddit r)
         {
-            var profile = new RedditUserProfileSqlite(r.GetUser(Name));
+            var profile = new RedditUserProfileSqlite(r.GetUserAsync(Name).Result);
             foreach (var a in ArchiveLinks)
             {
                 profile.AddUrlUsed(a.OriginalLink);

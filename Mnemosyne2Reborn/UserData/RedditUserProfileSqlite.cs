@@ -40,7 +40,7 @@ namespace Mnemosyne2Reborn.UserData
             {
                 try
                 {
-                    new RedditUserProfileSqlite(new Reddit().GetUser(user.Key)).OptedOut = true;
+                    new RedditUserProfileSqlite(new Reddit().GetUserAsync(user.Key).Result).OptedOut = true;
                 }
                 catch (System.Net.WebException e) when (e.Message.Contains("(404)"))
                 {

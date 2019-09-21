@@ -89,7 +89,7 @@ namespace Mnemosyne2Reborn.Commenting
             {
                 return;
             }
-            PostArchiveLinksToComment24Hours(config, state, Program.Headers[4], (Comment)reddit.GetThingByFullname(state.GetCommentForPost(post.Id)), LinksToPost);
+            PostArchiveLinksToComment24Hours(config, state, Program.Headers[4], (Comment)reddit.GetThingByFullnameAsync(state.GetCommentForPost(post.Id)).Result, LinksToPost);
         }
         public static void ArchiveCommentLinks(Config config, IBotState state, Reddit reddit, Comment comment, List<ArchiveLink> archiveLinks)
         {
@@ -109,7 +109,7 @@ namespace Mnemosyne2Reborn.Commenting
                 {
                     botCommentThingID = "t1_" + botCommentThingID;
                 }
-                Comment commentEdit = (Comment)reddit.GetThingByFullname(botCommentThingID);
+                Comment commentEdit = (Comment)reddit.GetThingByFullnameAsync(botCommentThingID).Result;
                 if (!EditArchiveComment(commentEdit, Links))
                 {
                     PostArchiveLinksToComment(config, state, Program.Headers[2], commentEdit, Links);
@@ -159,7 +159,7 @@ namespace Mnemosyne2Reborn.Commenting
                 }
                 Console.WriteLine($"Already have post in {postID}, getting comment {botCommentThingID.Substring(3)}");
                 Links = await linksTask;
-                if (!EditArchiveComment((Comment)reddit.GetThingByFullname(botCommentThingID), Links))
+                if (!EditArchiveComment((Comment)reddit.GetThingByFullnameAsync(botCommentThingID).Result, Links))
                 {
                     PostArchiveLinksToComment(config, state, Program.Headers[2], comment, Links);
                 }
@@ -189,7 +189,7 @@ namespace Mnemosyne2Reborn.Commenting
             }
             Console.Title = $"Posting new comment to comment {comment.Id}";
             string c = head + string.Join("", ArchiveList) + "\n" + string.Format(Program.Headers[3], config.FlavorText[rand.Next(0, config.FlavorText.Length)]);
-            Comment botComment = comment.Reply(c);
+            Comment botComment = comment.ReplyAsync(c).Result;
             try
             {
                 state.UpdateBotComment(comment.LinkId.Substring(3), botComment.Id);
@@ -199,7 +199,7 @@ namespace Mnemosyne2Reborn.Commenting
             {
                 Console.WriteLine($"Caught exception replying to comment {comment.Id} with new comment  {Regex.Replace(botComment.Id, "t1_", "")}: {e.Message}");
                 InternalLogger.EnhancedLog($"Exception generated and caught replying to comment {comment.Id} with new comment {Regex.Replace(botComment.Id, "t1_", "")}: ", e);
-                botComment.Del();
+                botComment.DelAsync().RunSynchronously();
             }
         }
         /// <summary>
@@ -220,7 +220,7 @@ namespace Mnemosyne2Reborn.Commenting
             Console.Title = $"Posting new comment to comment {comment.Id} for post after 24 hours";
             string LinksListBody = string.Join("", ArchiveList);
             string c = head + LinksListBody + "\n" + string.Format(Program.Headers[3], config.FlavorText[rand.Next(0, config.FlavorText.Length)]);
-            Comment botComment = comment.Reply(c);
+            Comment botComment = comment.ReplyAsync(c).Result;
             try
             {
                 state.UpdateBotComment(comment.Id, botComment.Id);
@@ -230,7 +230,7 @@ namespace Mnemosyne2Reborn.Commenting
             {
                 Console.WriteLine($"Caught exception replying to comment {comment.Id} with new comment  {Regex.Replace(botComment.Id, "t1_", "")}: {e.Message}");
                 InternalLogger.EnhancedLog($"Exception generated and caught replying to comment {comment.Id} with new comment {Regex.Replace(botComment.Id, "t1_", "")}: ", e);
-                botComment.Del();
+                botComment.DelAsync().RunSynchronously();
             }
         }
         /// <summary>
@@ -255,7 +255,7 @@ namespace Mnemosyne2Reborn.Commenting
                 Console.WriteLine("How in the hell did the comment get null'd?");
             }
 
-            Comment botComment = post.Comment(c);
+            Comment botComment = post.CommentAsync(c).Result;
             try
             {
                 if (!state.HasPostBeenChecked(post.Id))
@@ -267,7 +267,7 @@ namespace Mnemosyne2Reborn.Commenting
             {
                 Console.WriteLine($"Caught exception replying to post {post.Id} with new comment  {Regex.Replace(botComment.Id, "t1_", "")}: {e.Message}");
                 InternalLogger.EnhancedLog($"Exception generated and caught replying to post {post.Id} with new comment {Regex.Replace(botComment.Id, "t1_", "")}: ", e);
-                botComment.Del();
+                botComment.DelAsync().RunSynchronously();
                 state.DeletePostChecked(post.Id);
             }
         }
@@ -321,7 +321,7 @@ namespace Mnemosyne2Reborn.Commenting
                 }
                 if (bEditGood)
                 {
-                    targetComment.EditText(newCommentText);
+                    targetComment.EditTextAsync(newCommentText).RunSynchronously();
                 }
             }
             return bEditGood;
